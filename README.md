@@ -1,4 +1,4 @@
-# smf_mobile
+# SMF Mobile
 
 Mobile application for Inspector.
 
