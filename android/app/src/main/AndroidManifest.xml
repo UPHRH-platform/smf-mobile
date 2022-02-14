@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.smf_mobile">
    <application
-        android:label="smf_mobile"
+        android:label="UP SMF"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
