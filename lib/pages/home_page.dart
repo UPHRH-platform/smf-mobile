@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:smf_mobile/constants/app_urls.dart';
@@ -6,6 +7,7 @@ import 'package:smf_mobile/constants/color_constants.dart';
 import 'package:smf_mobile/models/application_model.dart';
 import 'package:smf_mobile/pages/past_applications.dart';
 import 'package:smf_mobile/repositories/application_repository.dart';
+import 'package:smf_mobile/util/helper.dart';
 import 'package:smf_mobile/widgets/application_card.dart';
 
 // import 'dart:developer' as developer;
@@ -19,6 +21,10 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  List<Application> _allApplications = [];
+  final List<Application> _pendingApplications = [];
+  final List<Application> _upcomingApplications = [];
+  final List<Application> _pastApplications = [];
   @override
   void initState() {
     super.initState();
@@ -26,10 +32,38 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<dynamic> _getApplications(context) async {
-    List<Application> applications =
+    _allApplications =
         await Provider.of<ApplicationRespository>(context, listen: false)
             .getApplications();
-    return applications;
+    String _errorMessage =
+        Provider.of<ApplicationRespository>(context, listen: false)
+            .errorMessage;
+    _pendingApplications.clear();
+    _upcomingApplications.clear();
+    _pastApplications.clear();
+    if (_allApplications.isNotEmpty) {
+      for (Application application in _allApplications) {
+        int days = Helper.getDateDiffence(
+            DateTime.now(), DateTime.parse(application.scheduledDate));
+        if (days == 0) {
+          _pendingApplications.add(application);
+        } else if (days > 0) {
+          _pastApplications.add(application);
+        } else {
+          _upcomingApplications.add(application);
+        }
+      }
+    } else if (_errorMessage.isNotEmpty) {
+      Fluttertoast.showToast(
+          msg: _errorMessage,
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.TOP,
+          timeInSecForIosWeb: 2,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+          fontSize: 16.0);
+    }
+    return _allApplications;
   }
 
   @override
@@ -63,8 +97,6 @@ class _HomePageState extends State<HomePage> {
             future: _getApplications(context),
             builder: (context, AsyncSnapshot<dynamic> snapshot) {
               if (snapshot.hasData && snapshot.data != null) {
-                List<Application> _todaysApplications = snapshot.data;
-
                 return Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -83,10 +115,10 @@ class _HomePageState extends State<HomePage> {
                     ListView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
-                      itemCount: _todaysApplications.length,
+                      itemCount: _pendingApplications.length,
                       itemBuilder: (context, i) {
                         return ApplicationCard(
-                            application: _todaysApplications[i]);
+                            application: _pendingApplications[i]);
                       },
                     ),
                     Container(
@@ -103,10 +135,10 @@ class _HomePageState extends State<HomePage> {
                     ListView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
-                      itemCount: _todaysApplications.length,
+                      itemCount: _upcomingApplications.length,
                       itemBuilder: (context, i) {
                         return ApplicationCard(
-                            application: _todaysApplications[i]);
+                            application: _upcomingApplications[i]);
                       },
                     ),
                     Container(
@@ -120,7 +152,7 @@ class _HomePageState extends State<HomePage> {
                               context,
                               MaterialPageRoute(
                                   builder: (context) => PastApplications(
-                                      pastApplications: _todaysApplications)),
+                                      pastApplications: _pastApplications)),
                             );
                           },
                           style: OutlinedButton.styleFrom(

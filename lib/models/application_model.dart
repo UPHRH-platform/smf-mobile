@@ -1,3 +1,5 @@
+import 'package:intl/intl.dart';
+
 class Application {
   final int formId;
   final String applicationId;
@@ -5,6 +7,7 @@ class Application {
   final String email;
   final String status;
   final Map dataObject;
+  final String scheduledDate;
   final String createdDate;
   final String createdBy;
 
@@ -15,6 +18,7 @@ class Application {
     required this.email,
     required this.status,
     required this.dataObject,
+    required this.scheduledDate,
     required this.createdDate,
     required this.createdBy,
   });
@@ -27,7 +31,10 @@ class Application {
       email: json['email'] ?? '',
       status: json['status'],
       dataObject: json['dataObject'],
-      createdDate: json['createdDate'],
+      scheduledDate: json['scheduledDate'] ?? '2022-02-15',
+      createdDate: json['createdDate'] != null
+          ? DateFormat.yMMMEd().format(DateTime.parse(json['createdDate']))
+          : '',
       createdBy: json['createdBy'],
     );
   }
@@ -39,6 +46,7 @@ class Application {
         email,
         status,
         dataObject,
+        scheduledDate,
         createdDate,
         createdBy
       ];

@@ -1,13 +1,15 @@
-// ignore_for_file: unnecessary_const
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:smf_mobile/constants/color_constants.dart';
 // import './../../constants.dart';
 
 class ApplicationField extends StatefulWidget {
+  final String fieldName;
+  final String fieldValue;
   const ApplicationField({
     Key? key,
+    required this.fieldName,
+    required this.fieldValue,
   }) : super(key: key);
   @override
   _ApplicationFieldState createState() => _ApplicationFieldState();
@@ -16,6 +18,7 @@ class ApplicationField extends StatefulWidget {
 class _ApplicationFieldState extends State<ApplicationField> {
   String _radioValue = 'Correct';
   final List<String> _options = ['Correct', 'Incorrect'];
+  final TextEditingController _noteController = TextEditingController();
 
   @override
   void initState() {
@@ -29,12 +32,13 @@ class _ApplicationFieldState extends State<ApplicationField> {
               return Stack(
                 children: [
                   Align(
-                    alignment: FractionalOffset.center,
+                    alignment: FractionalOffset.topCenter,
                     child: Container(
+                        margin: const EdgeInsets.only(top: 150),
                         decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(4)),
-                        height: 330,
+                        height: 285,
                         width: MediaQuery.of(context).size.width - 40,
                         child: Padding(
                           padding: const EdgeInsets.all(20),
@@ -63,15 +67,15 @@ class _ApplicationFieldState extends State<ApplicationField> {
                                   borderRadius: BorderRadius.circular(8),
                                   child: Focus(
                                     child: TextFormField(
-                                      // autofocus: true,
-                                      // focusNode: _notesFocus,
+                                      autofocus: true,
+                                      controller: _noteController,
                                       textCapitalization:
                                           TextCapitalization.sentences,
                                       textInputAction: TextInputAction.done,
                                       keyboardType: TextInputType.multiline,
                                       minLines:
-                                          10, //Normal textInputField will be displayed
-                                      maxLines: 15, // wh
+                                          8, //Normal textInputField will be displayed
+                                      maxLines: 8, // wh
                                       // controller: notesController,
                                       style: const TextStyle(
                                           color: AppColors.black87,
@@ -160,9 +164,7 @@ class _ApplicationFieldState extends State<ApplicationField> {
 
   @override
   Widget build(BuildContext context) {
-    // setState(() {
-    //   _radioValue = widget.answerGiven;
-    // });
+    // print(widget.field);
     return SingleChildScrollView(
         reverse: true,
         child: Container(
@@ -193,7 +195,7 @@ class _ApplicationFieldState extends State<ApplicationField> {
                         Padding(
                           padding: const EdgeInsets.only(top: 5),
                           child: Text(
-                            'Lorem ipsum dolar sit amet',
+                            widget.fieldName,
                             style: GoogleFonts.lato(
                               color: AppColors.black87,
                               fontSize: 14.0,
@@ -210,7 +212,7 @@ class _ApplicationFieldState extends State<ApplicationField> {
                             border: Border.all(color: AppColors.black16),
                           ),
                           child: Text(
-                            'Lorem ipsum dolar sit amet',
+                            widget.fieldValue,
                             style: GoogleFonts.lato(
                               color: AppColors.black87,
                               fontSize: 14.0,
@@ -229,12 +231,12 @@ class _ApplicationFieldState extends State<ApplicationField> {
                         borderRadius: BorderRadius.only(
                             bottomLeft: Radius.circular(4),
                             bottomRight: Radius.circular(4)),
-                        color: AppColors.black08,
+                        color: AppColors.scaffoldBackground,
                         boxShadow: [
                           BoxShadow(
                               color: AppColors.black16,
-                              offset: Offset(0, 1),
-                              blurRadius: 1)
+                              offset: Offset(0, 2),
+                              blurRadius: 2)
                         ],
                       ),
                       child: SizedBox(
@@ -293,6 +295,10 @@ class _ApplicationFieldState extends State<ApplicationField> {
                                                   setState(() {
                                                     _radioValue = _options[i];
                                                   });
+                                                  if (_options[i] ==
+                                                      'Incorrect') {
+                                                    _displayCommentDialog();
+                                                  }
                                                 },
                                               ),
                                               Text(
@@ -319,6 +325,29 @@ class _ApplicationFieldState extends State<ApplicationField> {
                                       )
                                     ],
                                   )),
+                              _noteController.text.isNotEmpty
+                                  ? Container(
+                                      margin: const EdgeInsets.only(top: 10),
+                                      padding: const EdgeInsets.fromLTRB(
+                                          15, 10, 15, 10),
+                                      width: double.infinity,
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        border: Border.all(
+                                            color: AppColors.black16),
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                      child: Text(
+                                        _noteController.text,
+                                        style: GoogleFonts.lato(
+                                          color: AppColors.black60,
+                                          fontSize: 14.0,
+                                          letterSpacing: 0.25,
+                                          fontWeight: FontWeight.w400,
+                                        ),
+                                      ),
+                                    )
+                                  : const Center()
                             ],
                           )))
                 ])));

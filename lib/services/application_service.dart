@@ -18,6 +18,7 @@ class ApplicationService extends BaseService {
     headers['Authorization'] = '$authToken';
     final response = await http.post(Uri.parse(ApiUrl.getAllApplications),
         headers: BaseService.defaultHeaders, body: body);
+    // developer.log('$authToken');
     return response;
   }
 }

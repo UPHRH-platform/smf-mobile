@@ -6,8 +6,12 @@ import 'package:smf_mobile/widgets/application_field.dart';
 import 'package:smf_mobile/widgets/silverappbar_delegate.dart';
 
 class ApplicationDetailsPage extends StatefulWidget {
+  final String applicationTitle;
+  final Map applicationFields;
   const ApplicationDetailsPage({
     Key? key,
+    required this.applicationTitle,
+    required this.applicationFields,
   }) : super(key: key);
 
   @override
@@ -19,16 +23,15 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   TabController? _tabController;
   int _activeTabIndex = 0;
-  final List _tabs = [
-    'General details',
-    'Insurance details',
-    'Training center details',
-    'Upload documents'
-  ];
+  final List<String> _tabs = [];
+  final List<Map> _fields = [];
 
   @override
   void initState() {
     super.initState();
+    widget.applicationFields.forEach((key, value) => _tabs.add(key));
+    widget.applicationFields.forEach((key, value) => _fields.add(value));
+    // print(_fields);
     _tabController = TabController(vsync: this, length: _tabs.length);
     _tabController!.addListener(_setActiveTabIndex);
   }
@@ -47,6 +50,7 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
 
   @override
   Widget build(BuildContext context) {
+    // print(widget.applicationFields);
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
@@ -55,7 +59,7 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
         backgroundColor: Colors.white,
         leading: const BackButton(color: AppColors.black60),
         title: Text(
-          'Applications title',
+          widget.applicationTitle,
           style: GoogleFonts.lato(
             color: AppColors.black87,
             fontSize: 16.0,
@@ -133,13 +137,16 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
                         color: AppColors.scaffoldBackground,
                         child:
                             TabBarView(controller: _tabController, children: [
-                          for (var tab in _tabs)
+                          for (Map field in _fields)
                             ListView.builder(
                                 shrinkWrap: true,
                                 physics: const NeverScrollableScrollPhysics(),
-                                itemCount: 3,
+                                itemCount: field.length,
                                 itemBuilder: (context, i) {
-                                  return const ApplicationField();
+                                  return ApplicationField(
+                                    fieldName: field.keys.elementAt(i),
+                                    fieldValue: field[field.keys.elementAt(i)],
+                                  );
                                 })
                         ]))))),
       ),

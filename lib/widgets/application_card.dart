@@ -27,7 +27,10 @@ class _ApplicationCardState extends State<ApplicationCard> {
         onTap: () => Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (context) => const ApplicationDetailsPage()),
+                  builder: (context) => ApplicationDetailsPage(
+                        applicationTitle: widget.application.title,
+                        applicationFields: widget.application.dataObject,
+                      )),
             ),
         child: Container(
           width: double.infinity,
