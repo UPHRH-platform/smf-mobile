@@ -26,5 +26,20 @@ class ApplicationRespository with ChangeNotifier {
     return _applications;
   }
 
+  Future<dynamic> submitInspection(Map data) async {
+    try {
+      final request = await ApplicationService.submitInspection(data);
+      _data = json.decode(request.body);
+      print(_data);
+    } catch (_) {
+      return _;
+    }
+
+    if (_data['statusInfo']['statusCode'] != 200) {
+      _errorMessage = _data['statusInfo']['errorMessage'];
+    }
+    return _data['statusInfo']['statusCode'];
+  }
+
   String get errorMessage => _errorMessage;
 }

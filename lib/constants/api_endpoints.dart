@@ -3,4 +3,5 @@ class ApiUrl {
   static const getOtp = '$baseUrl/api/user/requestOTP';
   static const validateOtp = '$baseUrl/api/signIn';
   static const getAllApplications = '$baseUrl/api/forms/getAllApplications';
+  static const submitInspection = '$baseUrl/api/forms/submitInspection';
 }

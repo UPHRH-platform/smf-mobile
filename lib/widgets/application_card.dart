@@ -28,8 +28,10 @@ class _ApplicationCardState extends State<ApplicationCard> {
               context,
               MaterialPageRoute(
                   builder: (context) => ApplicationDetailsPage(
+                        applicationId: widget.application.applicationId,
                         applicationTitle: widget.application.title,
                         applicationFields: widget.application.dataObject,
+                        applicationInspectors: widget.application.inspectors,
                       )),
             ),
         child: Container(

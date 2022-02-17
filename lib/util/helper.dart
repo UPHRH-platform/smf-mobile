@@ -1,4 +1,9 @@
+import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
+const _storage = FlutterSecureStorage();
 
 class Helper {
   static String getInitials(String name) {
@@ -13,6 +18,11 @@ class Helper {
     return shortCode;
   }
 
+  static Future<dynamic> getUser(String key) async {
+    var value = await _storage.read(key: key);
+    return value;
+  }
+
   static int getDateDiffence(DateTime today, DateTime dateTimeCreatedAt) {
     String month = today.month < 10 ? '0${today.month}' : '${today.month}';
     DateTime dateTimeNow = DateTime.parse('${today.year}-$month-${today.day}');
@@ -20,8 +30,33 @@ class Helper {
     return differenceInDays;
   }
 
-  static bool isTokenExpired(String token) {
-    bool isTokenExpired = JwtDecoder.isExpired(token);
+  static Future<bool> isTokenExpired() async {
+    bool isTokenExpired = true;
+    var authToken = await _storage.read(key: 'authToken');
+    isTokenExpired = JwtDecoder.isExpired(authToken!);
     return isTokenExpired;
+  }
+
+  static Future<Map<String, String>> getHeaders() async {
+    Map<String, String> headers = {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json; charset=utf-8',
+    };
+    var authToken = await _storage.read(key: 'authToken');
+    if (authToken != '' && authToken != null) {
+      headers['Authorization'] = authToken;
+    }
+    return headers;
+  }
+
+  static toastMessage(String message) {
+    Fluttertoast.showToast(
+        msg: message,
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.TOP,
+        timeInSecForIosWeb: 2,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0);
   }
 }

@@ -7,6 +7,7 @@ class Application {
   final String email;
   final String status;
   final Map dataObject;
+  final List inspectors;
   final String scheduledDate;
   final String createdDate;
   final String createdBy;
@@ -18,6 +19,7 @@ class Application {
     required this.email,
     required this.status,
     required this.dataObject,
+    required this.inspectors,
     required this.scheduledDate,
     required this.createdDate,
     required this.createdBy,
@@ -31,7 +33,8 @@ class Application {
       email: json['email'] ?? '',
       status: json['status'],
       dataObject: json['dataObject'],
-      scheduledDate: json['scheduledDate'] ?? '2022-02-15',
+      inspectors: json['inspection']['assignedTo'] ?? [],
+      scheduledDate: json['inspection']['scheduledDate'] ?? '',
       createdDate: json['createdDate'] != null
           ? DateFormat.yMMMEd().format(DateTime.parse(json['createdDate']))
           : '',
@@ -46,6 +49,7 @@ class Application {
         email,
         status,
         dataObject,
+        inspectors,
         scheduledDate,
         createdDate,
         createdBy

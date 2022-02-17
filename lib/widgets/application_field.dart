@@ -5,24 +5,43 @@ import 'package:smf_mobile/constants/color_constants.dart';
 
 class ApplicationField extends StatefulWidget {
   final String fieldName;
-  final String fieldValue;
+  final Map fieldData;
+  final ValueChanged<Map> parentAction;
   const ApplicationField({
     Key? key,
     required this.fieldName,
-    required this.fieldValue,
+    required this.fieldData,
+    required this.parentAction,
   }) : super(key: key);
   @override
   _ApplicationFieldState createState() => _ApplicationFieldState();
 }
 
 class _ApplicationFieldState extends State<ApplicationField> {
-  String _radioValue = 'Correct';
+  late Map _data;
+  late String _radioValue;
   final List<String> _options = ['Correct', 'Incorrect'];
   final TextEditingController _noteController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
+    _data = widget.fieldData[widget.fieldData.keys.elementAt(0)];
+    _radioValue = _data[_data.keys.elementAt(0)];
+    _noteController.text = _data[_data.keys.elementAt(1)];
+  }
+
+  _triggerUpdate() {
+    Map data = {
+      widget.fieldName: {
+        widget.fieldData.keys.elementAt(0): {
+          'value': _radioValue,
+          'comments': _noteController.text
+        }
+      }
+    };
+    // print(data);
+    widget.parentAction(data);
   }
 
   Future _displayCommentDialog() {
@@ -32,15 +51,16 @@ class _ApplicationFieldState extends State<ApplicationField> {
               return Stack(
                 children: [
                   Align(
-                    alignment: FractionalOffset.topCenter,
-                    child: Container(
+                      alignment: FractionalOffset.topCenter,
+                      child: Container(
                         margin: const EdgeInsets.only(top: 150),
                         decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(4)),
                         height: 285,
                         width: MediaQuery.of(context).size.width - 40,
-                        child: Padding(
+                        child: Material(
+                            child: Padding(
                           padding: const EdgeInsets.all(20),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -128,6 +148,7 @@ class _ApplicationFieldState extends State<ApplicationField> {
                                         child: TextButton(
                                           onPressed: () {
                                             Navigator.of(context).pop(false);
+                                            _triggerUpdate();
                                           },
                                           style: TextButton.styleFrom(
                                             // primary: Colors.white,
@@ -156,7 +177,7 @@ class _ApplicationFieldState extends State<ApplicationField> {
                             ],
                           ),
                         )),
-                  ),
+                      )),
                 ],
               );
             }));
@@ -164,7 +185,10 @@ class _ApplicationFieldState extends State<ApplicationField> {
 
   @override
   Widget build(BuildContext context) {
-    // print(widget.field);
+    // if (_data != widget.fieldData[widget.fieldData.keys.elementAt(0)]) {
+    //   _radioValue = _data[_data.keys.elementAt(0)];
+    //   _noteController.text = _data[_data.keys.elementAt(1)];
+    // }
     return SingleChildScrollView(
         reverse: true,
         child: Container(
@@ -212,7 +236,7 @@ class _ApplicationFieldState extends State<ApplicationField> {
                             border: Border.all(color: AppColors.black16),
                           ),
                           child: Text(
-                            widget.fieldValue,
+                            widget.fieldData.keys.elementAt(0),
                             style: GoogleFonts.lato(
                               color: AppColors.black87,
                               fontSize: 14.0,
@@ -231,7 +255,7 @@ class _ApplicationFieldState extends State<ApplicationField> {
                         borderRadius: BorderRadius.only(
                             bottomLeft: Radius.circular(4),
                             bottomRight: Radius.circular(4)),
-                        color: AppColors.scaffoldBackground,
+                        color: AppColors.fieldBackground,
                         boxShadow: [
                           BoxShadow(
                               color: AppColors.black16,
@@ -263,54 +287,68 @@ class _ApplicationFieldState extends State<ApplicationField> {
                                     // alignment: MainAxisAlignment.start,
                                     children: <Widget>[
                                       for (int i = 0; i < _options.length; i++)
-                                        Container(
-                                            padding: const EdgeInsets.only(
-                                                right: 15),
-                                            margin: const EdgeInsets.only(
-                                                right: 15),
-                                            decoration: BoxDecoration(
-                                              color: _radioValue == _options[i]
-                                                  ? AppColors.radioSelected
-                                                  : Colors.transparent,
-                                              borderRadius:
-                                                  const BorderRadius.all(
-                                                      Radius.circular(4.0)),
-                                              border: Border.all(
-                                                color:
-                                                    _radioValue == _options[i]
+                                        InkWell(
+                                            onTap: () {
+                                              setState(() {
+                                                _radioValue = _options[i];
+                                              });
+                                              if (_options[i] == 'Incorrect') {
+                                                _displayCommentDialog();
+                                              }
+                                              _triggerUpdate();
+                                            },
+                                            child: Container(
+                                                padding: const EdgeInsets.only(
+                                                    right: 15),
+                                                margin: const EdgeInsets.only(
+                                                    right: 15),
+                                                decoration: BoxDecoration(
+                                                  color: _radioValue ==
+                                                          _options[i]
+                                                      ? AppColors.radioSelected
+                                                      : Colors.transparent,
+                                                  borderRadius:
+                                                      const BorderRadius.all(
+                                                          Radius.circular(4.0)),
+                                                  border: Border.all(
+                                                    color: _radioValue ==
+                                                            _options[i]
                                                         ? AppColors.primaryBlue
                                                         : AppColors.black16,
-                                              ),
-                                            ),
-                                            child: Row(children: [
-                                              Radio(
-                                                value: _options[i],
-                                                groupValue: _radioValue,
-                                                activeColor:
-                                                    AppColors.primaryBlue,
-                                                materialTapTargetSize:
-                                                    MaterialTapTargetSize
-                                                        .shrinkWrap,
-                                                onChanged: (val) {
-                                                  setState(() {
-                                                    _radioValue = _options[i];
-                                                  });
-                                                  if (_options[i] ==
-                                                      'Incorrect') {
-                                                    _displayCommentDialog();
-                                                  }
-                                                },
-                                              ),
-                                              Text(
-                                                _options[i],
-                                                style: GoogleFonts.lato(
-                                                  color: AppColors.black87,
-                                                  fontWeight: FontWeight.w400,
-                                                  fontSize: 14.0,
-                                                  letterSpacing: 0.25,
+                                                  ),
                                                 ),
-                                              ),
-                                            ])),
+                                                child: Row(children: [
+                                                  Radio(
+                                                    value: _options[i],
+                                                    groupValue: _radioValue,
+                                                    activeColor:
+                                                        AppColors.primaryBlue,
+                                                    materialTapTargetSize:
+                                                        MaterialTapTargetSize
+                                                            .shrinkWrap,
+                                                    onChanged: (val) {
+                                                      setState(() {
+                                                        _radioValue =
+                                                            _options[i];
+                                                      });
+                                                      _triggerUpdate();
+                                                      if (_options[i] ==
+                                                          'Incorrect') {
+                                                        _displayCommentDialog();
+                                                      }
+                                                    },
+                                                  ),
+                                                  Text(
+                                                    _options[i],
+                                                    style: GoogleFonts.lato(
+                                                      color: AppColors.black87,
+                                                      fontWeight:
+                                                          FontWeight.w400,
+                                                      fontSize: 14.0,
+                                                      letterSpacing: 0.25,
+                                                    ),
+                                                  ),
+                                                ]))),
                                       const Spacer(),
                                       Padding(
                                         padding: const EdgeInsets.only(left: 0),

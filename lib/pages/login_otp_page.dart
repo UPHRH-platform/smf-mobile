@@ -9,6 +9,7 @@ import 'package:otp_text_field/otp_field.dart';
 import 'package:otp_text_field/style.dart';
 import 'package:smf_mobile/repositories/login_repository.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:smf_mobile/util/helper.dart';
 
 class LoginOtpPage extends StatefulWidget {
   static const route = AppUrl.loginOtpPage;
@@ -30,18 +31,6 @@ class _LoginOtpPageState extends State<LoginOtpPage> {
 
   Future<void> _validateOtp() async {
     String otp = _otp;
-    // if (otp.length != 6) {
-    //   Fluttertoast.showToast(
-    //       msg: 'Please enter 6 digits.',
-    //       // toastLength: Toast.LENGTH_SHORT,
-    //       gravity: ToastGravity.CENTER,
-    //       timeInSecForIosWeb: 2,
-    //       backgroundColor: Colors.red,
-    //       textColor: Colors.white,
-    //       fontSize: 16.0);
-    //   return;
-    // }
-
     try {
       final responseCode =
           await Provider.of<LoginRespository>(context, listen: false)
@@ -53,15 +42,7 @@ class _LoginOtpPageState extends State<LoginOtpPage> {
       } else {
         _errorMessage =
             Provider.of<LoginRespository>(context, listen: false).errorMessage;
-        Fluttertoast.showToast(
-            msg: _errorMessage,
-            toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.TOP,
-            timeInSecForIosWeb: 2,
-            backgroundColor: Colors.red,
-            textColor: Colors.white,
-            fontSize: 16.0);
-        // print(_errorMessage);
+        Helper.toastMessage(_errorMessage);
       }
     } catch (err) {
       throw Exception(err);

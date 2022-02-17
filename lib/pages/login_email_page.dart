@@ -7,6 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:smf_mobile/pages/login_otp_page.dart';
 import 'package:smf_mobile/repositories/login_repository.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:smf_mobile/util/helper.dart';
 
 class LoginEmailPage extends StatefulWidget {
   static const route = AppUrl.loginEmailPage;
@@ -29,14 +30,7 @@ class _LoginEmailPageState extends State<LoginEmailPage> {
   Future<void> _generateOtp() async {
     final email = _emailController.text;
     if (email == '') {
-      Fluttertoast.showToast(
-          msg: 'Please enter email.',
-          // toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.CENTER,
-          timeInSecForIosWeb: 2,
-          backgroundColor: Colors.red,
-          textColor: Colors.white,
-          fontSize: 16.0);
+      Helper.toastMessage('Please enter email.');
       return;
     }
     SystemChannels.textInput.invokeMethod('TextInput.hide');
@@ -51,15 +45,7 @@ class _LoginEmailPageState extends State<LoginEmailPage> {
       } else {
         _errorMessage =
             Provider.of<LoginRespository>(context, listen: false).errorMessage;
-        Fluttertoast.showToast(
-            msg: _errorMessage,
-            toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.TOP,
-            timeInSecForIosWeb: 2,
-            backgroundColor: Colors.red,
-            textColor: Colors.white,
-            fontSize: 16.0);
-        // print(_errorMessage);
+        Helper.toastMessage(_errorMessage);
       }
     } catch (err) {
       throw Exception(err);

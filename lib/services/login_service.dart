@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:smf_mobile/constants/api_endpoints.dart';
 import 'package:smf_mobile/services/base_service.dart';
+import 'package:smf_mobile/util/helper.dart';
 // import 'dart:developer' as developer;
 
 class LoginService extends BaseService {
@@ -13,16 +14,18 @@ class LoginService extends BaseService {
       'username': username,
     };
     var body = json.encode(requestData);
-    final response = await http.post(Uri.parse(ApiUrl.getOtp),
-        headers: BaseService.defaultHeaders, body: body);
+    Map<String, String> headers = await Helper.getHeaders();
+    final response =
+        await http.post(Uri.parse(ApiUrl.getOtp), headers: headers, body: body);
     return response;
   }
 
   static Future<dynamic> validateOtp(String username, String otp) async {
     Map requestData = {'username': username, 'otp': otp};
     var body = json.encode(requestData);
+    Map<String, String> headers = await Helper.getHeaders();
     final response = await http.post(Uri.parse(ApiUrl.validateOtp),
-        headers: BaseService.defaultHeaders, body: body);
+        headers: headers, body: body);
     return response;
   }
 }

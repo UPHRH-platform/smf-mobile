@@ -1,17 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'package:smf_mobile/constants/color_constants.dart';
 import 'package:smf_mobile/pages/inspection_summary.dart';
+import 'package:smf_mobile/pages/login_email_page.dart';
+import 'package:smf_mobile/repositories/application_repository.dart';
+import 'package:smf_mobile/util/helper.dart';
 import 'package:smf_mobile/widgets/application_field.dart';
 import 'package:smf_mobile/widgets/silverappbar_delegate.dart';
 
 class ApplicationDetailsPage extends StatefulWidget {
+  final String applicationId;
   final String applicationTitle;
   final Map applicationFields;
+  final List applicationInspectors;
   const ApplicationDetailsPage({
     Key? key,
+    required this.applicationId,
     required this.applicationTitle,
     required this.applicationFields,
+    required this.applicationInspectors,
   }) : super(key: key);
 
   @override
@@ -23,23 +31,84 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   TabController? _tabController;
   int _activeTabIndex = 0;
+  final Map _data = {};
   final List<String> _tabs = [];
   final List<Map> _fields = [];
+  String _errorMessage = '';
 
   @override
   void initState() {
     super.initState();
     widget.applicationFields.forEach((key, value) => _tabs.add(key));
-    widget.applicationFields.forEach((key, value) => _fields.add(value));
-    // print(_fields);
     _tabController = TabController(vsync: this, length: _tabs.length);
     _tabController!.addListener(_setActiveTabIndex);
+    _populateFields();
   }
 
   void _setActiveTabIndex() {
     setState(() {
       _activeTabIndex = _tabController!.index;
     });
+  }
+
+  void _populateFields() {
+    Map updatedFields = {};
+    widget.applicationFields.forEach((key, value) => {
+          updatedFields = {},
+          value.forEach((childKey, childValue) => {
+                updatedFields[childKey] = {
+                  childValue: {'value': 'Correct', 'comments': ''}
+                }
+              }),
+          _data[key] = updatedFields
+        });
+    _data.forEach((key, value) => _fields.add(value));
+  }
+
+  void updateField(Map fieldData) {
+    _data[_data.keys.elementAt(_activeTabIndex)].forEach((key, value) => {
+          if (key == fieldData.keys.elementAt(0))
+            {
+              setState(() {
+                _data[_data.keys.elementAt(_activeTabIndex)][key] =
+                    fieldData[fieldData.keys.elementAt(0)];
+                _fields[_activeTabIndex] =
+                    _data[_data.keys.elementAt(_activeTabIndex)];
+              })
+            }
+        });
+  }
+
+  void _validateUser() async {
+    bool tokenExpired = await Helper.isTokenExpired();
+    if (tokenExpired) {
+      Helper.toastMessage('Your session has expired.');
+      Navigator.of(context).pushReplacement(MaterialPageRoute(
+        builder: (context) => const LoginEmailPage(),
+      ));
+    }
+  }
+
+  Future<void> _submitInspection() async {
+    _validateUser();
+    Map data = {'applicationId': widget.applicationId, 'dataObject': _data};
+    try {
+      final responseCode =
+          await Provider.of<ApplicationRespository>(context, listen: false)
+              .submitInspection(data);
+      if (responseCode == 200) {
+        Navigator.of(context).pushReplacement(MaterialPageRoute(
+            builder: (context) => InspectionSummaryPage(
+                inspectors: widget.applicationInspectors)));
+      } else {
+        _errorMessage =
+            Provider.of<ApplicationRespository>(context, listen: false)
+                .errorMessage;
+        Helper.toastMessage(_errorMessage);
+      }
+    } catch (err) {
+      throw Exception(err);
+    }
   }
 
   @override
@@ -145,7 +214,8 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
                                 itemBuilder: (context, i) {
                                   return ApplicationField(
                                     fieldName: field.keys.elementAt(i),
-                                    fieldValue: field[field.keys.elementAt(i)],
+                                    fieldData: field[field.keys.elementAt(i)],
+                                    parentAction: updateField,
                                   );
                                 })
                         ]))))),
@@ -214,10 +284,7 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
                         ))
                     : TextButton(
                         onPressed: () {
-                          Navigator.of(context).pushReplacement(
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      const InspectionSummaryPage()));
+                          _submitInspection();
                         },
                         style: TextButton.styleFrom(
                           // primary: Colors.white,

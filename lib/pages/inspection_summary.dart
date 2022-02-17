@@ -2,31 +2,47 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:smf_mobile/constants/app_urls.dart';
 import 'package:smf_mobile/constants/color_constants.dart';
-import 'package:smf_mobile/widgets/people_card.dart';
-
+import 'package:smf_mobile/util/helper.dart';
 import 'inspection_completed.dart';
-
-// import 'dart:developer' as developer;
 
 class InspectionSummaryPage extends StatefulWidget {
   static const route = AppUrl.inspectionSummary;
+  final List inspectors;
 
-  const InspectionSummaryPage({Key? key}) : super(key: key);
+  const InspectionSummaryPage({Key? key, required this.inspectors})
+      : super(key: key);
   @override
   _InspectionSummaryPageState createState() => _InspectionSummaryPageState();
 }
 
 class _InspectionSummaryPageState extends State<InspectionSummaryPage> {
-  final List<String> _dropdownItems = [
-    'Select from the list',
-    'Somorjit Phuritshabam',
-    'Shoaib Muhammed'
-  ];
-  String _selectedItem = 'Select from the list';
+  // final List<String> _dropdownItems = [
+  //   'Select from the list',
+  //   'Somorjit Phuritshabam',
+  //   'Shoaib Muhammed'
+  // ];
+  final List<Map> _inspectors = [];
+
+  bool _iAgree = false;
 
   @override
   void initState() {
     super.initState();
+    _populateInspectors();
+  }
+
+  Future<void> _populateInspectors() async {
+    String userId = await Helper.getUser('id');
+    for (var i = 0; i < widget.inspectors.length; i++) {
+      if (userId != widget.inspectors[i]['id']) {
+        _inspectors.add({
+          'name':
+              '${widget.inspectors[i]['firstName']} ${widget.inspectors[i]['lastName']}',
+          'designation': 'Inspector',
+          'isChecked': false
+        });
+      }
+    }
   }
 
   @override
@@ -196,7 +212,88 @@ class _InspectionSummaryPageState extends State<InspectionSummaryPage> {
                 //         ),
                 //       ),
                 //     ])),
-                for (int i = 0; i < 3; i++) const PeopleCard(),
+                for (int i = 0; i < _inspectors.length; i++)
+                  Container(
+                    color: Colors.white,
+                    // width: double.infinity,
+                    margin: const EdgeInsets.only(
+                        left: 20, right: 20, bottom: 10.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Container(
+                          width: MediaQuery.of(context).size.width - 80,
+                          decoration: BoxDecoration(
+                            color: AppColors.black08,
+                            borderRadius: BorderRadius.circular(4),
+                            // border: Border.all(color: AppColors.black08),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(15.0),
+                                child: Container(
+                                  height: 48,
+                                  width: 48,
+                                  decoration: const BoxDecoration(
+                                    color: AppColors.primaryGreen,
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(4.0)),
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                        Helper.getInitials(
+                                            _inspectors[i]['name']),
+                                        style: GoogleFonts.lato(
+                                            color: Colors.white)),
+                                  ),
+                                ),
+                              ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        '${_inspectors[i]['name']}',
+                                        style: GoogleFonts.lato(
+                                            color: AppColors.black87,
+                                            fontSize: 14.0,
+                                            fontWeight: FontWeight.w700),
+                                      ),
+                                      Padding(
+                                        padding:
+                                            const EdgeInsets.only(top: 10.0),
+                                        child: Text(
+                                          '${_inspectors[i]['designation']}',
+                                          style: GoogleFonts.lato(
+                                              color: AppColors.black60,
+                                              fontSize: 14.0,
+                                              fontWeight: FontWeight.w400),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                              const Spacer(),
+                              Checkbox(
+                                  value: _inspectors[i]['isChecked'],
+                                  activeColor: AppColors.primaryBlue,
+                                  onChanged: (newValue) {
+                                    setState(() {
+                                      _inspectors[i]['isChecked'] = newValue!;
+                                    });
+                                  }),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 const Divider(),
                 Container(
                   padding: const EdgeInsets.only(left: 10, bottom: 20),
@@ -204,12 +301,12 @@ class _InspectionSummaryPageState extends State<InspectionSummaryPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       Checkbox(
-                          value: true,
+                          value: _iAgree,
                           activeColor: AppColors.primaryBlue,
                           onChanged: (newValue) {
-                            // setState(() {
-                            //   checkBoxValue = newValue;
-                            // });),
+                            setState(() {
+                              _iAgree = newValue!;
+                            });
                           }),
                       Container(
                           padding: const EdgeInsets.only(top: 10),

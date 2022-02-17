@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 class AppColors {
   static const scaffoldBackground = Color.fromRGBO(240, 243, 244, 1);
+  static const fieldBackground = Color.fromARGB(255, 236, 237, 238);
   static const primaryBlue = Color.fromRGBO(4, 93, 173, 1);
   static const radioSelected = Color.fromRGBO(0, 116, 182, 0.2);
   static const primaryGreen = Color.fromRGBO(48, 105, 51, 1);

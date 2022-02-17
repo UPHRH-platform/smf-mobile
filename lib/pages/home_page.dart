@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:smf_mobile/constants/app_urls.dart';
 import 'package:smf_mobile/constants/color_constants.dart';
 import 'package:smf_mobile/models/application_model.dart';
+import 'package:smf_mobile/pages/login_email_page.dart';
 import 'package:smf_mobile/pages/past_applications.dart';
 import 'package:smf_mobile/repositories/application_repository.dart';
 import 'package:smf_mobile/util/helper.dart';
@@ -28,10 +29,20 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    _getApplications(context);
+  }
+
+  void _validateUser() async {
+    bool tokenExpired = await Helper.isTokenExpired();
+    if (tokenExpired) {
+      Helper.toastMessage('Your session has expired.');
+      Navigator.of(context).pushReplacement(MaterialPageRoute(
+        builder: (context) => const LoginEmailPage(),
+      ));
+    }
   }
 
   Future<dynamic> _getApplications(context) async {
+    _validateUser();
     _allApplications =
         await Provider.of<ApplicationRespository>(context, listen: false)
             .getApplications();
@@ -42,26 +53,24 @@ class _HomePageState extends State<HomePage> {
     _upcomingApplications.clear();
     _pastApplications.clear();
     if (_allApplications.isNotEmpty) {
+      List temp = [];
       for (Application application in _allApplications) {
-        int days = Helper.getDateDiffence(
-            DateTime.now(), DateTime.parse(application.scheduledDate));
-        if (days == 0) {
-          _pendingApplications.add(application);
-        } else if (days > 0) {
-          _pastApplications.add(application);
-        } else {
-          _upcomingApplications.add(application);
+        if (application.scheduledDate != '') {
+          temp = application.scheduledDate.split("-");
+          temp = List.from(temp.reversed);
+          int days = Helper.getDateDiffence(
+              DateTime.now(), DateTime.parse(temp.join("-")));
+          if (days == 0) {
+            _pendingApplications.add(application);
+          } else if (days > 0) {
+            _pastApplications.add(application);
+          } else {
+            _upcomingApplications.add(application);
+          }
         }
       }
     } else if (_errorMessage.isNotEmpty) {
-      Fluttertoast.showToast(
-          msg: _errorMessage,
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.TOP,
-          timeInSecForIosWeb: 2,
-          backgroundColor: Colors.red,
-          textColor: Colors.white,
-          fontSize: 16.0);
+      Helper.toastMessage(_errorMessage);
     }
     return _allApplications;
   }
