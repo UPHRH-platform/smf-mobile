@@ -30,7 +30,6 @@ class ApplicationRespository with ChangeNotifier {
     try {
       final request = await ApplicationService.submitInspection(data);
       _data = json.decode(request.body);
-      print(_data);
     } catch (_) {
       return _;
     }

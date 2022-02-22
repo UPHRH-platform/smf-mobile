@@ -1,0 +1,17 @@
+{
+    "login": "Login",
+    "emailId": "Email Id",
+    "getOtp": "GET OTP",
+    "enterOtp": "Enter OTP",
+    "otpFieldDescription": "Enter the 6 digit OTP sent to your email address.",
+    "signIn": "SIGN IN",
+    "goBackText": "Go back, re-enter the email",
+    "pendingApplications": "Pending applications",
+    "today": "Today",
+    "upcoming": "Upcoming",
+    "pastApplications": "Past applications",
+    "viewPastApplications": "View past applications",
+    "next": "Next",
+    "previous": "previous",
+    "inspectionCompleted": "Inspection completed"
+}

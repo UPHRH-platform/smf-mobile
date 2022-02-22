@@ -1,25 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:smf_mobile/constants/app_constants.dart';
 import 'package:smf_mobile/constants/color_constants.dart';
+import 'package:smf_mobile/models/application_model.dart';
+import 'package:smf_mobile/models/form_model.dart';
 import 'package:smf_mobile/pages/inspection_summary.dart';
 import 'package:smf_mobile/pages/login_email_page.dart';
-import 'package:smf_mobile/repositories/application_repository.dart';
+import 'package:smf_mobile/repositories/form_repository.dart';
 import 'package:smf_mobile/util/helper.dart';
 import 'package:smf_mobile/widgets/application_field.dart';
 import 'package:smf_mobile/widgets/silverappbar_delegate.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ApplicationDetailsPage extends StatefulWidget {
-  final String applicationId;
-  final String applicationTitle;
-  final Map applicationFields;
-  final List applicationInspectors;
+  final Application application;
   const ApplicationDetailsPage({
     Key? key,
-    required this.applicationId,
-    required this.applicationTitle,
-    required this.applicationFields,
-    required this.applicationInspectors,
+    required this.application,
   }) : super(key: key);
 
   @override
@@ -30,19 +28,42 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
     with SingleTickerProviderStateMixin {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   TabController? _tabController;
+  late FormData _formData;
   int _activeTabIndex = 0;
   final Map _data = {};
+  final Map _fieldTypes = {};
   final List<String> _tabs = [];
   final List<Map> _fields = [];
-  String _errorMessage = '';
 
   @override
   void initState() {
     super.initState();
-    widget.applicationFields.forEach((key, value) => _tabs.add(key));
+
+    widget.application.dataObject.forEach((key, value) => _tabs.add(key));
     _tabController = TabController(vsync: this, length: _tabs.length);
     _tabController!.addListener(_setActiveTabIndex);
     _populateFields();
+  }
+
+  Future<dynamic> _getFormDetails() async {
+    _validateUser();
+    _formData = await Provider.of<FormRespository>(context, listen: false)
+        .getFormDetails(widget.application.formId);
+    // print('object');
+    String _errorMessage =
+        Provider.of<FormRespository>(context, listen: false).errorMessage;
+    if (_errorMessage != '') {
+      Helper.toastMessage(_errorMessage);
+    } else {
+      for (int i = 0; i < _formData.fields.length; i++) {
+        if (_formData.fields[i]['fieldType'] != FieldType.heading) {
+          _fieldTypes[_formData.fields[i]['name']] =
+              _formData.fields[i]['fieldType'];
+        }
+      }
+    }
+    // print(_fieldTypes);
+    return _fieldTypes;
   }
 
   void _setActiveTabIndex() {
@@ -51,9 +72,9 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
     });
   }
 
-  void _populateFields() {
+  void _populateFields() async {
     Map updatedFields = {};
-    widget.applicationFields.forEach((key, value) => {
+    widget.application.dataObject.forEach((key, value) => {
           updatedFields = {},
           value.forEach((childKey, childValue) => {
                 updatedFields[childKey] = {
@@ -91,24 +112,19 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
 
   Future<void> _submitInspection() async {
     _validateUser();
-    Map data = {'applicationId': widget.applicationId, 'dataObject': _data};
-    try {
-      final responseCode =
-          await Provider.of<ApplicationRespository>(context, listen: false)
-              .submitInspection(data);
-      if (responseCode == 200) {
-        Navigator.of(context).pushReplacement(MaterialPageRoute(
-            builder: (context) => InspectionSummaryPage(
-                inspectors: widget.applicationInspectors)));
-      } else {
-        _errorMessage =
-            Provider.of<ApplicationRespository>(context, listen: false)
-                .errorMessage;
-        Helper.toastMessage(_errorMessage);
-      }
-    } catch (err) {
-      throw Exception(err);
-    }
+    Map data = {
+      'applicationId': widget.application.applicationId,
+      'dataObject': _data
+    };
+
+    Navigator.of(context).pushReplacement(MaterialPageRoute(
+        builder: (context) => InspectionSummaryPage(
+              // formId: widget.formId,
+              formId: 1645422297511,
+              inspectors: widget.application.inspectors,
+              leadInspector: widget.application.leadInspector,
+              inspectionData: data,
+            )));
   }
 
   @override
@@ -128,7 +144,7 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
         backgroundColor: Colors.white,
         leading: const BackButton(color: AppColors.black60),
         title: Text(
-          widget.applicationTitle,
+          widget.application.title,
           style: GoogleFonts.lato(
             color: AppColors.black87,
             fontSize: 16.0,
@@ -201,24 +217,43 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
                         ),
                       ];
                     },
-                    body: Container(
-                        padding: const EdgeInsets.only(top: 20),
-                        color: AppColors.scaffoldBackground,
-                        child:
-                            TabBarView(controller: _tabController, children: [
-                          for (Map field in _fields)
-                            ListView.builder(
-                                shrinkWrap: true,
-                                physics: const NeverScrollableScrollPhysics(),
-                                itemCount: field.length,
-                                itemBuilder: (context, i) {
-                                  return ApplicationField(
-                                    fieldName: field.keys.elementAt(i),
-                                    fieldData: field[field.keys.elementAt(i)],
-                                    parentAction: updateField,
-                                  );
-                                })
-                        ]))))),
+                    body: FutureBuilder(
+                      future: _getFormDetails(),
+                      builder: (context, AsyncSnapshot<dynamic> snapshot) {
+                        if (snapshot.hasData && snapshot.data != null) {
+                          return Container(
+                              padding: const EdgeInsets.only(top: 20),
+                              color: AppColors.scaffoldBackground,
+                              child: TabBarView(
+                                  controller: _tabController,
+                                  children: [
+                                    for (Map field in _fields)
+                                      ListView.builder(
+                                          shrinkWrap: true,
+                                          physics:
+                                              const NeverScrollableScrollPhysics(),
+                                          itemCount: field.length,
+                                          itemBuilder: (context, i) {
+                                            return ApplicationField(
+                                              fieldName:
+                                                  field.keys.elementAt(i),
+                                              fieldData: field[
+                                                  field.keys.elementAt(i)],
+                                              fieldType: _fieldTypes[
+                                                  field.keys.elementAt(i)],
+                                              applicationStatus:
+                                                  widget.application.status,
+                                              parentAction: updateField,
+                                            );
+                                          })
+                                  ]));
+                        } else {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        }
+                      },
+                    )))),
       ),
       bottomNavigationBar: BottomAppBar(
           elevation: 20,
@@ -248,7 +283,7 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
                             Padding(
                                 padding: const EdgeInsets.only(left: 10),
                                 child: Text(
-                                  'Previous',
+                                  AppLocalizations.of(context)!.previous,
                                   style: GoogleFonts.lato(
                                     color: AppColors.primaryBlue,
                                     fontSize: 14.0,
@@ -268,7 +303,7 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
                             Padding(
                                 padding: const EdgeInsets.only(right: 10),
                                 child: Text(
-                                  'Next',
+                                  AppLocalizations.of(context)!.next,
                                   style: GoogleFonts.lato(
                                     color: AppColors.primaryBlue,
                                     fontSize: 14.0,
@@ -282,27 +317,32 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
                             )
                           ],
                         ))
-                    : TextButton(
-                        onPressed: () {
-                          _submitInspection();
-                        },
-                        style: TextButton.styleFrom(
-                          // primary: Colors.white,
-                          padding: const EdgeInsets.only(left: 15, right: 15),
-                          backgroundColor: AppColors.primaryBlue,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(4),
-                              side: const BorderSide(color: AppColors.black16)),
-                        ),
-                        child: Text(
-                          'Inspection completed',
-                          style: GoogleFonts.lato(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ),
+                    : widget.application.status ==
+                            InspectionStatus.sentForInspection
+                        ? TextButton(
+                            onPressed: () {
+                              _submitInspection();
+                            },
+                            style: TextButton.styleFrom(
+                              // primary: Colors.white,
+                              padding:
+                                  const EdgeInsets.only(left: 15, right: 15),
+                              backgroundColor: AppColors.primaryBlue,
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(4),
+                                  side: const BorderSide(
+                                      color: AppColors.black16)),
+                            ),
+                            child: Text(
+                              AppLocalizations.of(context)!.inspectionCompleted,
+                              style: GoogleFonts.lato(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 14,
+                              ),
+                            ),
+                          )
+                        : const Center(),
               ],
             ),
           )),

@@ -6,8 +6,8 @@ import 'package:smf_mobile/constants/color_constants.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:smf_mobile/pages/login_otp_page.dart';
 import 'package:smf_mobile/repositories/login_repository.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:smf_mobile/util/helper.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class LoginEmailPage extends StatefulWidget {
   static const route = AppUrl.loginEmailPage;
@@ -22,10 +22,18 @@ class _LoginEmailPageState extends State<LoginEmailPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   String _errorMessage = '';
 
+  late Locale locale;
+
   @override
   void initState() {
     super.initState();
   }
+
+  // This method should be triggered on some event
+  // _setLang() async {
+  //   locale = const Locale('es', '');
+  //   LandingPage.of(context)?.setLocale(locale);
+  // }
 
   Future<void> _generateOtp() async {
     final email = _emailController.text;
@@ -100,7 +108,7 @@ class _LoginEmailPageState extends State<LoginEmailPage> {
                               child: Align(
                                   alignment: Alignment.center,
                                   child: Text(
-                                    'Login',
+                                    AppLocalizations.of(context)!.login,
                                     textAlign: TextAlign.center,
                                     style: GoogleFonts.lato(
                                         color: AppColors.black87,
@@ -115,7 +123,7 @@ class _LoginEmailPageState extends State<LoginEmailPage> {
                                 top: 50,
                               ),
                               child: Text(
-                                'Email Id',
+                                AppLocalizations.of(context)!.emailId,
                                 textAlign: TextAlign.left,
                                 style: GoogleFonts.lato(
                                     color: AppColors.black87,
@@ -215,7 +223,8 @@ class _LoginEmailPageState extends State<LoginEmailPage> {
                                       Align(
                                           alignment: Alignment.center,
                                           child: Text(
-                                            'GET OTP',
+                                            AppLocalizations.of(context)!
+                                                .getOtp,
                                             textAlign: TextAlign.center,
                                             style: GoogleFonts.lato(
                                                 color: Colors.white,

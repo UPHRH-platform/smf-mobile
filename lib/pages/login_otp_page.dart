@@ -8,8 +8,8 @@ import 'package:smf_mobile/pages/login_email_page.dart';
 import 'package:otp_text_field/otp_field.dart';
 import 'package:otp_text_field/style.dart';
 import 'package:smf_mobile/repositories/login_repository.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:smf_mobile/util/helper.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class LoginOtpPage extends StatefulWidget {
   static const route = AppUrl.loginOtpPage;
@@ -97,7 +97,7 @@ class _LoginOtpPageState extends State<LoginOtpPage> {
                               child: Align(
                                   alignment: Alignment.center,
                                   child: Text(
-                                    'Login',
+                                    AppLocalizations.of(context)!.login,
                                     textAlign: TextAlign.center,
                                     style: GoogleFonts.lato(
                                         color: AppColors.black87,
@@ -112,7 +112,7 @@ class _LoginOtpPageState extends State<LoginOtpPage> {
                                 top: 50,
                               ),
                               child: Text(
-                                'Enter OTP',
+                                AppLocalizations.of(context)!.enterOtp,
                                 textAlign: TextAlign.left,
                                 style: GoogleFonts.lato(
                                     color: AppColors.black87,
@@ -165,7 +165,7 @@ class _LoginOtpPageState extends State<LoginOtpPage> {
                           Padding(
                             padding: const EdgeInsets.fromLTRB(0, 0, 0, 30),
                             child: Text(
-                              'Enter the 6 digit OTP sent to your email address.',
+                              AppLocalizations.of(context)!.otpFieldDescription,
                               style: GoogleFonts.lato(
                                   color: AppColors.black60,
                                   fontSize: 12,
@@ -201,7 +201,8 @@ class _LoginOtpPageState extends State<LoginOtpPage> {
                                       Align(
                                           alignment: Alignment.center,
                                           child: Text(
-                                            'SIGN IN',
+                                            AppLocalizations.of(context)!
+                                                .signIn,
                                             textAlign: TextAlign.center,
                                             style: GoogleFonts.lato(
                                                 color: Colors.white,
@@ -224,7 +225,7 @@ class _LoginOtpPageState extends State<LoginOtpPage> {
                               padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
                               width: double.infinity,
                               child: Text(
-                                'Go back, re-enter the email',
+                                AppLocalizations.of(context)!.goBackText,
                                 textAlign: TextAlign.center,
                                 style: GoogleFonts.lato(
                                     color: AppColors.primaryBlue,

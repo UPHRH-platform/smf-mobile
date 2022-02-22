@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:smf_mobile/constants/color_constants.dart';
 import 'package:smf_mobile/models/application_model.dart';
 import 'package:smf_mobile/widgets/application_card.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class PastApplications extends StatefulWidget {
   final List<Application> pastApplications;
@@ -27,7 +28,7 @@ class _PastApplicationsState extends State<PastApplications> {
           backgroundColor: Colors.white,
           leading: const BackButton(color: AppColors.black60),
           title: Text(
-            'Past applications',
+            AppLocalizations.of(context)!.pastApplications,
             style: GoogleFonts.lato(
               color: AppColors.black87,
               fontSize: 16.0,

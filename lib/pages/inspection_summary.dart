@@ -1,47 +1,126 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import 'package:smf_mobile/constants/app_constants.dart';
 import 'package:smf_mobile/constants/app_urls.dart';
 import 'package:smf_mobile/constants/color_constants.dart';
+import 'package:smf_mobile/models/form_model.dart';
+import 'package:smf_mobile/pages/login_email_page.dart';
+import 'package:smf_mobile/repositories/application_repository.dart';
+import 'package:smf_mobile/repositories/form_repository.dart';
 import 'package:smf_mobile/util/helper.dart';
+import 'package:smf_mobile/widgets/people_card.dart';
 import 'inspection_completed.dart';
 
 class InspectionSummaryPage extends StatefulWidget {
   static const route = AppUrl.inspectionSummary;
+  final int formId;
   final List inspectors;
+  final List leadInspector;
+  final Map inspectionData;
 
-  const InspectionSummaryPage({Key? key, required this.inspectors})
+  const InspectionSummaryPage(
+      {Key? key,
+      required this.formId,
+      required this.inspectors,
+      required this.leadInspector,
+      required this.inspectionData})
       : super(key: key);
   @override
   _InspectionSummaryPageState createState() => _InspectionSummaryPageState();
 }
 
 class _InspectionSummaryPageState extends State<InspectionSummaryPage> {
-  // final List<String> _dropdownItems = [
-  //   'Select from the list',
-  //   'Somorjit Phuritshabam',
-  //   'Shoaib Muhammed'
-  // ];
+  final TextEditingController _summaryController = TextEditingController();
   final List<Map> _inspectors = [];
-
+  int _leadInspectorId = 0;
   bool _iAgree = false;
+  late FormData _formData;
+  String _errorMessage = '';
+  late Map _summaryField;
+  late Map _termsField;
 
   @override
   void initState() {
     super.initState();
-    _populateInspectors();
+    _populateApplicationInspectors();
   }
 
-  Future<void> _populateInspectors() async {
-    String userId = await Helper.getUser('id');
+  Future<void> _populateApplicationInspectors() async {
+    if (widget.leadInspector.isNotEmpty) {
+      _leadInspectorId = widget.leadInspector[0];
+    }
+    _inspectors.clear();
     for (var i = 0; i < widget.inspectors.length; i++) {
-      if (userId != widget.inspectors[i]['id']) {
-        _inspectors.add({
-          'name':
-              '${widget.inspectors[i]['firstName']} ${widget.inspectors[i]['lastName']}',
-          'designation': 'Inspector',
-          'isChecked': false
-        });
+      _inspectors.add({
+        'id': widget.inspectors[i]['id'],
+        'name':
+            '${widget.inspectors[i]['firstName']} ${widget.inspectors[i]['lastName']}',
+      });
+      setState(() {});
+    }
+  }
+
+  void _validateUser() async {
+    bool tokenExpired = await Helper.isTokenExpired();
+    if (tokenExpired) {
+      Helper.toastMessage('Your session has expired.');
+      Navigator.of(context).pushReplacement(MaterialPageRoute(
+        builder: (context) => const LoginEmailPage(),
+      ));
+    }
+  }
+
+  Future<dynamic> _getFormDetails(context) async {
+    _validateUser();
+    _formData = await Provider.of<FormRespository>(context, listen: false)
+        .getFormDetails(widget.formId);
+    // print('object');
+    String _errorMessage =
+        Provider.of<FormRespository>(context, listen: false).errorMessage;
+    if (_errorMessage != '') {
+      Helper.toastMessage(_errorMessage);
+    } else {
+      for (int i = 0; i < _formData.inspectionFields.length; i++) {
+        if (_formData.inspectionFields[i]['fieldType'] == FieldType.heading) {
+          _summaryField = _formData.inspectionFields[i];
+        } else if (_formData.inspectionFields[i]['fieldType'] ==
+            FieldType.checkbox) {
+          _termsField = _formData.inspectionFields[i];
+        }
       }
+    }
+    return _formData;
+  }
+
+  Future<void> _submitInspection() async {
+    _validateUser();
+    if (!_iAgree) {
+      Helper.toastMessage('Please accept terms and conditions');
+      return;
+    }
+    try {
+      Map data = widget.inspectionData;
+      data['inspectorSummaryDataObject'] = {
+        'Inspection Summary': {
+          'Enter the summary of this inspection': _summaryController.text
+        }
+      };
+      final responseCode =
+          await Provider.of<ApplicationRespository>(context, listen: false)
+              .submitInspection(data);
+      if (responseCode != 0) {
+        Navigator.of(context).pushReplacement(MaterialPageRoute(
+            builder: (context) => const InspectionCompletedPage()));
+      } else {
+        _errorMessage =
+            Provider.of<ApplicationRespository>(context, listen: false)
+                .errorMessage;
+        Helper.toastMessage(_errorMessage);
+      }
+    } catch (err) {
+      throw Exception(err);
     }
   }
 
@@ -68,7 +147,8 @@ class _InspectionSummaryPageState extends State<InspectionSummaryPage> {
         body: SingleChildScrollView(
             child: Column(children: [
           Container(
-            // height: MediaQuery.of(context).size.height,
+            constraints: BoxConstraints(
+                minHeight: MediaQuery.of(context).size.height - 200),
             margin: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(4),
@@ -80,250 +160,137 @@ class _InspectionSummaryPageState extends State<InspectionSummaryPage> {
                     blurRadius: 2)
               ],
             ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                    margin: const EdgeInsets.fromLTRB(20, 30, 20, 15),
-                    child: Text(
-                      'Enter summary of this inspection',
-                      style: GoogleFonts.lato(
-                        color: AppColors.black87,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 14,
-                        letterSpacing: 0.25,
-                      ),
-                    )),
-                Container(
-                  margin: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-                  padding: const EdgeInsets.all(5),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(4),
-                    border: Border.all(color: AppColors.black16),
-                  ),
-                  child: TextFormField(
-                    // autofocus: true,
-                    // focusNode: _notesFocus,
-                    textCapitalization: TextCapitalization.sentences,
-                    textInputAction: TextInputAction.done,
-                    keyboardType: TextInputType.multiline,
-                    minLines: 10, //Normal textInputField will be displayed
-                    maxLines: 15, // wh
-                    // controller: notesController,
-                    style:
-                        const TextStyle(color: AppColors.black87, fontSize: 14),
-                    decoration: const InputDecoration(
-                      border: InputBorder.none,
-                      hintText: 'Type here',
-                      hintStyle:
-                          TextStyle(fontSize: 14.0, color: AppColors.black60),
-                      contentPadding: EdgeInsets.all(10.0),
-                    ),
-                  ),
-                ),
-                Container(
-                    margin: const EdgeInsets.fromLTRB(20, 10, 20, 15),
-                    child: Text(
-                      'People accopanied you',
-                      style: GoogleFonts.lato(
-                        color: AppColors.black87,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 14,
-                        letterSpacing: 0.25,
-                      ),
-                    )),
-                // Container(
-                //     margin: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-                //     child: Row(children: [
-                //       Container(
-                //           padding: const EdgeInsets.only(right: 10),
-                //           decoration: BoxDecoration(
-                //             color: Colors.white,
-                //             borderRadius: BorderRadius.circular(4),
-                //             border: Border.all(color: AppColors.black16),
-                //           ),
-                //           child: DropdownButton<String>(
-                //             value: _selectedItem,
-                //             icon: const Icon(
-                //               Icons.arrow_drop_down_outlined,
-                //               color: AppColors.black60,
-                //             ),
-                //             iconSize: 20,
-                //             elevation: 16,
-                //             style: const TextStyle(
-                //                 color: AppColors.black60, fontSize: 12),
-                //             underline: Container(),
-                //             selectedItemBuilder: (BuildContext context) {
-                //               return _dropdownItems.map<Widget>((String item) {
-                //                 return Row(
-                //                   children: [
-                //                     Padding(
-                //                         padding: const EdgeInsets.fromLTRB(
-                //                             20.0, 0.0, 20, 0.0),
-                //                         child: Text(
-                //                           item,
-                //                           style: GoogleFonts.lato(
-                //                             color: AppColors.black60,
-                //                             fontSize: 12,
-                //                             fontWeight: FontWeight.w400,
-                //                           ),
-                //                         ))
-                //                   ],
-                //                 );
-                //               }).toList();
-                //             },
-                //             onChanged: (newValue) {
-                //               setState(() {
-                //                 _selectedItem = newValue.toString();
-                //               });
-                //             },
-                //             items: _dropdownItems
-                //                 .map<DropdownMenuItem<String>>((String value) {
-                //               return DropdownMenuItem<String>(
-                //                 value: value,
-                //                 child: Text(value),
-                //               );
-                //             }).toList(),
-                //           )),
-                //       const Spacer(),
-                //       ButtonTheme(
-                //         child: OutlinedButton(
-                //           onPressed: () {
-                //             // Navigator.of(context).pop(false);
-                //           },
-                //           style: OutlinedButton.styleFrom(
-                //             // primary: Colors.white,
-                //             padding: const EdgeInsets.fromLTRB(30, 15, 30, 15),
-                //             side: const BorderSide(
-                //                 width: 1, color: AppColors.primaryBlue),
-                //             shape: RoundedRectangleBorder(
-                //               borderRadius: BorderRadius.circular(4),
-                //             ),
-                //             // onSurface: Colors.grey,
-                //           ),
-                //           child: Text(
-                //             'Add',
-                //             style: GoogleFonts.lato(
-                //                 color: AppColors.primaryBlue,
-                //                 fontSize: 14,
-                //                 fontWeight: FontWeight.w700),
-                //           ),
-                //         ),
-                //       ),
-                //     ])),
-                for (int i = 0; i < _inspectors.length; i++)
-                  Container(
-                    color: Colors.white,
-                    // width: double.infinity,
-                    margin: const EdgeInsets.only(
-                        left: 20, right: 20, bottom: 10.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Container(
-                          width: MediaQuery.of(context).size.width - 80,
-                          decoration: BoxDecoration(
-                            color: AppColors.black08,
-                            borderRadius: BorderRadius.circular(4),
-                            // border: Border.all(color: AppColors.black08),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.all(15.0),
-                                child: Container(
-                                  height: 48,
-                                  width: 48,
-                                  decoration: const BoxDecoration(
-                                    color: AppColors.primaryGreen,
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(4.0)),
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                        Helper.getInitials(
-                                            _inspectors[i]['name']),
-                                        style: GoogleFonts.lato(
-                                            color: Colors.white)),
-                                  ),
-                                ),
-                              ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        '${_inspectors[i]['name']}',
-                                        style: GoogleFonts.lato(
-                                            color: AppColors.black87,
-                                            fontSize: 14.0,
-                                            fontWeight: FontWeight.w700),
-                                      ),
-                                      Padding(
-                                        padding:
-                                            const EdgeInsets.only(top: 10.0),
-                                        child: Text(
-                                          '${_inspectors[i]['designation']}',
-                                          style: GoogleFonts.lato(
-                                              color: AppColors.black60,
-                                              fontSize: 14.0,
-                                              fontWeight: FontWeight.w400),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                              const Spacer(),
-                              Checkbox(
-                                  value: _inspectors[i]['isChecked'],
-                                  activeColor: AppColors.primaryBlue,
-                                  onChanged: (newValue) {
-                                    setState(() {
-                                      _inspectors[i]['isChecked'] = newValue!;
-                                    });
-                                  }),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                const Divider(),
-                Container(
-                  padding: const EdgeInsets.only(left: 10, bottom: 20),
-                  child: Row(
+            child: FutureBuilder(
+              future: _getFormDetails(context),
+              builder: (context, AsyncSnapshot<dynamic> snapshot) {
+                if (snapshot.hasData && snapshot.data != null) {
+                  return Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Checkbox(
-                          value: _iAgree,
-                          activeColor: AppColors.primaryBlue,
-                          onChanged: (newValue) {
-                            setState(() {
-                              _iAgree = newValue!;
-                            });
-                          }),
+                    children: [
                       Container(
-                          padding: const EdgeInsets.only(top: 10),
-                          width: MediaQuery.of(context).size.width - 120,
+                          margin: const EdgeInsets.fromLTRB(20, 30, 20, 15),
                           child: Text(
-                            'Sunt autem vel illum, qui dolorem aspernari ut calere ignem, nivem esse albam, dulce mel quorum nihil ut ita ruant itaque earum rerum necessitatibus saepe eveniet, ut labore et aperta iudicari ea commodi consequatur? quis autem vel eum iure reprehenderit, qui in liberos atque corrupti.',
+                            _summaryField['values'][0]['heading'] ?? '',
                             style: GoogleFonts.lato(
                               color: AppColors.black87,
-                              fontSize: 12.0,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 14,
                               letterSpacing: 0.25,
-                              fontWeight: FontWeight.w400,
                             ),
-                          ))
+                          )),
+                      Container(
+                        margin: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                        padding: const EdgeInsets.all(5),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(color: AppColors.black16),
+                        ),
+                        child: TextFormField(
+                          textCapitalization: TextCapitalization.sentences,
+                          textInputAction: TextInputAction.done,
+                          keyboardType: TextInputType.multiline,
+                          minLines: 10,
+                          maxLines: 15,
+                          controller: _summaryController,
+                          style: const TextStyle(
+                              color: AppColors.black87, fontSize: 14),
+                          decoration: const InputDecoration(
+                            border: InputBorder.none,
+                            hintText: 'Type here',
+                            hintStyle: TextStyle(
+                                fontSize: 14.0, color: AppColors.black60),
+                            contentPadding: EdgeInsets.all(10.0),
+                          ),
+                        ),
+                      ),
+                      _leadInspectorId != 0
+                          ? Container(
+                              margin: const EdgeInsets.fromLTRB(20, 10, 20, 15),
+                              child: Text(
+                                'Lead inspector',
+                                style: GoogleFonts.lato(
+                                  color: AppColors.black87,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 14,
+                                  letterSpacing: 0.25,
+                                ),
+                              ))
+                          : const Center(),
+                      for (int i = 0; i < _inspectors.length; i++)
+                        if (_leadInspectorId == _inspectors[i]['id'])
+                          PeopleCard(
+                            inspector: _inspectors[i],
+                          ),
+                      Container(
+                          margin: const EdgeInsets.fromLTRB(20, 10, 20, 15),
+                          child: Text(
+                            'Assisting inspectors',
+                            style: GoogleFonts.lato(
+                              color: AppColors.black87,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 14,
+                              letterSpacing: 0.25,
+                            ),
+                          )),
+                      for (int i = 0; i < _inspectors.length; i++)
+                        if (_leadInspectorId != _inspectors[i]['id'])
+                          PeopleCard(
+                            inspector: _inspectors[i],
+                          ),
+                      const Divider(),
+                      Container(
+                          margin: const EdgeInsets.fromLTRB(20, 10, 20, 0),
+                          child: Text(
+                            'Terms and conditions',
+                            style: GoogleFonts.lato(
+                              color: AppColors.black87,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 14,
+                              letterSpacing: 0.25,
+                            ),
+                          )),
+                      Container(
+                        padding: const EdgeInsets.only(left: 10, bottom: 20),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Checkbox(
+                                value: _iAgree,
+                                activeColor: AppColors.primaryBlue,
+                                onChanged: (newValue) {
+                                  setState(() {
+                                    _iAgree = newValue!;
+                                  });
+                                }),
+                            Container(
+                                padding: const EdgeInsets.only(top: 10),
+                                width: MediaQuery.of(context).size.width - 120,
+                                child: Text(
+                                  _termsField['values'][0]
+                                          ['additionalProperties'][
+                                      _termsField['values'][0]
+                                              ['additionalProperties']
+                                          .keys
+                                          .elementAt(0)],
+                                  style: GoogleFonts.lato(
+                                    color: AppColors.black87,
+                                    fontSize: 12.0,
+                                    letterSpacing: 0.25,
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                ))
+                          ],
+                        ),
+                      ),
                     ],
-                  ),
-                ),
-              ],
+                  );
+                } else {
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+              },
             ),
           ),
           Container(
@@ -332,8 +299,7 @@ class _InspectionSummaryPageState extends State<InspectionSummaryPage> {
                 alignment: Alignment.bottomRight,
                 child: TextButton(
                   onPressed: () {
-                    Navigator.of(context).pushReplacement(MaterialPageRoute(
-                        builder: (context) => const InspectionCompletedPage()));
+                    _submitInspection();
                   },
                   style: TextButton.styleFrom(
                     // primary: Colors.white,
