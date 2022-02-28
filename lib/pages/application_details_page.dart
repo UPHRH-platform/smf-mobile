@@ -32,6 +32,7 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
   int _activeTabIndex = 0;
   final Map _data = {};
   final Map _fieldTypes = {};
+  final Map _fieldOptions = {};
   final List<String> _tabs = [];
   final List<Map> _fields = [];
 
@@ -59,6 +60,8 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
         if (_formData.fields[i]['fieldType'] != FieldType.heading) {
           _fieldTypes[_formData.fields[i]['name']] =
               _formData.fields[i]['fieldType'];
+          _fieldOptions[_formData.fields[i]['name']] =
+              _formData.fields[i]['values'];
         }
       }
     }
@@ -98,12 +101,13 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
               })
             }
         });
+    // print(fieldData);
   }
 
   void _validateUser() async {
     bool tokenExpired = await Helper.isTokenExpired();
     if (tokenExpired) {
-      Helper.toastMessage('Your session has expired.');
+      Helper.toastMessage(AppLocalizations.of(context)!.sessionExpiredMessage);
       Navigator.of(context).pushReplacement(MaterialPageRoute(
         builder: (context) => const LoginEmailPage(),
       ));
@@ -240,6 +244,8 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
                                               fieldData: field[
                                                   field.keys.elementAt(i)],
                                               fieldType: _fieldTypes[
+                                                  field.keys.elementAt(i)],
+                                              fieldOptions: _fieldOptions[
                                                   field.keys.elementAt(i)],
                                               applicationStatus:
                                                   widget.application.status,

@@ -3,11 +3,13 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:smf_mobile/constants/app_constants.dart';
 import 'package:smf_mobile/constants/color_constants.dart';
 import 'package:smf_mobile/widgets/application_field_dialog.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ApplicationField extends StatefulWidget {
   final String fieldName;
   final Map fieldData;
   final String fieldType;
+  final List fieldOptions;
   final String applicationStatus;
   final ValueChanged<Map> parentAction;
   const ApplicationField({
@@ -15,6 +17,7 @@ class ApplicationField extends StatefulWidget {
     required this.fieldName,
     required this.fieldData,
     required this.fieldType,
+    required this.fieldOptions,
     required this.applicationStatus,
     required this.parentAction,
   }) : super(key: key);
@@ -27,15 +30,21 @@ class _ApplicationFieldState extends State<ApplicationField> {
   late String _radioValue;
   String _inspectionValue = '';
   String _summaryText = '';
-  final List<String> _options = ['Correct', 'Incorrect'];
+  final List<String> _options = [FieldValue.correct, FieldValue.inCorrect];
 
   @override
   void initState() {
     super.initState();
-    // print(widget.fieldName + ', ' + widget.fieldType);
+
     _data = widget.fieldData[widget.fieldData.keys.elementAt(0)];
+    // print('Field: ' + _data.toString());
     _radioValue = _data[_data.keys.elementAt(0)];
     _summaryText = _data[_data.keys.elementAt(1)];
+    try {
+      _inspectionValue = _data[_data.keys.elementAt(2)];
+    } catch (_) {
+      return;
+    }
   }
 
   triggerUpdate(Map dialogData) {
@@ -64,6 +73,7 @@ class _ApplicationFieldState extends State<ApplicationField> {
                 summaryText: _summaryText,
                 inspectionValue: _inspectionValue,
                 fieldType: widget.fieldType,
+                fieldOptions: widget.fieldOptions,
                 parentAction: triggerUpdate,
               );
             }));
@@ -158,7 +168,8 @@ class _ApplicationFieldState extends State<ApplicationField> {
                                   width: MediaQuery.of(context).size.width,
                                   padding: const EdgeInsets.only(bottom: 10),
                                   child: Text(
-                                    'Is the given information found correct?',
+                                    AppLocalizations.of(context)!
+                                        .sessionExpiredMessage,
                                     style: GoogleFonts.lato(
                                       color: AppColors.black60,
                                       fontWeight: FontWeight.w700,
@@ -182,7 +193,7 @@ class _ApplicationFieldState extends State<ApplicationField> {
                                                   _radioValue = _options[i];
                                                 });
                                                 if (_options[i] ==
-                                                    'Incorrect') {
+                                                    FieldValue.inCorrect) {
                                                   _displayCommentDialog();
                                                 }
                                                 Map data = {
@@ -239,7 +250,8 @@ class _ApplicationFieldState extends State<ApplicationField> {
                                                         };
                                                         triggerUpdate(data);
                                                         if (_options[i] ==
-                                                            'Incorrect') {
+                                                            FieldValue
+                                                                .inCorrect) {
                                                           _displayCommentDialog();
                                                         }
                                                       }
@@ -264,24 +276,27 @@ class _ApplicationFieldState extends State<ApplicationField> {
                                             if (widget.applicationStatus ==
                                                     InspectionStatus
                                                         .sentForInspection &&
-                                                _radioValue != 'Correct') {
+                                                _radioValue !=
+                                                    FieldValue.correct) {
                                               _displayCommentDialog();
                                             }
                                           },
-                                          icon: _radioValue != 'Correct'
-                                              ? const Icon(
-                                                  Icons.edit,
-                                                  color: AppColors.black40,
-                                                )
-                                              : const Icon(
-                                                  Icons.message,
-                                                  color: AppColors.black40,
-                                                ),
+                                          icon:
+                                              _radioValue != FieldValue.correct
+                                                  ? const Icon(
+                                                      Icons.edit,
+                                                      color: AppColors.black40,
+                                                    )
+                                                  : const Icon(
+                                                      Icons.message,
+                                                      color: AppColors.black40,
+                                                    ),
                                         ),
                                       )
                                     ],
                                   )),
-                              _radioValue != 'Correct' && _summaryText != ''
+                              _radioValue != FieldValue.correct &&
+                                      _summaryText != ''
                                   ? Container(
                                       margin: const EdgeInsets.only(top: 10),
                                       padding: const EdgeInsets.fromLTRB(
@@ -304,7 +319,8 @@ class _ApplicationFieldState extends State<ApplicationField> {
                                       ),
                                     )
                                   : const Center(),
-                              _radioValue != 'Correct' && _inspectionValue != ''
+                              _radioValue != FieldValue.correct &&
+                                      _inspectionValue != ''
                                   ? Container(
                                       width: MediaQuery.of(context).size.width,
                                       padding: const EdgeInsets.only(top: 20),
@@ -318,7 +334,8 @@ class _ApplicationFieldState extends State<ApplicationField> {
                                         ),
                                       ))
                                   : const Center(),
-                              _radioValue != 'Correct' && _inspectionValue != ''
+                              _radioValue != FieldValue.correct &&
+                                      _inspectionValue != ''
                                   ? Container(
                                       margin: const EdgeInsets.only(top: 10),
                                       padding: const EdgeInsets.fromLTRB(

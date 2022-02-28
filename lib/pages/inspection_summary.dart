@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:smf_mobile/constants/app_constants.dart';
@@ -12,6 +11,7 @@ import 'package:smf_mobile/repositories/form_repository.dart';
 import 'package:smf_mobile/util/helper.dart';
 import 'package:smf_mobile/widgets/people_card.dart';
 import 'inspection_completed.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class InspectionSummaryPage extends StatefulWidget {
   static const route = AppUrl.inspectionSummary;
@@ -65,7 +65,7 @@ class _InspectionSummaryPageState extends State<InspectionSummaryPage> {
   void _validateUser() async {
     bool tokenExpired = await Helper.isTokenExpired();
     if (tokenExpired) {
-      Helper.toastMessage('Your session has expired.');
+      Helper.toastMessage(AppLocalizations.of(context)!.sessionExpiredMessage);
       Navigator.of(context).pushReplacement(MaterialPageRoute(
         builder: (context) => const LoginEmailPage(),
       ));

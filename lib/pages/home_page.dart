@@ -34,7 +34,7 @@ class _HomePageState extends State<HomePage> {
   void _validateUser() async {
     bool tokenExpired = await Helper.isTokenExpired();
     if (tokenExpired) {
-      Helper.toastMessage('Your session has expired.');
+      Helper.toastMessage(AppLocalizations.of(context)!.sessionExpiredMessage);
       Navigator.of(context).pushReplacement(MaterialPageRoute(
         builder: (context) => const LoginEmailPage(),
       ));

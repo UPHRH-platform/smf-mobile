@@ -17,10 +17,28 @@ class ApplicationCard extends StatefulWidget {
 }
 
 class _ApplicationCardState extends State<ApplicationCard> {
+  String _inspectionStatus = '';
   @override
   void initState() {
     super.initState();
+    _getInspectionStatus();
   }
+
+  void _getInspectionStatus() {
+    if (widget.application.status == InspectionStatus.inspectionCompleted) {
+      _inspectionStatus = 'Completed';
+    } else if (widget.application.status ==
+        InspectionStatus.sentForInspection) {
+      _inspectionStatus = 'Pending';
+    } else {
+      _inspectionStatus = _toCapitalized(widget.application.status);
+    }
+    setState(() {});
+  }
+
+  _toCapitalized(String string) => string.isNotEmpty
+      ? '${string[0].toUpperCase()}${string.substring(1).toLowerCase()}'
+      : '';
 
   @override
   Widget build(BuildContext context) {
@@ -89,28 +107,16 @@ class _ApplicationCardState extends State<ApplicationCard> {
                           fontWeight: FontWeight.w400,
                         )),
                   ),
-                  widget.application.status ==
-                          InspectionStatus.inspectionCompleted
-                      ? Padding(
-                          padding: const EdgeInsets.only(bottom: 10),
-                          child: Text('Completed',
-                              style: GoogleFonts.lato(
-                                color: AppColors.black60,
-                                fontSize: 14.0,
-                                letterSpacing: 0.12,
-                                fontWeight: FontWeight.w700,
-                              )),
-                        )
-                      : Padding(
-                          padding: const EdgeInsets.only(bottom: 10),
-                          child: Text('Pending',
-                              style: GoogleFonts.lato(
-                                color: AppColors.black60,
-                                fontSize: 14.0,
-                                letterSpacing: 0.12,
-                                fontWeight: FontWeight.w700,
-                              )),
-                        )
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: Text(_inspectionStatus,
+                        style: GoogleFonts.lato(
+                          color: AppColors.black60,
+                          fontSize: 14.0,
+                          letterSpacing: 0.12,
+                          fontWeight: FontWeight.w700,
+                        )),
+                  ),
                 ],
               )
             ],

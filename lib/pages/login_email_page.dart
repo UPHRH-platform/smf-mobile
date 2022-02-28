@@ -1,3 +1,4 @@
+// import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -8,6 +9,8 @@ import 'package:smf_mobile/pages/login_otp_page.dart';
 import 'package:smf_mobile/repositories/login_repository.dart';
 import 'package:smf_mobile/util/helper.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:smf_mobile/util/notification_helper.dart';
 
 class LoginEmailPage extends StatefulWidget {
   static const route = AppUrl.loginEmailPage;
@@ -20,19 +23,39 @@ class LoginEmailPage extends StatefulWidget {
 class _LoginEmailPageState extends State<LoginEmailPage> {
   final TextEditingController _emailController = TextEditingController();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  FirebaseMessaging messaging = FirebaseMessaging.instance;
   String _errorMessage = '';
-
   late Locale locale;
 
   @override
   void initState() {
     super.initState();
+    // _configureMessaging();
   }
 
-  // This method should be triggered on some event
-  // _setLang() async {
-  //   locale = const Locale('es', '');
-  //   LandingPage.of(context)?.setLocale(locale);
+  // _configureMessaging() async {
+  //   NotificationSettings settings = await messaging.requestPermission(
+  //     alert: true,
+  //     announcement: false,
+  //     badge: true,
+  //     carPlay: false,
+  //     criticalAlert: false,
+  //     provisional: false,
+  //     sound: true,
+  //   );
+  //   print('User granted permission: ${settings.authorizationStatus}');
+
+  //   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+  //     if (message.notification != null) {
+  //       var random = Random();
+  //       int notificationId = random.nextInt(999999);
+  //       String body =
+  //           message.notification!.body.toString() + message.data.toString();
+  //       NotificationHelper.scheduleNotification(context, DateTime.now(),
+  //           notificationId, message.notification!.title.toString(), body);
+  //     }
+  //     print('Message data: $message');
+  //   });
   // }
 
   Future<void> _generateOtp() async {
@@ -45,7 +68,7 @@ class _LoginEmailPageState extends State<LoginEmailPage> {
     try {
       final responseCode =
           await Provider.of<LoginRespository>(context, listen: false)
-              .getOtp(email);
+              .getOtp(email.trim());
       if (responseCode == 200) {
         Navigator.of(context).pushReplacement(MaterialPageRoute(
           builder: (context) => const LoginOtpPage(),

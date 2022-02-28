@@ -1,19 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:smf_mobile/constants/app_constants.dart';
 import 'package:smf_mobile/constants/color_constants.dart';
+import 'package:smf_mobile/widgets/questions/dropdown_question.dart';
+import 'package:smf_mobile/widgets/questions/multi_select_question.dart';
+import 'package:smf_mobile/widgets/questions/radio_question.dart';
 import 'package:smf_mobile/widgets/questions/text_question.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ApplicationFieldDialog extends StatefulWidget {
   final String summaryText;
   final String inspectionValue;
   final String fieldType;
+  final List fieldOptions;
   final ValueChanged<Map> parentAction;
   const ApplicationFieldDialog({
     Key? key,
     required this.summaryText,
     required this.inspectionValue,
     required this.fieldType,
+    required this.fieldOptions,
     required this.parentAction,
   }) : super(key: key);
 
@@ -29,14 +36,20 @@ class _ApplicationFieldDialogState extends State<ApplicationFieldDialog> {
   @override
   void initState() {
     super.initState();
+    // print('Dialog: ' + widget.inspectionValue);
     _summaryController.text = widget.summaryText;
+    _inspectionValue = widget.inspectionValue;
   }
 
   saveData(String inspectionValue) {
     setState(() {
       _inspectionValue = inspectionValue;
     });
-    // _submitData();
+    data = {
+      'summaryText': _summaryController.text,
+      'inspectionValue': _inspectionValue
+    };
+    widget.parentAction(data);
   }
 
   _submitData() {
@@ -44,6 +57,7 @@ class _ApplicationFieldDialogState extends State<ApplicationFieldDialog> {
       'summaryText': _summaryController.text,
       'inspectionValue': _inspectionValue
     };
+    // print('inspectionValue: $_inspectionValue');
     widget.parentAction(data);
   }
 
@@ -57,7 +71,7 @@ class _ApplicationFieldDialogState extends State<ApplicationFieldDialog> {
               margin: const EdgeInsets.only(top: 150),
               decoration: BoxDecoration(
                   color: Colors.white, borderRadius: BorderRadius.circular(4)),
-              constraints: const BoxConstraints(minHeight: 300, maxHeight: 400),
+              constraints: const BoxConstraints(minHeight: 300, maxHeight: 440),
               width: MediaQuery.of(context).size.width - 40,
               child: Material(
                   child: Padding(
@@ -66,7 +80,7 @@ class _ApplicationFieldDialogState extends State<ApplicationFieldDialog> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     SizedBox(
-                      height: 290,
+                      height: 330,
                       child: ListView(
                           shrinkWrap: true,
                           physics: const AlwaysScrollableScrollPhysics(),
@@ -94,7 +108,7 @@ class _ApplicationFieldDialogState extends State<ApplicationFieldDialog> {
                                 borderRadius: BorderRadius.circular(8),
                                 child: Focus(
                                   child: TextFormField(
-                                    autofocus: true,
+                                    // autofocus: true,
                                     controller: _summaryController,
                                     textCapitalization:
                                         TextCapitalization.sentences,
@@ -103,7 +117,11 @@ class _ApplicationFieldDialogState extends State<ApplicationFieldDialog> {
                                     minLines:
                                         8, //Normal textInputField will be displayed
                                     maxLines: 8, // wh
-                                    // controller: notesController,
+                                    onEditingComplete: () {
+                                      SystemChannels.textInput
+                                          .invokeMethod('TextInput.hide');
+                                      return;
+                                    },
                                     style: const TextStyle(
                                         color: AppColors.black87, fontSize: 14),
                                     decoration: const InputDecoration(
@@ -118,25 +136,52 @@ class _ApplicationFieldDialogState extends State<ApplicationFieldDialog> {
                                 ),
                               ),
                             ),
-                            Padding(
-                                padding: const EdgeInsets.only(top: 20),
-                                child: Text(
-                                  'Actual value(s)',
-                                  style: GoogleFonts.lato(
-                                    color: AppColors.black87,
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 14,
-                                    letterSpacing: 0.25,
-                                  ),
-                                )),
+                            widget.fieldType != FieldType.file
+                                ? Padding(
+                                    padding: const EdgeInsets.only(top: 20),
+                                    child: Text(
+                                      'Actual value(s)',
+                                      style: GoogleFonts.lato(
+                                        color: AppColors.black87,
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 14,
+                                        letterSpacing: 0.25,
+                                      ),
+                                    ))
+                                : const Center(),
                             widget.fieldType == FieldType.text ||
                                     widget.fieldType == FieldType.numeric ||
-                                    widget.fieldType == FieldType.email
+                                    widget.fieldType == FieldType.email ||
+                                    widget.fieldType == FieldType.date ||
+                                    widget.fieldType == FieldType.textarea
                                 ? TextQuestion(
                                     fieldType: widget.fieldType,
                                     answerGiven: widget.inspectionValue,
                                     parentAction: saveData)
-                                : const Center(),
+                                : widget.fieldType == FieldType.dropdown
+                                    ? DropdownQuestion(
+                                        items: widget.fieldOptions,
+                                        selectedItem: widget.inspectionValue,
+                                        parentAction: saveData)
+                                    : widget.fieldType == FieldType.radio ||
+                                            widget.fieldType ==
+                                                FieldType.boolean
+                                        ? RadioQuestion(
+                                            items: widget.fieldOptions,
+                                            fieldType: widget.fieldType,
+                                            selectedItem:
+                                                widget.inspectionValue,
+                                            parentAction: saveData)
+                                        : widget.fieldType ==
+                                                    FieldType.checkbox ||
+                                                widget.fieldType ==
+                                                    FieldType.multiselect
+                                            ? MultiSelectQuestion(
+                                                items: widget.fieldOptions,
+                                                selectedItems:
+                                                    widget.inspectionValue,
+                                                parentAction: saveData)
+                                            : const Center(),
                           ]),
                     ),
                     Container(
@@ -148,6 +193,7 @@ class _ApplicationFieldDialogState extends State<ApplicationFieldDialog> {
                               child: OutlinedButton(
                                 onPressed: () {
                                   Navigator.of(context).pop(false);
+                                  _submitData();
                                 },
                                 style: OutlinedButton.styleFrom(
                                   // primary: Colors.white,

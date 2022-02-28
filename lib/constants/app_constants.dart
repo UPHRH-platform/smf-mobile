@@ -18,6 +18,13 @@ class FieldType {
 }
 
 class InspectionStatus {
+  static const String newInspection = 'NEW';
   static const String sentForInspection = 'SENTFORINS';
   static const String inspectionCompleted = 'INSCOMPLETED';
+  static const String returned = 'RETURNED';
+}
+
+class FieldValue {
+  static const String correct = 'Correct';
+  static const String inCorrect = 'Incorrect';
 }

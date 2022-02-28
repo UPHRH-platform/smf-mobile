@@ -9,9 +9,7 @@ class LoginService extends BaseService {
   LoginService(HttpClient client) : super(client);
 
   static Future<dynamic> getOtp(String username) async {
-    Map requestData = {
-      'username': username,
-    };
+    Map requestData = {'username': username, 'isMobile': true};
     var body = json.encode(requestData);
     Map<String, String> headers = await BaseService.getHeaders();
     final response =
@@ -24,6 +22,20 @@ class LoginService extends BaseService {
     var body = json.encode(requestData);
     Map<String, String> headers = await BaseService.getHeaders();
     final response = await http.post(Uri.parse(ApiUrl.validateOtp),
+        headers: headers, body: body);
+    return response;
+  }
+
+  static Future<dynamic> updateUserDeviceToken(
+      String token, String identifier, int userId) async {
+    Map requestData = {
+      "deviceToken": token,
+      "deviceId": identifier,
+      "userId": userId
+    };
+    var body = json.encode(requestData);
+    Map<String, String> headers = await BaseService.getHeaders();
+    final response = await http.post(Uri.parse(ApiUrl.updateUserDeviceToken),
         headers: headers, body: body);
     return response;
   }

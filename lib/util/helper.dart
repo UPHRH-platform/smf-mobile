@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
@@ -33,7 +35,9 @@ class Helper {
   static Future<bool> isTokenExpired() async {
     bool isTokenExpired = true;
     var authToken = await _storage.read(key: 'authToken');
-    isTokenExpired = JwtDecoder.isExpired(authToken!);
+    if (authToken != null) {
+      isTokenExpired = JwtDecoder.isExpired(authToken);
+    }
     return isTokenExpired;
   }
 
@@ -46,5 +50,14 @@ class Helper {
         backgroundColor: Colors.red,
         textColor: Colors.white,
         fontSize: 16.0);
+  }
+
+  static getUniqueId() {
+    DateTime _now = DateTime.now();
+    var random = Random();
+    int id1 = random.nextInt(99999);
+    int id2 = random.nextInt(99999);
+    int notificationId = id1 + id2 + _now.millisecond;
+    return notificationId;
   }
 }

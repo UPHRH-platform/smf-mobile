@@ -13,5 +13,11 @@
     "viewPastApplications": "View past applications",
     "next": "Next",
     "previous": "previous",
-    "inspectionCompleted": "Inspection completed"
+    "inspectionCompleted": "Inspection completed",
+    "sessionExpiredMessage": "Your session has expired.",
+    "isGivenInformationCorrect": "Is the given information found correct?",
+    "typeHere": "Type here",
+    "cancel": "Cancel",
+    "submit": "Submit",
+    "actualValue": "Actual value(s)"
 }

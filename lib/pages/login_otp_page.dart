@@ -10,6 +10,8 @@ import 'package:otp_text_field/style.dart';
 import 'package:smf_mobile/repositories/login_repository.dart';
 import 'package:smf_mobile/util/helper.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:unique_identifier/unique_identifier.dart';
+import 'package:flutter/services.dart';
 
 class LoginOtpPage extends StatefulWidget {
   static const route = AppUrl.loginOtpPage;
@@ -23,10 +25,27 @@ class _LoginOtpPageState extends State<LoginOtpPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   String _errorMessage = '';
   String _otp = '';
+  late String _identifier;
 
   @override
   void initState() {
     super.initState();
+    initUniqueIdentifierState();
+  }
+
+  Future<void> initUniqueIdentifierState() async {
+    String? identifier;
+    try {
+      identifier = await UniqueIdentifier.serial;
+    } on PlatformException {
+      identifier = 'Failed to get Unique Identifier';
+    }
+
+    if (!mounted) return;
+
+    setState(() {
+      _identifier = identifier!;
+    });
   }
 
   Future<void> _validateOtp() async {
@@ -34,7 +53,7 @@ class _LoginOtpPageState extends State<LoginOtpPage> {
     try {
       final responseCode =
           await Provider.of<LoginRespository>(context, listen: false)
-              .validateOtp(otp);
+              .validateOtp(context, otp, _identifier);
       if (responseCode == 200) {
         Navigator.of(context).pushReplacement(MaterialPageRoute(
           builder: (context) => const HomePage(),
@@ -144,19 +163,26 @@ class _LoginOtpPageState extends State<LoginOtpPage> {
                                       color: Colors.white,
                                     ),
                                     child: OTPTextField(
-                                      length: 6,
-                                      width: MediaQuery.of(context).size.width,
-                                      fieldWidth: 38,
-                                      style: const TextStyle(fontSize: 14),
-                                      textFieldAlignment:
-                                          MainAxisAlignment.spaceAround,
-                                      fieldStyle: FieldStyle.underline,
-                                      onCompleted: (pin) {
-                                        setState(() {
-                                          _otp = pin;
-                                        });
-                                      },
-                                    ),
+                                        length: 6,
+                                        width:
+                                            MediaQuery.of(context).size.width,
+                                        fieldWidth: 38,
+                                        style: const TextStyle(fontSize: 14),
+                                        textFieldAlignment:
+                                            MainAxisAlignment.spaceAround,
+                                        fieldStyle: FieldStyle.underline,
+                                        onCompleted: (pin) {
+                                          setState(() {
+                                            _otp = pin;
+                                          });
+                                        },
+                                        onChanged: (String? pin) {
+                                          if (pin?.length == 6) {
+                                            setState(() {
+                                              _otp = pin.toString();
+                                            });
+                                          }
+                                        }),
                                   )
                                 ],
                               ),
