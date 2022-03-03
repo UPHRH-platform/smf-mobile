@@ -7,15 +7,15 @@ import 'package:smf_mobile/widgets/questions/dropdown_question.dart';
 import 'package:smf_mobile/widgets/questions/multi_select_question.dart';
 import 'package:smf_mobile/widgets/questions/radio_question.dart';
 import 'package:smf_mobile/widgets/questions/text_question.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+// import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-class ApplicationFieldDialog extends StatefulWidget {
+class LeadInspectorDialog extends StatefulWidget {
   final String summaryText;
   final String inspectionValue;
   final String fieldType;
   final List fieldOptions;
   final ValueChanged<Map> parentAction;
-  const ApplicationFieldDialog({
+  const LeadInspectorDialog({
     Key? key,
     required this.summaryText,
     required this.inspectionValue,
@@ -25,10 +25,10 @@ class ApplicationFieldDialog extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _ApplicationFieldDialogState createState() => _ApplicationFieldDialogState();
+  _LeadInspectorDialogState createState() => _LeadInspectorDialogState();
 }
 
-class _ApplicationFieldDialogState extends State<ApplicationFieldDialog> {
+class _LeadInspectorDialogState extends State<LeadInspectorDialog> {
   final TextEditingController _summaryController = TextEditingController();
   String _inspectionValue = '';
   bool inspectionUpdated = false;

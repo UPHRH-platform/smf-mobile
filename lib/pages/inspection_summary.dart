@@ -219,9 +219,11 @@ class _InspectionSummaryPageState extends State<InspectionSummaryPage> {
                           : const Center(),
                       for (int i = 0; i < _inspectors.length; i++)
                         if (_leadInspectorId == _inspectors[i]['id'])
-                          PeopleCard(
-                            inspector: _inspectors[i],
-                          ),
+                          Container(
+                              margin: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+                              child: PeopleCard(
+                                inspector: _inspectors[i],
+                              )),
                       Container(
                           margin: const EdgeInsets.fromLTRB(20, 10, 20, 15),
                           child: Text(
@@ -235,9 +237,11 @@ class _InspectionSummaryPageState extends State<InspectionSummaryPage> {
                           )),
                       for (int i = 0; i < _inspectors.length; i++)
                         if (_leadInspectorId != _inspectors[i]['id'])
-                          PeopleCard(
-                            inspector: _inspectors[i],
-                          ),
+                          Container(
+                              margin: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+                              child: PeopleCard(
+                                inspector: _inspectors[i],
+                              )),
                       const Divider(),
                       Container(
                           margin: const EdgeInsets.fromLTRB(20, 10, 20, 0),

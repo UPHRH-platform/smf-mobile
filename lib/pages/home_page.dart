@@ -7,6 +7,7 @@ import 'package:smf_mobile/models/application_model.dart';
 import 'package:smf_mobile/pages/login_email_page.dart';
 import 'package:smf_mobile/pages/past_applications.dart';
 import 'package:smf_mobile/repositories/application_repository.dart';
+import 'package:smf_mobile/repositories/login_repository.dart';
 import 'package:smf_mobile/util/helper.dart';
 import 'package:smf_mobile/widgets/application_card.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -41,7 +42,7 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  Future<dynamic> _getApplications(context) async {
+  Future<dynamic> _getApplications() async {
     _validateUser();
     _allApplications =
         await Provider.of<ApplicationRespository>(context, listen: false)
@@ -75,6 +76,13 @@ class _HomePageState extends State<HomePage> {
     return _allApplications;
   }
 
+  Future<void> _logout() async {
+    await Provider.of<LoginRespository>(context, listen: false).clearData();
+    Navigator.of(context).pushReplacement(MaterialPageRoute(
+      builder: (context) => const LoginEmailPage(),
+    ));
+  }
+
   Future<void> _pullRefresh() async {
     setState(() {});
   }
@@ -96,7 +104,41 @@ class _HomePageState extends State<HomePage> {
               fontWeight: FontWeight.w600,
             ),
           ),
-          // centerTitle: true,
+          actions: [
+            SizedBox.fromSize(
+                size: const Size(0, 10),
+                child: IconButton(
+                  icon: const Icon(Icons.more_vert),
+                  color: AppColors.black87,
+                  iconSize: 20,
+                  onPressed: () {},
+                )),
+            PopupMenuButton<String>(
+              // initialValue: _dropdownOptions[0],
+              onSelected: (String result) {
+                switch (result) {
+                  case 'logout':
+                    _logout();
+                    break;
+                  default:
+                }
+              },
+              itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                PopupMenuItem<String>(
+                  value: 'logout',
+                  child: Text(
+                    'Logout',
+                    style: GoogleFonts.lato(
+                      color: AppColors.black87,
+                      fontSize: 14.0,
+                      letterSpacing: 0.12,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
+            )
+          ],
         ),
         // Tab controller
         body: Container(
@@ -106,7 +148,7 @@ class _HomePageState extends State<HomePage> {
             minHeight: MediaQuery.of(context).size.height - 150,
           ),
           child: FutureBuilder(
-            future: _getApplications(context),
+            future: _getApplications(),
             builder: (context, AsyncSnapshot<dynamic> snapshot) {
               if (snapshot.hasData && snapshot.data != null) {
                 return RefreshIndicator(
@@ -117,17 +159,39 @@ class _HomePageState extends State<HomePage> {
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Container(
-                            width: double.infinity,
-                            margin: const EdgeInsets.only(top: 10, bottom: 20),
-                            child: Text(AppLocalizations.of(context)!.today,
-                                style: GoogleFonts.lato(
-                                  color: AppColors.black87,
-                                  fontSize: 16.0,
-                                  letterSpacing: 0.12,
-                                  fontWeight: FontWeight.w600,
-                                )),
-                          ),
+                          _pendingApplications.isEmpty &&
+                                  _upcomingApplications.isEmpty
+                              ? Container(
+                                  width: double.infinity,
+                                  height:
+                                      MediaQuery.of(context).size.height - 250,
+                                  margin: const EdgeInsets.only(
+                                      top: 10, bottom: 20),
+                                  child: Center(
+                                    child: Text('No applications at the moment',
+                                        style: GoogleFonts.lato(
+                                          color: AppColors.black87,
+                                          fontSize: 16.0,
+                                          letterSpacing: 0.12,
+                                          fontWeight: FontWeight.w600,
+                                        )),
+                                  ))
+                              : const Center(),
+                          _pendingApplications.isNotEmpty
+                              ? Container(
+                                  width: double.infinity,
+                                  margin: const EdgeInsets.only(
+                                      top: 10, bottom: 20),
+                                  child:
+                                      Text(AppLocalizations.of(context)!.today,
+                                          style: GoogleFonts.lato(
+                                            color: AppColors.black87,
+                                            fontSize: 16.0,
+                                            letterSpacing: 0.12,
+                                            fontWeight: FontWeight.w600,
+                                          )),
+                                )
+                              : const Center(),
                           ListView.builder(
                             shrinkWrap: true,
                             physics: const NeverScrollableScrollPhysics(),
@@ -137,17 +201,21 @@ class _HomePageState extends State<HomePage> {
                                   application: _pendingApplications[i]);
                             },
                           ),
-                          Container(
-                            width: double.infinity,
-                            margin: const EdgeInsets.only(top: 20, bottom: 20),
-                            child: Text(AppLocalizations.of(context)!.upcoming,
-                                style: GoogleFonts.lato(
-                                  color: AppColors.black87,
-                                  fontSize: 16.0,
-                                  letterSpacing: 0.12,
-                                  fontWeight: FontWeight.w600,
-                                )),
-                          ),
+                          _upcomingApplications.isNotEmpty
+                              ? Container(
+                                  width: double.infinity,
+                                  margin: const EdgeInsets.only(
+                                      top: 20, bottom: 20),
+                                  child: Text(
+                                      AppLocalizations.of(context)!.upcoming,
+                                      style: GoogleFonts.lato(
+                                        color: AppColors.black87,
+                                        fontSize: 16.0,
+                                        letterSpacing: 0.12,
+                                        fontWeight: FontWeight.w600,
+                                      )),
+                                )
+                              : const Center(),
                           ListView.builder(
                             shrinkWrap: true,
                             physics: const NeverScrollableScrollPhysics(),

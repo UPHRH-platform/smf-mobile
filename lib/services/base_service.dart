@@ -12,7 +12,7 @@ abstract class BaseService {
       'Accept': 'application/json',
       'Content-Type': 'application/json; charset=utf-8',
     };
-    var authToken = await _storage.read(key: 'authToken');
+    var authToken = await _storage.read(key: 'smf_user_auth_token');
     if (authToken != '' && authToken != null) {
       headers['Authorization'] = authToken;
     }

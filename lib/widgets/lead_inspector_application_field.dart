@@ -2,17 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:smf_mobile/constants/app_constants.dart';
 import 'package:smf_mobile/constants/color_constants.dart';
-import 'package:smf_mobile/widgets/application_field_dialog.dart';
+import 'package:smf_mobile/widgets/lead_inspector_dialog.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-class ApplicationField extends StatefulWidget {
+class LeadInspectorApplicationField extends StatefulWidget {
   final String fieldName;
   final Map fieldData;
   final String fieldType;
   final List fieldOptions;
   final String applicationStatus;
   final ValueChanged<Map> parentAction;
-  const ApplicationField({
+  const LeadInspectorApplicationField({
     Key? key,
     required this.fieldName,
     required this.fieldData,
@@ -22,10 +22,12 @@ class ApplicationField extends StatefulWidget {
     required this.parentAction,
   }) : super(key: key);
   @override
-  _ApplicationFieldState createState() => _ApplicationFieldState();
+  _LeadInspectorApplicationFieldState createState() =>
+      _LeadInspectorApplicationFieldState();
 }
 
-class _ApplicationFieldState extends State<ApplicationField> {
+class _LeadInspectorApplicationFieldState
+    extends State<LeadInspectorApplicationField> {
   late Map _data;
   late String _radioValue;
   String _inspectionValue = '';
@@ -69,7 +71,7 @@ class _ApplicationFieldState extends State<ApplicationField> {
     return showDialog(
         context: context,
         builder: (context) => StatefulBuilder(builder: (context, setState) {
-              return ApplicationFieldDialog(
+              return LeadInspectorDialog(
                 summaryText: _summaryText,
                 inspectionValue: _inspectionValue,
                 fieldType: widget.fieldType,
@@ -169,7 +171,7 @@ class _ApplicationFieldState extends State<ApplicationField> {
                                   padding: const EdgeInsets.only(bottom: 10),
                                   child: Text(
                                     AppLocalizations.of(context)!
-                                        .sessionExpiredMessage,
+                                        .isGivenInformationCorrect,
                                     style: GoogleFonts.lato(
                                       color: AppColors.black60,
                                       fontWeight: FontWeight.w700,

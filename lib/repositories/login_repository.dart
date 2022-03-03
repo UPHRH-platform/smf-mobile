@@ -43,12 +43,14 @@ class LoginRespository with ChangeNotifier {
       _errorMessage = _data['statusInfo']['errorMessage'];
     } else {
       _loginDetails = Login.fromJson(_data['responseData']);
-      _storage.write(key: 'id', value: '${_loginDetails.id}');
-      _storage.write(key: 'username', value: _loginDetails.username);
-      _storage.write(key: 'email', value: _loginDetails.email);
-      _storage.write(key: 'firstName', value: _loginDetails.firstName);
-      _storage.write(key: 'lastName', value: _loginDetails.lastName);
-      _storage.write(key: 'authToken', value: _loginDetails.authToken);
+      _storage.write(key: 'smf_user_id', value: '${_loginDetails.id}');
+      _storage.write(key: 'smf_user_username', value: _loginDetails.username);
+      _storage.write(key: 'smf_user_email', value: _loginDetails.email);
+      _storage.write(
+          key: 'smf_user_first_name', value: _loginDetails.firstName);
+      _storage.write(key: 'smf_user_last_name', value: _loginDetails.lastName);
+      _storage.write(
+          key: 'smf_user_auth_token', value: _loginDetails.authToken);
       _firebaseMessaging.getToken().then((token) async {
         final request = await LoginService.updateUserDeviceToken(
           token.toString(),
@@ -76,10 +78,10 @@ class LoginRespository with ChangeNotifier {
       provisional: false,
       sound: true,
     );
-    print('User granted permission: ${settings.authorizationStatus}');
+    // print('User granted permission: ${settings.authorizationStatus}');
 
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      print('message.notification...');
+      // print('message.notification...');
       if (message.notification != null) {
         // int uniqueNotificationId = Helper.getUniqueId();
         String body = message.notification!.body.toString();

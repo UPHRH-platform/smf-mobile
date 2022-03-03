@@ -15,7 +15,7 @@ class PeopleCard extends StatelessWidget {
     return Container(
       color: Colors.white,
       // width: double.infinity,
-      margin: const EdgeInsets.only(left: 20, right: 20, bottom: 10.0),
+      margin: const EdgeInsets.only(left: 0, right: 00, bottom: 10.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [

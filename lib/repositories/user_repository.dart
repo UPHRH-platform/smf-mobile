@@ -18,12 +18,7 @@ class UserRespository with ChangeNotifier {
 
     if (_data['statusInfo']['statusCode'] != 200) {
       _errorMessage = _data['statusInfo']['errorMessage'];
-    } else {
-      // _applications = [
-      //   for (final item in _data['responseData']) Application.fromJson(item)
-      // ];
     }
-    // return _applications;
     return _data;
   }
 

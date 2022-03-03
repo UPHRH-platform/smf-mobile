@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:smf_mobile/constants/app_constants.dart';
 import 'package:smf_mobile/constants/app_urls.dart';
 import 'package:smf_mobile/constants/color_constants.dart';
 import 'package:smf_mobile/models/application_model.dart';
 import 'package:smf_mobile/pages/application_details_page.dart';
+import 'package:smf_mobile/util/helper.dart';
 
 class ApplicationCard extends StatefulWidget {
   static const route = AppUrl.homePage;
@@ -17,28 +17,10 @@ class ApplicationCard extends StatefulWidget {
 }
 
 class _ApplicationCardState extends State<ApplicationCard> {
-  String _inspectionStatus = '';
   @override
   void initState() {
     super.initState();
-    _getInspectionStatus();
   }
-
-  void _getInspectionStatus() {
-    if (widget.application.status == InspectionStatus.inspectionCompleted) {
-      _inspectionStatus = 'Completed';
-    } else if (widget.application.status ==
-        InspectionStatus.sentForInspection) {
-      _inspectionStatus = 'Pending';
-    } else {
-      _inspectionStatus = _toCapitalized(widget.application.status);
-    }
-    setState(() {});
-  }
-
-  _toCapitalized(String string) => string.isNotEmpty
-      ? '${string[0].toUpperCase()}${string.substring(1).toLowerCase()}'
-      : '';
 
   @override
   Widget build(BuildContext context) {
@@ -87,7 +69,8 @@ class _ApplicationCardState extends State<ApplicationCard> {
               ),
               Padding(
                 padding: const EdgeInsets.only(bottom: 10),
-                child: Text('Scheduled on: ${widget.application.createdDate}',
+                child: Text(
+                    'Scheduled on: ${Helper.formatDate(widget.application.scheduledDate)}',
                     style: GoogleFonts.lato(
                       color: AppColors.black60,
                       fontSize: 14.0,
@@ -109,7 +92,8 @@ class _ApplicationCardState extends State<ApplicationCard> {
                   ),
                   Padding(
                     padding: const EdgeInsets.only(bottom: 10),
-                    child: Text(_inspectionStatus,
+                    child: Text(
+                        Helper.getInspectionStatus(widget.application.status),
                         style: GoogleFonts.lato(
                           color: AppColors.black60,
                           fontSize: 14.0,

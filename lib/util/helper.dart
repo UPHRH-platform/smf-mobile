@@ -2,8 +2,10 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:intl/intl.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:smf_mobile/constants/app_constants.dart';
 
 const _storage = FlutterSecureStorage();
 
@@ -26,15 +28,16 @@ class Helper {
   }
 
   static int getDateDiffence(DateTime today, DateTime dateTimeCreatedAt) {
-    String month = today.month < 10 ? '0${today.month}' : '${today.month}';
-    DateTime dateTimeNow = DateTime.parse('${today.year}-$month-${today.day}');
-    final differenceInDays = dateTimeNow.difference(dateTimeCreatedAt).inDays;
+    // print('$today, $dateTimeCreatedAt');
+    // String month = today.month < 10 ? '0${today.month}' : '${today.month}';
+    // DateTime dateTimeNow = DateTime.parse('${today.year}-03-${today.day}');
+    final differenceInDays = today.difference(dateTimeCreatedAt).inDays;
     return differenceInDays;
   }
 
   static Future<bool> isTokenExpired() async {
     bool isTokenExpired = true;
-    var authToken = await _storage.read(key: 'authToken');
+    var authToken = await _storage.read(key: 'smf_user_auth_token');
     if (authToken != null) {
       isTokenExpired = JwtDecoder.isExpired(authToken);
     }
@@ -59,5 +62,28 @@ class Helper {
     int id2 = random.nextInt(99999);
     int notificationId = id1 + id2 + _now.millisecond;
     return notificationId;
+  }
+
+  static formatDate(String date) {
+    List temp = date.split("-");
+    temp = List.from(temp.reversed);
+    return DateFormat.yMMMEd().format(DateTime.parse(temp.join('-')));
+  }
+
+  static capitalize(String string) => string.isNotEmpty
+      ? '${string[0].toUpperCase()}${string.substring(1).toLowerCase()}'
+      : '';
+
+  static getInspectionStatus(String status) {
+    String _inspectionStatus = '';
+    if (status == InspectionStatus.inspectionCompleted) {
+      _inspectionStatus = 'Completed';
+    } else if (status == InspectionStatus.sentForInspection) {
+      _inspectionStatus = 'Pending';
+    } else {
+      _inspectionStatus = capitalize(_inspectionStatus);
+    }
+    // print(_inspectionStatus);
+    return _inspectionStatus;
   }
 }

@@ -9,6 +9,8 @@ class Application {
   final Map dataObject;
   final List inspectors;
   final List leadInspector;
+  final Map inspectorDataObject;
+  final Map inspectorSummaryDataObject;
   final String scheduledDate;
   final String createdDate;
   final String createdBy;
@@ -22,6 +24,8 @@ class Application {
     required this.dataObject,
     required this.inspectors,
     required this.leadInspector,
+    required this.inspectorDataObject,
+    required this.inspectorSummaryDataObject,
     required this.scheduledDate,
     required this.createdDate,
     required this.createdBy,
@@ -37,10 +41,12 @@ class Application {
       dataObject: json['dataObject'],
       inspectors: json['inspection']['assignedTo'] ?? [],
       leadInspector: json['inspection']['leadInspector'] ?? [],
+      inspectorDataObject: json['inspectorDataObject'] != null
+          ? json['inspectorDataObject']['dataObject']
+          : {},
+      inspectorSummaryDataObject: json['inspectorSummaryDataObject'] ?? {},
       scheduledDate: json['inspection']['scheduledDate'] ?? '',
-      createdDate: json['createdDate'] != null
-          ? DateFormat.yMMMEd().format(DateTime.parse(json['createdDate']))
-          : '',
+      createdDate: json['createdDate'],
       createdBy: json['createdBy'],
     );
   }
@@ -54,6 +60,8 @@ class Application {
         dataObject,
         inspectors,
         leadInspector,
+        inspectorDataObject,
+        inspectorSummaryDataObject,
         scheduledDate,
         createdDate,
         createdBy
