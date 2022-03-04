@@ -1,5 +1,6 @@
 {
     "login": "Login",
+    "logout": "Logout", 
     "emailId": "Email Id",
     "getOtp": "GET OTP",
     "enterOtp": "Enter OTP",
@@ -14,6 +15,9 @@
     "next": "Next",
     "previous": "previous",
     "inspectionCompleted": "Inspection completed",
+    "completed": "Completed",
+    "pending": "Pending",
+    "noApplications": "No applications at the moment",
     "sessionExpiredMessage": "Your session has expired.",
     "isGivenInformationCorrect": "Is the given information found correct?",
     "typeHere": "Type here",

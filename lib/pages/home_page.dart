@@ -11,6 +11,9 @@ import 'package:smf_mobile/repositories/login_repository.dart';
 import 'package:smf_mobile/util/helper.dart';
 import 'package:smf_mobile/widgets/application_card.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'dart:async';
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:smf_mobile/util/connectivity_helper.dart';
 
 // import 'dart:developer' as developer;
 
@@ -23,6 +26,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  Map _source = {ConnectivityResult.none: false};
+  final MyConnectivity _connectivity = MyConnectivity.instance;
   List<Application> _allApplications = [];
   final List<Application> _pendingApplications = [];
   final List<Application> _upcomingApplications = [];
@@ -30,6 +35,10 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+    _connectivity.initialise();
+    _connectivity.myStream.listen((source) {
+      setState(() => _source = source);
+    });
   }
 
   void _validateUser() async {
@@ -42,11 +51,31 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  bool _isInternetConnected() {
+    bool connected;
+    switch (_source.keys.toList()[0]) {
+      case ConnectivityResult.mobile:
+        print('connected to mobile...');
+        connected = true;
+        break;
+      case ConnectivityResult.wifi:
+        print('connected to wifi...');
+        connected = true;
+        break;
+      case ConnectivityResult.none:
+      default:
+        print('offline...');
+        connected = false;
+    }
+    return connected;
+  }
+
   Future<dynamic> _getApplications() async {
+    print('_getApplications...');
     _validateUser();
     _allApplications =
         await Provider.of<ApplicationRespository>(context, listen: false)
-            .getApplications();
+            .getApplications(_isInternetConnected());
     String _errorMessage =
         Provider.of<ApplicationRespository>(context, listen: false)
             .errorMessage;
@@ -127,7 +156,7 @@ class _HomePageState extends State<HomePage> {
                 PopupMenuItem<String>(
                   value: 'logout',
                   child: Text(
-                    'Logout',
+                    AppLocalizations.of(context)!.logout,
                     style: GoogleFonts.lato(
                       color: AppColors.black87,
                       fontSize: 14.0,
@@ -168,7 +197,9 @@ class _HomePageState extends State<HomePage> {
                                   margin: const EdgeInsets.only(
                                       top: 10, bottom: 20),
                                   child: Center(
-                                    child: Text('No applications at the moment',
+                                    child: Text(
+                                        AppLocalizations.of(context)!
+                                            .noApplications,
                                         style: GoogleFonts.lato(
                                           color: AppColors.black87,
                                           fontSize: 16.0,

@@ -93,7 +93,8 @@ class _ApplicationCardState extends State<ApplicationCard> {
                   Padding(
                     padding: const EdgeInsets.only(bottom: 10),
                     child: Text(
-                        Helper.getInspectionStatus(widget.application.status),
+                        Helper.getInspectionStatus(
+                            context, widget.application.status),
                         style: GoogleFonts.lato(
                           color: AppColors.black60,
                           fontSize: 14.0,

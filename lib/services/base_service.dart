@@ -1,7 +1,6 @@
 import 'dart:io';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-
-const _storage = FlutterSecureStorage();
+import 'package:smf_mobile/constants/app_constants.dart';
+import 'package:smf_mobile/util/helper.dart';
 
 abstract class BaseService {
   final HttpClient client;
@@ -12,7 +11,7 @@ abstract class BaseService {
       'Accept': 'application/json',
       'Content-Type': 'application/json; charset=utf-8',
     };
-    var authToken = await _storage.read(key: 'smf_user_auth_token');
+    var authToken = await Helper.getUser(Storage.authtoken);
     if (authToken != '' && authToken != null) {
       headers['Authorization'] = authToken;
     }

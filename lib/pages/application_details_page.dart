@@ -59,7 +59,7 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
   }
 
   Future<void> _checkInspectorRole() async {
-    String id = await Helper.getUser('smf_user_id');
+    String id = await Helper.getUser(Storage.userId);
     int userId = int.parse(id);
     if (widget.application.leadInspector.isNotEmpty) {
       _leadInspectorId = widget.application.leadInspector[0];
@@ -67,7 +67,8 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
         setState(() {
           _isleadInspector = true;
         });
-      } else {
+      } else if (widget.application.status ==
+          InspectionStatus.inspectionCompleted) {
         _inspectionSummary =
             widget.application.inspectorSummaryDataObject['Inspection Summary'][
                 widget.application
@@ -370,7 +371,7 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
                                                                         4),
                                                           ),
                                                           child: Text(
-                                                            'Status: ${Helper.getInspectionStatus(widget.application.status)}',
+                                                            'Status: ${Helper.getInspectionStatus(context, widget.application.status)}',
                                                             textAlign: TextAlign
                                                                 .center,
                                                             style: GoogleFonts

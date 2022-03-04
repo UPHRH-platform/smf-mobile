@@ -1,11 +1,11 @@
 import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:smf_mobile/constants/app_constants.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 const _storage = FlutterSecureStorage();
 
@@ -37,7 +37,7 @@ class Helper {
 
   static Future<bool> isTokenExpired() async {
     bool isTokenExpired = true;
-    var authToken = await _storage.read(key: 'smf_user_auth_token');
+    var authToken = await _storage.read(key: Storage.authtoken);
     if (authToken != null) {
       isTokenExpired = JwtDecoder.isExpired(authToken);
     }
@@ -74,12 +74,12 @@ class Helper {
       ? '${string[0].toUpperCase()}${string.substring(1).toLowerCase()}'
       : '';
 
-  static getInspectionStatus(String status) {
+  static getInspectionStatus(BuildContext context, String status) {
     String _inspectionStatus = '';
     if (status == InspectionStatus.inspectionCompleted) {
-      _inspectionStatus = 'Completed';
+      _inspectionStatus = AppLocalizations.of(context)!.completed;
     } else if (status == InspectionStatus.sentForInspection) {
-      _inspectionStatus = 'Pending';
+      _inspectionStatus = AppLocalizations.of(context)!.pending;
     } else {
       _inspectionStatus = capitalize(_inspectionStatus);
     }

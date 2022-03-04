@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/widgets.dart';
+import 'package:smf_mobile/constants/app_constants.dart';
 import 'package:smf_mobile/models/login_model.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:smf_mobile/services/login_service.dart';
@@ -43,14 +44,12 @@ class LoginRespository with ChangeNotifier {
       _errorMessage = _data['statusInfo']['errorMessage'];
     } else {
       _loginDetails = Login.fromJson(_data['responseData']);
-      _storage.write(key: 'smf_user_id', value: '${_loginDetails.id}');
-      _storage.write(key: 'smf_user_username', value: _loginDetails.username);
-      _storage.write(key: 'smf_user_email', value: _loginDetails.email);
-      _storage.write(
-          key: 'smf_user_first_name', value: _loginDetails.firstName);
-      _storage.write(key: 'smf_user_last_name', value: _loginDetails.lastName);
-      _storage.write(
-          key: 'smf_user_auth_token', value: _loginDetails.authToken);
+      _storage.write(key: Storage.userId, value: '${_loginDetails.id}');
+      _storage.write(key: Storage.username, value: _loginDetails.username);
+      _storage.write(key: Storage.email, value: _loginDetails.email);
+      _storage.write(key: Storage.firstname, value: _loginDetails.firstName);
+      _storage.write(key: Storage.lastname, value: _loginDetails.lastName);
+      _storage.write(key: Storage.authtoken, value: _loginDetails.authToken);
       _firebaseMessaging.getToken().then((token) async {
         final request = await LoginService.updateUserDeviceToken(
           token.toString(),
