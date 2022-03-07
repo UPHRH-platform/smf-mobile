@@ -8,4 +8,5 @@ class ApiUrl {
   static const submitInspection = '$baseUrl/api/forms/submitInspection';
   static const getAllUsers = '$baseUrl/api/user/v1/getAllUser';
   static const getFormDetails = '$baseUrl/api/forms/getFormById?id=';
+  static const submitConcent = '$baseUrl/api/forms/consentApplication';
 }

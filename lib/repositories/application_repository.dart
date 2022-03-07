@@ -57,5 +57,19 @@ class ApplicationRespository with ChangeNotifier {
     return _data['statusInfo']['statusCode'];
   }
 
+  Future<dynamic> submitConcent(Map data) async {
+    try {
+      final request = await ApplicationService.submitConcent(data);
+      _data = json.decode(request.body);
+    } catch (_) {
+      return _;
+    }
+
+    if (_data['statusInfo']['statusCode'] != 200) {
+      _errorMessage = _data['statusInfo']['errorMessage'];
+    }
+    return _data['statusInfo']['statusCode'];
+  }
+
   String get errorMessage => _errorMessage;
 }

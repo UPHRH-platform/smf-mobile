@@ -5,6 +5,7 @@ import 'package:smf_mobile/constants/color_constants.dart';
 import 'package:smf_mobile/models/application_model.dart';
 import 'package:smf_mobile/pages/application_details_page.dart';
 import 'package:smf_mobile/util/helper.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ApplicationCard extends StatefulWidget {
   static const route = AppUrl.homePage;
@@ -70,7 +71,8 @@ class _ApplicationCardState extends State<ApplicationCard> {
               Padding(
                 padding: const EdgeInsets.only(bottom: 10),
                 child: Text(
-                    'Scheduled on: ${Helper.formatDate(widget.application.scheduledDate)}',
+                    AppLocalizations.of(context)!.scheduledOn +
+                        ': ${Helper.formatDate(widget.application.scheduledDate)}',
                     style: GoogleFonts.lato(
                       color: AppColors.black60,
                       fontSize: 14.0,
@@ -82,7 +84,7 @@ class _ApplicationCardState extends State<ApplicationCard> {
                 children: [
                   Padding(
                     padding: const EdgeInsets.only(bottom: 10),
-                    child: Text('Status: ',
+                    child: Text(AppLocalizations.of(context)!.status + ': ',
                         style: GoogleFonts.lato(
                           color: AppColors.black60,
                           fontSize: 14.0,

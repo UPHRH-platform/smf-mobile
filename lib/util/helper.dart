@@ -79,9 +79,9 @@ class Helper {
     if (status == InspectionStatus.inspectionCompleted) {
       _inspectionStatus = AppLocalizations.of(context)!.completed;
     } else if (status == InspectionStatus.sentForInspection) {
-      _inspectionStatus = AppLocalizations.of(context)!.pending;
+      _inspectionStatus = AppLocalizations.of(context)!.sentForInspection;
     } else {
-      _inspectionStatus = capitalize(_inspectionStatus);
+      _inspectionStatus = capitalize(status);
     }
     // print(_inspectionStatus);
     return _inspectionStatus;

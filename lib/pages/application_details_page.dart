@@ -5,8 +5,10 @@ import 'package:smf_mobile/constants/app_constants.dart';
 import 'package:smf_mobile/constants/color_constants.dart';
 import 'package:smf_mobile/models/application_model.dart';
 import 'package:smf_mobile/models/form_model.dart';
+import 'package:smf_mobile/pages/inspection_completed.dart';
 import 'package:smf_mobile/pages/inspection_summary.dart';
 import 'package:smf_mobile/pages/login_email_page.dart';
+import 'package:smf_mobile/repositories/application_repository.dart';
 import 'package:smf_mobile/repositories/form_repository.dart';
 import 'package:smf_mobile/util/helper.dart';
 import 'package:smf_mobile/widgets/assistant_inspector_application_field.dart';
@@ -47,6 +49,7 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
   int _leadInspectorId = 0;
   final List<Map> _inspectors = [];
   String _inspectionSummary = '';
+  String _errorMessage = '';
 
   @override
   void initState() {
@@ -93,7 +96,7 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
     _formData = await Provider.of<FormRespository>(context, listen: false)
         .getFormDetails(widget.application.formId);
     // print('object');
-    String _errorMessage =
+    _errorMessage =
         Provider.of<FormRespository>(context, listen: false).errorMessage;
     if (_errorMessage != '') {
       Helper.toastMessage(_errorMessage);
@@ -172,19 +175,49 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
 
   Future<void> _submitInspection() async {
     _validateUser();
-    Map data = {
-      'applicationId': widget.application.applicationId,
-      'dataObject': _data
-    };
+    if (_isleadInspector) {
+      Map data = {
+        'applicationId': widget.application.applicationId,
+        'dataObject': _data
+      };
 
-    Navigator.of(context).pushReplacement(MaterialPageRoute(
-        builder: (context) => InspectionSummaryPage(
-              // formId: widget.formId,
-              formId: 1645422297511,
-              inspectors: widget.application.inspectors,
-              leadInspector: widget.application.leadInspector,
-              inspectionData: data,
-            )));
+      Navigator.of(context).pushReplacement(MaterialPageRoute(
+          builder: (context) => InspectionSummaryPage(
+                // formId: widget.formId,
+                formId: 1645422297511,
+                inspectors: widget.application.inspectors,
+                leadInspector: widget.application.leadInspector,
+                inspectionData: data,
+              )));
+    } else {
+      if (!_iConcent && !_iDisagree) {
+        Helper.toastMessage(
+            AppLocalizations.of(context)!.pleaseConcentDisagree);
+        return;
+      }
+      try {
+        Map data = {
+          'applicationId': widget.application.applicationId,
+          'agree': _iConcent,
+          'comments': _note
+        };
+
+        final responseCode =
+            await Provider.of<ApplicationRespository>(context, listen: false)
+                .submitConcent(data);
+        if (responseCode != 0) {
+          Navigator.of(context).pushReplacement(MaterialPageRoute(
+              builder: (context) => const InspectionCompletedPage()));
+        } else {
+          _errorMessage =
+              Provider.of<ApplicationRespository>(context, listen: false)
+                  .errorMessage;
+          Helper.toastMessage(_errorMessage);
+        }
+      } catch (err) {
+        throw Exception(err);
+      }
+    }
   }
 
   triggerUpdate(Map data) {
@@ -371,7 +404,10 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
                                                                         4),
                                                           ),
                                                           child: Text(
-                                                            'Status: ${Helper.getInspectionStatus(context, widget.application.status)}',
+                                                            AppLocalizations.of(
+                                                                        context)!
+                                                                    .status +
+                                                                ': ${Helper.getInspectionStatus(context, widget.application.status)}',
                                                             textAlign: TextAlign
                                                                 .center,
                                                             style: GoogleFonts
@@ -395,7 +431,13 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
                                                           width:
                                                               double.infinity,
                                                           child: Text(
-                                                            'Inspection completed on ${Helper.formatDate(widget.application.scheduledDate)}',
+                                                            AppLocalizations.of(
+                                                                        context)!
+                                                                    .inspetionCompletedOn +
+                                                                ' ' +
+                                                                Helper.formatDate(widget
+                                                                    .application
+                                                                    .scheduledDate),
                                                             textAlign: TextAlign
                                                                 .center,
                                                             style: GoogleFonts
@@ -451,7 +493,9 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
                                                             const EdgeInsets
                                                                 .only(top: 5),
                                                         child: Text(
-                                                          'Inspection Summary',
+                                                          AppLocalizations.of(
+                                                                  context)!
+                                                              .inspectionSummary,
                                                           style:
                                                               GoogleFonts.lato(
                                                             color: AppColors
@@ -499,7 +543,9 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
                                                                   20,
                                                                   15),
                                                               child: Text(
-                                                                'Lead inspector',
+                                                                AppLocalizations.of(
+                                                                        context)!
+                                                                    .leadInspector,
                                                                 style:
                                                                     GoogleFonts
                                                                         .lato(
@@ -535,7 +581,9 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
                                                                   20,
                                                                   15),
                                                           child: Text(
-                                                            'Assisting inspectors',
+                                                            AppLocalizations.of(
+                                                                    context)!
+                                                                .assistingInspectors,
                                                             style: GoogleFonts
                                                                 .lato(
                                                               color: AppColors
@@ -665,7 +713,8 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
                                       child: Row(
                                         children: [
                                           Text(
-                                            'I disagree',
+                                            AppLocalizations.of(context)!
+                                                .iDisagree,
                                             style: GoogleFonts.lato(
                                                 color: _iDisagree
                                                     ? Colors.white
@@ -717,7 +766,8 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
                                       child: Row(
                                         children: [
                                           Text(
-                                            'I concent',
+                                            AppLocalizations.of(context)!
+                                                .iConcent,
                                             style: GoogleFonts.lato(
                                                 color: _iConcent
                                                     ? Colors.white
@@ -741,6 +791,20 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
                                       )),
                                 )
                               : const Center(),
+                          _iConcent || _iDisagree
+                              ? Padding(
+                                  padding: const EdgeInsets.only(left: 0),
+                                  child: IconButton(
+                                    onPressed: () {
+                                      _displayCommentDialog();
+                                    },
+                                    icon: const Icon(
+                                      Icons.edit,
+                                      color: AppColors.black40,
+                                    ),
+                                  ),
+                                )
+                              : const Center()
                         ],
                       )
                     : const Center(),
@@ -798,8 +862,8 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
                                   )
                                 ],
                               ))
-                          : widget.application.status ==
-                                  InspectionStatus.sentForInspection
+                          : widget.application.status !=
+                                  InspectionStatus.inspectionCompleted
                               ? TextButton(
                                   onPressed: () {
                                     _submitInspection();

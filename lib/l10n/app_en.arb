@@ -16,12 +16,21 @@
     "previous": "previous",
     "inspectionCompleted": "Inspection completed",
     "completed": "Completed",
-    "pending": "Pending",
+    "sentForInspection": "Sent for inspection",
     "noApplications": "No applications at the moment",
     "sessionExpiredMessage": "Your session has expired.",
     "isGivenInformationCorrect": "Is the given information found correct?",
     "typeHere": "Type here",
     "cancel": "Cancel",
     "submit": "Submit",
-    "actualValue": "Actual value(s)"
+    "actualValue": "Actual value(s)",
+    "pleaseConcentDisagree": "Please concent or disagree",
+    "status": "Status",
+    "scheduledOn": "Scheduled on",
+    "inspetionCompletedOn": "Inspection completed on",
+    "inspectionSummary": "Inspection Summary",
+    "leadInspector": "Lead inspector",
+    "assistingInspectors": "Assisting inspectors",
+    "iDisagree": "I disagree",
+    "iConcent": "I concent"
 }

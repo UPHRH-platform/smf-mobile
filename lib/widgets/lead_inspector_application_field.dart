@@ -188,9 +188,10 @@ class _LeadInspectorApplicationFieldState
                                       for (int i = 0; i < _options.length; i++)
                                         InkWell(
                                             onTap: () {
-                                              if (widget.applicationStatus ==
+                                              // print(_options[i]);
+                                              if (widget.applicationStatus !=
                                                   InspectionStatus
-                                                      .sentForInspection) {
+                                                      .inspectionCompleted) {
                                                 setState(() {
                                                   _radioValue = _options[i];
                                                 });
@@ -237,9 +238,9 @@ class _LeadInspectorApplicationFieldState
                                                             .shrinkWrap,
                                                     onChanged: (val) {
                                                       if (widget
-                                                              .applicationStatus ==
+                                                              .applicationStatus !=
                                                           InspectionStatus
-                                                              .sentForInspection) {
+                                                              .inspectionCompleted) {
                                                         setState(() {
                                                           _radioValue =
                                                               _options[i];
@@ -275,9 +276,9 @@ class _LeadInspectorApplicationFieldState
                                         padding: const EdgeInsets.only(left: 0),
                                         child: IconButton(
                                           onPressed: () {
-                                            if (widget.applicationStatus ==
+                                            if (widget.applicationStatus !=
                                                     InspectionStatus
-                                                        .sentForInspection &&
+                                                        .inspectionCompleted &&
                                                 _radioValue !=
                                                     FieldValue.correct) {
                                               _displayCommentDialog();
