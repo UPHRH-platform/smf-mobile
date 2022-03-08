@@ -76,12 +76,19 @@ class Helper {
 
   static getInspectionStatus(BuildContext context, String status) {
     String _inspectionStatus = '';
-    if (status == InspectionStatus.inspectionCompleted) {
-      _inspectionStatus = AppLocalizations.of(context)!.completed;
-    } else if (status == InspectionStatus.sentForInspection) {
-      _inspectionStatus = AppLocalizations.of(context)!.sentForInspection;
-    } else {
-      _inspectionStatus = capitalize(status);
+    switch (status) {
+      case InspectionStatus.inspectionCompleted:
+        _inspectionStatus = AppLocalizations.of(context)!.completed;
+        break;
+      case InspectionStatus.sentForInspection:
+        _inspectionStatus = AppLocalizations.of(context)!.sentForInspection;
+        break;
+      case InspectionStatus.leadInspectorCompleted:
+        _inspectionStatus =
+            AppLocalizations.of(context)!.leadInspectorCompleted;
+        break;
+      default:
+        _inspectionStatus = capitalize(status);
     }
     // print(_inspectionStatus);
     return _inspectionStatus;

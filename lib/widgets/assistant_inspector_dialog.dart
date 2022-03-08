@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:smf_mobile/constants/app_constants.dart';
 import 'package:smf_mobile/constants/color_constants.dart';
 // import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class AssistantInspectorDialog extends StatefulWidget {
   final String noteText;
+  final String status;
   final ValueChanged<Map> parentAction;
   const AssistantInspectorDialog({
     Key? key,
     required this.noteText,
+    required this.status,
     required this.parentAction,
   }) : super(key: key);
 
@@ -83,6 +86,10 @@ class _AssistantInspectorDialogState extends State<AssistantInspectorDialog> {
                                 child: Focus(
                                   child: TextFormField(
                                     // autofocus: true,
+                                    enabled: widget.status ==
+                                            InspectionStatus.inspectionCompleted
+                                        ? false
+                                        : true,
                                     controller: _noteController,
                                     textCapitalization:
                                         TextCapitalization.sentences,
@@ -121,7 +128,10 @@ class _AssistantInspectorDialogState extends State<AssistantInspectorDialog> {
                               child: OutlinedButton(
                                 onPressed: () {
                                   Navigator.of(context).pop(false);
-                                  _saveData(false);
+                                  if (widget.status !=
+                                      InspectionStatus.inspectionCompleted) {
+                                    _saveData(false);
+                                  }
                                 },
                                 style: OutlinedButton.styleFrom(
                                   // primary: Colors.white,
@@ -146,7 +156,10 @@ class _AssistantInspectorDialogState extends State<AssistantInspectorDialog> {
                               child: OutlinedButton(
                                 onPressed: () {
                                   Navigator.of(context).pop(false);
-                                  _saveData(true);
+                                  if (widget.status !=
+                                      InspectionStatus.inspectionCompleted) {
+                                    _saveData(true);
+                                  }
                                 },
                                 style: OutlinedButton.styleFrom(
                                   // primary: Colors.white,
@@ -171,7 +184,10 @@ class _AssistantInspectorDialogState extends State<AssistantInspectorDialog> {
                               child: TextButton(
                                 onPressed: () {
                                   Navigator.of(context).pop(false);
-                                  _saveData(true);
+                                  if (widget.status !=
+                                      InspectionStatus.inspectionCompleted) {
+                                    _saveData(true);
+                                  }
                                 },
                                 style: TextButton.styleFrom(
                                   // primary: Colors.white,

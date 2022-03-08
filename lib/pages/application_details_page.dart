@@ -50,6 +50,7 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
   final List<Map> _inspectors = [];
   String _inspectionSummary = '';
   String _errorMessage = '';
+  String _inspectionStatus = '';
 
   @override
   void initState() {
@@ -87,6 +88,18 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
         'name':
             '${widget.application.inspectors[i]['firstName']} ${widget.application.inspectors[i]['lastName']}',
       });
+      if (widget.application.inspectors[i]['id'] == userId &&
+          !_isleadInspector) {
+        _note = widget.application.inspectors[i]['comments'] ?? '';
+        _inspectionStatus = widget.application.inspectors[i]['status'] ?? false;
+        _iConcent =
+            widget.application.inspectors[i]['consentApplication'] ?? false;
+        if (widget.application.inspectors[i]['consentApplication'] != null) {
+          _iDisagree = widget.application.inspectors[i]['consentApplication']
+              ? false
+              : true;
+        }
+      }
       setState(() {});
     }
   }
@@ -234,6 +247,7 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
         builder: (context) => StatefulBuilder(builder: (context, setState) {
               return AssistantInspectorDialog(
                 noteText: _note,
+                status: _inspectionStatus,
                 parentAction: triggerUpdate,
               );
             }));
@@ -247,7 +261,7 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
 
   @override
   Widget build(BuildContext context) {
-    // print(widget.applicationFields);
+    // print(widget.application.inspectorDataObject);
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
@@ -633,7 +647,14 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
                                                         field.keys
                                                             .elementAt(i)],
                                                     applicationStatus: widget
-                                                        .application.status,
+                                                                .application
+                                                                .inspectionStatus ==
+                                                            InspectionStatus
+                                                                .leadInspectorCompleted
+                                                        ? InspectionStatus
+                                                            .inspectionCompleted
+                                                        : widget
+                                                            .application.status,
                                                     parentAction: updateField,
                                                   )
                                                 : widget.application.status ==
@@ -691,12 +712,19 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
                               ? ButtonTheme(
                                   child: OutlinedButton(
                                       onPressed: () {
-                                        if (!_iDisagree) {
+                                        if (!_iDisagree &&
+                                            _inspectionStatus !=
+                                                InspectionStatus
+                                                    .inspectionCompleted) {
                                           _displayCommentDialog();
                                         }
-                                        setState(() {
-                                          _iDisagree = !_iDisagree;
-                                        });
+                                        if (_inspectionStatus !=
+                                            InspectionStatus
+                                                .inspectionCompleted) {
+                                          setState(() {
+                                            _iDisagree = !_iDisagree;
+                                          });
+                                        }
                                       },
                                       style: OutlinedButton.styleFrom(
                                         backgroundColor: _iDisagree
@@ -743,12 +771,19 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
                                   padding: const EdgeInsets.only(left: 10),
                                   child: TextButton(
                                       onPressed: () {
-                                        if (!_iConcent) {
+                                        if (!_iConcent &&
+                                            _inspectionStatus !=
+                                                InspectionStatus
+                                                    .inspectionCompleted) {
                                           _displayCommentDialog();
                                         }
-                                        setState(() {
-                                          _iConcent = !_iConcent;
-                                        });
+                                        if (_inspectionStatus !=
+                                            InspectionStatus
+                                                .inspectionCompleted) {
+                                          setState(() {
+                                            _iConcent = !_iConcent;
+                                          });
+                                        }
                                       },
                                       style: TextButton.styleFrom(
                                         // primary: Colors.white,
@@ -863,7 +898,9 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
                                 ],
                               ))
                           : widget.application.status !=
-                                  InspectionStatus.inspectionCompleted
+                                      InspectionStatus.inspectionCompleted &&
+                                  widget.application.inspectionStatus !=
+                                      InspectionStatus.leadInspectorCompleted
                               ? TextButton(
                                   onPressed: () {
                                     _submitInspection();

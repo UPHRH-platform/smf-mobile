@@ -6,6 +6,7 @@ import 'package:smf_mobile/database/offline_model.dart';
 import 'package:smf_mobile/models/application_model.dart';
 import 'package:smf_mobile/services/application_service.dart';
 import 'package:smf_mobile/util/helper.dart';
+import 'dart:developer' as developer;
 
 class ApplicationRespository with ChangeNotifier {
   late Map _data;

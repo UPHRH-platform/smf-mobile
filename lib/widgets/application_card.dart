@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:smf_mobile/constants/app_constants.dart';
 import 'package:smf_mobile/constants/app_urls.dart';
 import 'package:smf_mobile/constants/color_constants.dart';
 import 'package:smf_mobile/models/application_model.dart';
@@ -21,6 +22,19 @@ class _ApplicationCardState extends State<ApplicationCard> {
   @override
   void initState() {
     super.initState();
+  }
+
+  String _getApplicationStatus(String inspetionStatus, String actualStatus) {
+    String status = '';
+    if (actualStatus == InspectionStatus.inspectionCompleted) {
+      status = InspectionStatus.inspectionCompleted;
+    }
+    if (inspetionStatus == InspectionStatus.leadInspectorCompleted) {
+      status = InspectionStatus.leadInspectorCompleted;
+    } else {
+      status = actualStatus;
+    }
+    return status;
   }
 
   @override
@@ -96,7 +110,10 @@ class _ApplicationCardState extends State<ApplicationCard> {
                     padding: const EdgeInsets.only(bottom: 10),
                     child: Text(
                         Helper.getInspectionStatus(
-                            context, widget.application.status),
+                            context,
+                            _getApplicationStatus(
+                                widget.application.inspectionStatus,
+                                widget.application.status)),
                         style: GoogleFonts.lato(
                           color: AppColors.black60,
                           fontSize: 14.0,

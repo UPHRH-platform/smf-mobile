@@ -21,6 +21,7 @@ class InspectionStatus {
   static const String newInspection = 'NEW';
   static const String sentForInspection = 'SENTFORINS';
   static const String inspectionCompleted = 'INSCOMPLETED';
+  static const String leadInspectorCompleted = 'LEADINSCOMPLETED';
   static const String inspectionPending = 'PENDING';
   static const String returned = 'RETURNED';
 }

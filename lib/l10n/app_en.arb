@@ -15,6 +15,7 @@
     "next": "Next",
     "previous": "previous",
     "inspectionCompleted": "Inspection completed",
+    "leadInspectorCompleted": "Lead inspector completed",
     "completed": "Completed",
     "sentForInspection": "Sent for inspection",
     "noApplications": "No applications at the moment",
