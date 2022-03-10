@@ -35,6 +35,7 @@ class AppDatabase {
   static const String name = 'smf_db';
   static const String applicationsTable = 'applications';
   static const String inspectionTable = 'inspections';
+  static const String loginPinsTable = 'login_pins';
 }
 
 class Storage {
@@ -44,4 +45,10 @@ class Storage {
   static const String firstname = 'smf_user_first_name';
   static const String lastname = 'smf_user_last_name';
   static const String authtoken = 'smf_user_auth_token';
+  static const String applicationId = 'smf_application_id';
+}
+
+class Inspector {
+  static const String leadInspector = 'lead_inspector';
+  static const String assistantInspector = 'assistant_inspector';
 }

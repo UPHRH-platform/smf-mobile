@@ -1,9 +1,12 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:smf_mobile/constants/app_constants.dart';
 import 'package:smf_mobile/constants/app_urls.dart';
 import 'package:smf_mobile/constants/color_constants.dart';
 import 'package:smf_mobile/models/application_model.dart';
+import 'package:smf_mobile/pages/application_details_page.dart';
 import 'package:smf_mobile/pages/login_email_page.dart';
 import 'package:smf_mobile/pages/past_applications.dart';
 import 'package:smf_mobile/repositories/application_repository.dart';
@@ -19,26 +22,76 @@ import 'package:smf_mobile/util/connectivity_helper.dart';
 
 class HomePage extends StatefulWidget {
   static const route = AppUrl.homePage;
-
+  // final String applicationId;
   const HomePage({Key? key}) : super(key: key);
   @override
   _HomePageState createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   Map _source = {ConnectivityResult.none: false};
   final MyConnectivity _connectivity = MyConnectivity.instance;
   List<Application> _allApplications = [];
   final List<Application> _pendingApplications = [];
   final List<Application> _upcomingApplications = [];
   final List<Application> _pastApplications = [];
+  bool _isInForeground = true;
+
   @override
   void initState() {
     super.initState();
     _connectivity.initialise();
     _connectivity.myStream.listen((source) {
-      setState(() => _source = source);
+      setState(() {
+        _source = source;
+      });
     });
+    // print('applicationId:' + widget.applicationId);
+    WidgetsBinding.instance!.addObserver(this);
+  }
+
+  void _checkNewApplication(String applicationId) {
+    print('applicationId $applicationId');
+    if (applicationId != '') {
+      for (Application application in _allApplications) {
+        if (application.applicationId == applicationId) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => ApplicationDetailsPage(
+                      application: application,
+                    )),
+          );
+          return;
+        }
+      }
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    _isInForeground = state == AppLifecycleState.resumed;
+    if (_isInForeground) {
+      FirebaseMessaging.instance.getInitialMessage().then((message) {
+        if (message != null) {
+          // print('getInitialMessage: ${message.data}');
+          _checkNewApplication(message.data['applicationId']);
+        }
+      });
+      // setState(() {});
+      // print('_isInForeground...');
+      // Future.delayed(const Duration(milliseconds: 500), () {
+      //   _checkNewApplication();
+      // });
+    }
+  }
+
+  @override
+  void dispose() {
+    // WidgetsBinding.instance!.removeObserver(this);
+    // _connectivity.disposeStream();
+    super.dispose();
   }
 
   void _validateUser() async {
@@ -51,31 +104,11 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  bool _isInternetConnected() {
-    bool connected;
-    switch (_source.keys.toList()[0]) {
-      case ConnectivityResult.mobile:
-        print('connected to mobile...');
-        connected = true;
-        break;
-      case ConnectivityResult.wifi:
-        print('connected to wifi...');
-        connected = true;
-        break;
-      case ConnectivityResult.none:
-      default:
-        print('offline...');
-        connected = false;
-    }
-    return connected;
-  }
-
   Future<dynamic> _getApplications() async {
-    print('_getApplications...');
     _validateUser();
     _allApplications =
         await Provider.of<ApplicationRespository>(context, listen: false)
-            .getApplications(_isInternetConnected());
+            .getApplications(Helper.isInternetConnected(_source));
     String _errorMessage =
         Provider.of<ApplicationRespository>(context, listen: false)
             .errorMessage;

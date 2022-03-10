@@ -20,7 +20,10 @@ class Routes {
 
         case AppUrl.loginOtpPage:
           return MaterialPageRoute(
-              settings: routeSettings, builder: (_) => const LoginOtpPage());
+              settings: routeSettings,
+              builder: (_) => const LoginOtpPage(
+                    username: '',
+                  ));
 
         case AppUrl.homePage:
           return MaterialPageRoute(

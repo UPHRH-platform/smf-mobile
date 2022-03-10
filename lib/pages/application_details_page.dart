@@ -17,6 +17,9 @@ import 'package:smf_mobile/widgets/lead_inspector_application_field.dart';
 import 'package:smf_mobile/widgets/people_card.dart';
 import 'package:smf_mobile/widgets/silverappbar_delegate.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'dart:async';
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:smf_mobile/util/connectivity_helper.dart';
 
 class ApplicationDetailsPage extends StatefulWidget {
   final Application application;
@@ -31,6 +34,8 @@ class ApplicationDetailsPage extends StatefulWidget {
 
 class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
     with SingleTickerProviderStateMixin {
+  Map _source = {ConnectivityResult.none: false};
+  final MyConnectivity _connectivity = MyConnectivity.instance;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   TabController? _tabController;
   late FormData _formData;
@@ -51,10 +56,15 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
   String _inspectionSummary = '';
   String _errorMessage = '';
   String _inspectionStatus = '';
+  late int _userId;
 
   @override
   void initState() {
     super.initState();
+    _connectivity.initialise();
+    _connectivity.myStream.listen((source) {
+      setState(() => _source = source);
+    });
     widget.application.dataObject.forEach((key, value) => _tabs.add(key));
     _tabController = TabController(vsync: this, length: _tabs.length);
     _tabController!.addListener(_setActiveTabIndex);
@@ -64,10 +74,10 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
 
   Future<void> _checkInspectorRole() async {
     String id = await Helper.getUser(Storage.userId);
-    int userId = int.parse(id);
+    _userId = int.parse(id);
     if (widget.application.leadInspector.isNotEmpty) {
       _leadInspectorId = widget.application.leadInspector[0];
-      if (widget.application.leadInspector[0] == userId) {
+      if (widget.application.leadInspector[0] == _userId) {
         setState(() {
           _isleadInspector = true;
         });
@@ -88,7 +98,7 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
         'name':
             '${widget.application.inspectors[i]['firstName']} ${widget.application.inspectors[i]['lastName']}',
       });
-      if (widget.application.inspectors[i]['id'] == userId &&
+      if (widget.application.inspectors[i]['id'] == _userId &&
           !_isleadInspector) {
         _note = widget.application.inspectors[i]['comments'] ?? '';
         _inspectionStatus = widget.application.inspectors[i]['status'] ?? false;
@@ -191,6 +201,7 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
     if (_isleadInspector) {
       Map data = {
         'applicationId': widget.application.applicationId,
+        'userId': _userId,
         'dataObject': _data
       };
 
@@ -205,19 +216,20 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
     } else {
       if (!_iConcent && !_iDisagree) {
         Helper.toastMessage(
-            AppLocalizations.of(context)!.pleaseConcentDisagree);
+            AppLocalizations.of(context)!.pleaseConsentDisagree);
         return;
       }
       try {
         Map data = {
           'applicationId': widget.application.applicationId,
+          'userId': _userId,
           'agree': _iConcent,
           'comments': _note
         };
 
         final responseCode =
             await Provider.of<ApplicationRespository>(context, listen: false)
-                .submitConcent(data);
+                .submitConcent(Helper.isInternetConnected(_source), data);
         if (responseCode != 0) {
           Navigator.of(context).pushReplacement(MaterialPageRoute(
               builder: (context) => const InspectionCompletedPage()));
@@ -256,6 +268,7 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
   @override
   void dispose() {
     _tabController?.dispose();
+    // _connectivity.disposeStream();
     super.dispose();
   }
 
@@ -802,7 +815,7 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
                                         children: [
                                           Text(
                                             AppLocalizations.of(context)!
-                                                .iConcent,
+                                                .iConsent,
                                             style: GoogleFonts.lato(
                                                 color: _iConcent
                                                     ? Colors.white

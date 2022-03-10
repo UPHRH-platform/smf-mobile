@@ -10,16 +10,22 @@ class OfflineModel {
         onCreate: (db, version) async {
       const String applicationsTable = AppDatabase.applicationsTable;
       const String inspectionTable = AppDatabase.inspectionTable;
+      const String loginPinsTable = AppDatabase.loginPinsTable;
 
       await db.execute('''CREATE TABLE $applicationsTable (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER NOT NULL,
+            username VARCHAR(64),
             application_data TEXT
             )''');
       await db.execute('''CREATE TABLE $inspectionTable (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER NOT NULL,
+            inspector_type CHECK( inspector_type IN ('${Inspector.leadInspector}','${Inspector.assistantInspector}') ),
             inspection_data TEXT
+            )''');
+      await db.execute('''CREATE TABLE $loginPinsTable (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username VARCHAR(64),
+            pin VARCHAR(4)
             )''');
     }, version: 1);
   }
@@ -33,19 +39,19 @@ class OfflineModel {
     );
   }
 
-  static Future<Map> getApplications(int userId) async {
+  static Future<Map> getApplications(String username) async {
     final db = await OfflineModel.database();
-    List<dynamic> whereArgs = [userId];
+    List<dynamic> whereArgs = [username];
     List<Map> rows = await db.query(AppDatabase.applicationsTable,
-        where: 'user_id = ?', orderBy: 'id DESC', whereArgs: whereArgs);
+        where: 'username = ?', orderBy: 'id DESC', whereArgs: whereArgs);
     return rows[0];
   }
 
-  static Future<void> deleteApplications(int userId) async {
+  static Future<void> deleteApplications(String username) async {
     Database db = await OfflineModel.database();
-    List<dynamic> whereArgs = [userId];
+    List<dynamic> whereArgs = [username];
     await db.delete(AppDatabase.applicationsTable,
-        where: 'user_id = ?', whereArgs: whereArgs);
+        where: 'username = ?', whereArgs: whereArgs);
   }
 
   static Future<void> saveInspection(Map<String, Object> data) async {
@@ -57,17 +63,41 @@ class OfflineModel {
     );
   }
 
-  static Future<List<Map<String, dynamic>>> getInspections(int userId) async {
+  static Future<List<Map<String, dynamic>>> getInspections() async {
     final db = await OfflineModel.database();
-    List<dynamic> whereArgs = [userId];
-    return db.query(AppDatabase.inspectionTable,
-        where: 'user_id = ?', whereArgs: whereArgs);
+    return db.query(
+      AppDatabase.inspectionTable,
+    );
   }
 
-  static Future<void> deleteInspections(int userId) async {
+  static Future<void> deleteInspections() async {
     Database db = await OfflineModel.database();
-    List<dynamic> whereArgs = [userId];
-    await db.delete(AppDatabase.inspectionTable,
-        where: 'user_id = ?', whereArgs: whereArgs);
+    await db.delete(
+      AppDatabase.inspectionTable,
+    );
+  }
+
+  static Future<void> savePin(Map<String, Object> data) async {
+    final db = await OfflineModel.database();
+    db.insert(
+      AppDatabase.loginPinsTable,
+      data,
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  static Future<void> deletePin(String username) async {
+    Database db = await OfflineModel.database();
+    List<dynamic> whereArgs = [username];
+    await db.delete(AppDatabase.loginPinsTable,
+        where: 'username = ?', whereArgs: whereArgs);
+  }
+
+  static Future<Map> getPinDetails(String pin) async {
+    final db = await OfflineModel.database();
+    List<dynamic> whereArgs = [pin];
+    List<Map> rows = await db.query(AppDatabase.loginPinsTable,
+        where: 'pin = ?', orderBy: 'id DESC', whereArgs: whereArgs);
+    return rows.isNotEmpty ? rows[0] : {};
   }
 }

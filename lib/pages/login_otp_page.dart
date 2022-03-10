@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:smf_mobile/constants/app_urls.dart';
 import 'package:smf_mobile/constants/color_constants.dart';
+import 'package:smf_mobile/database/offline_model.dart';
 import 'package:smf_mobile/pages/home_page.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:smf_mobile/pages/login_email_page.dart';
@@ -16,7 +17,16 @@ import 'package:flutter/services.dart';
 class LoginOtpPage extends StatefulWidget {
   static const route = AppUrl.loginOtpPage;
 
-  const LoginOtpPage({Key? key}) : super(key: key);
+  final String username;
+  final String pin;
+  final bool loginRequest;
+
+  const LoginOtpPage({
+    Key? key,
+    required this.username,
+    this.pin = '',
+    this.loginRequest = true,
+  }) : super(key: key);
   @override
   _LoginOtpPageState createState() => _LoginOtpPageState();
 }
@@ -51,17 +61,40 @@ class _LoginOtpPageState extends State<LoginOtpPage> {
   Future<void> _validateOtp() async {
     String otp = _otp;
     try {
-      final responseCode =
-          await Provider.of<LoginRespository>(context, listen: false)
-              .validateOtp(context, otp, _identifier);
-      if (responseCode == 200) {
-        Navigator.of(context).pushReplacement(MaterialPageRoute(
-          builder: (context) => const HomePage(),
-        ));
+      if (widget.loginRequest) {
+        final responseCode = await Provider.of<LoginRespository>(context,
+                listen: false)
+            .validateOtp(context, widget.username, otp, _identifier, '', true);
+        if (responseCode == 200) {
+          Navigator.of(context).pushReplacement(MaterialPageRoute(
+            builder: (context) => const HomePage(),
+          ));
+        } else {
+          _errorMessage = Provider.of<LoginRespository>(context, listen: false)
+              .errorMessage;
+          Helper.toastMessage(_errorMessage);
+        }
       } else {
-        _errorMessage =
-            Provider.of<LoginRespository>(context, listen: false).errorMessage;
-        Helper.toastMessage(_errorMessage);
+        final responseData =
+            await Provider.of<LoginRespository>(context, listen: false)
+                .generatePin(widget.username, widget.pin, otp);
+        if (responseData) {
+          Helper.toastMessage(
+              AppLocalizations.of(context)!.pinGeneratedMessage);
+          await OfflineModel.deletePin(widget.username);
+          Map<String, Object> data = {
+            'username': widget.username,
+            'pin': widget.pin
+          };
+          await OfflineModel.savePin(data);
+          Navigator.of(context).pushReplacement(MaterialPageRoute(
+            builder: (context) => const LoginEmailPage(),
+          ));
+        } else {
+          _errorMessage = Provider.of<LoginRespository>(context, listen: false)
+              .errorMessage;
+          Helper.toastMessage(_errorMessage);
+        }
       }
     } catch (err) {
       throw Exception(err);
@@ -85,7 +118,7 @@ class _LoginOtpPageState extends State<LoginOtpPage> {
               child: Column(
                 children: [
                   Container(
-                    padding: const EdgeInsets.only(top: 100, bottom: 100),
+                    padding: const EdgeInsets.only(top: 60, bottom: 60),
                     child: Center(
                       child: Image.asset(
                         'assets/images/logo.png',
@@ -227,8 +260,11 @@ class _LoginOtpPageState extends State<LoginOtpPage> {
                                       Align(
                                           alignment: Alignment.center,
                                           child: Text(
-                                            AppLocalizations.of(context)!
-                                                .signIn,
+                                            widget.loginRequest
+                                                ? AppLocalizations.of(context)!
+                                                    .signIn
+                                                : AppLocalizations.of(context)!
+                                                    .submit,
                                             textAlign: TextAlign.center,
                                             style: GoogleFonts.lato(
                                                 color: Colors.white,

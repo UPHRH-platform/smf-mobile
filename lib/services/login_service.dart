@@ -9,7 +9,10 @@ class LoginService extends BaseService {
   LoginService(HttpClient client) : super(client);
 
   static Future<dynamic> getOtp(String username) async {
-    Map requestData = {'username': username, 'isMobile': true};
+    Map requestData = {
+      'username': username,
+      'isMobile': true,
+    };
     var body = json.encode(requestData);
     Map<String, String> headers = await BaseService.getHeaders();
     final response =
@@ -17,12 +20,31 @@ class LoginService extends BaseService {
     return response;
   }
 
-  static Future<dynamic> validateOtp(String username, String otp) async {
-    Map requestData = {'username': username, 'otp': otp};
+  static Future<dynamic> validateOtp(Map requestData) async {
     var body = json.encode(requestData);
     Map<String, String> headers = await BaseService.getHeaders();
     final response = await http.post(Uri.parse(ApiUrl.validateOtp),
         headers: headers, body: body);
+    // developer.log(ApiUrl.validateOtp);
+    // developer.log(jsonEncode(requestData));
+    // developer.log(response.body);
+    return response;
+  }
+
+  static Future<dynamic> generatePin(
+      String username, String pin, String otp) async {
+    Map requestData = {
+      'username': username,
+      'pin': pin,
+      'otp': otp,
+    };
+    var body = json.encode(requestData);
+    Map<String, String> headers = await BaseService.getHeaders();
+    final response = await http.post(Uri.parse(ApiUrl.generatePin),
+        headers: headers, body: body);
+    // developer.log(ApiUrl.generatePin);
+    // developer.log(jsonEncode(requestData));
+    // developer.log(response.body);
     return response;
   }
 

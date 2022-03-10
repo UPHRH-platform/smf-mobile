@@ -5,9 +5,8 @@ import 'package:provider/provider.dart';
 import 'package:smf_mobile/constants/app_urls.dart';
 import 'package:smf_mobile/constants/color_constants.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:smf_mobile/database/offline_model.dart';
-import 'package:smf_mobile/pages/create_pin_page.dart';
 import 'package:smf_mobile/pages/home_page.dart';
+import 'package:smf_mobile/pages/login_email_page.dart';
 import 'package:smf_mobile/pages/login_otp_page.dart';
 import 'package:smf_mobile/repositories/login_repository.dart';
 import 'package:smf_mobile/util/helper.dart';
@@ -15,47 +14,43 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:otp_text_field/otp_field.dart';
 import 'package:unique_identifier/unique_identifier.dart';
 
-class LoginEmailPage extends StatefulWidget {
+class CreatePinPage extends StatefulWidget {
   static const route = AppUrl.loginEmailPage;
 
-  const LoginEmailPage({Key? key}) : super(key: key);
+  const CreatePinPage({Key? key}) : super(key: key);
   @override
-  _LoginEmailPageState createState() => _LoginEmailPageState();
+  _CreatePinPageState createState() => _CreatePinPageState();
 }
 
-class _LoginEmailPageState extends State<LoginEmailPage> {
+class _CreatePinPageState extends State<CreatePinPage> {
   final TextEditingController _emailController = TextEditingController();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   String _errorMessage = '';
   late Locale locale;
-  String _pin = '';
-  late String _identifier;
+  String _pin1 = '';
+  String _pin2 = '';
 
   @override
   void initState() {
     super.initState();
-    initUniqueIdentifierState();
-  }
-
-  Future<void> initUniqueIdentifierState() async {
-    String? identifier;
-    try {
-      identifier = await UniqueIdentifier.serial;
-    } on PlatformException {
-      identifier = 'Failed to get Unique Identifier';
-    }
-
-    if (!mounted) return;
-
-    setState(() {
-      _identifier = identifier!;
-    });
   }
 
   Future<void> _generateOtp() async {
     final email = _emailController.text.trim();
     if (email == '') {
       Helper.toastMessage(AppLocalizations.of(context)!.pleaseEnterEmail);
+      return;
+    }
+    if (_pin1 == '' || _pin2 == '') {
+      Helper.toastMessage(AppLocalizations.of(context)!.pleaseEnterPin);
+      return;
+    }
+    if (_pin1.length < 4 || _pin2.length < 4) {
+      Helper.toastMessage(AppLocalizations.of(context)!.pleaseEnterValidPin);
+      return;
+    }
+    if (_pin1 != _pin2) {
+      Helper.toastMessage(AppLocalizations.of(context)!.pleaseMatchPin);
       return;
     }
     SystemChannels.textInput.invokeMethod('TextInput.hide');
@@ -65,40 +60,16 @@ class _LoginEmailPageState extends State<LoginEmailPage> {
               .getOtp(email.trim());
       if (responseCode == 200) {
         Navigator.of(context).pushReplacement(MaterialPageRoute(
-          builder: (context) => LoginOtpPage(username: email),
+          builder: (context) => LoginOtpPage(
+            username: email,
+            pin: _pin1,
+            loginRequest: false,
+          ),
         ));
       } else {
         _errorMessage =
             Provider.of<LoginRespository>(context, listen: false).errorMessage;
         Helper.toastMessage(_errorMessage);
-      }
-    } catch (err) {
-      throw Exception(err);
-    }
-  }
-
-  Future<void> _validatePin() async {
-    print('_validatePin...');
-    String pin = _pin;
-    try {
-      Map pinDetails = await OfflineModel.getPinDetails(pin);
-      print(pinDetails);
-      if (pinDetails['username'] != null) {
-        final responseCode = await Provider.of<LoginRespository>(context,
-                listen: false)
-            .validateOtp(
-                context, pinDetails['username'], '', _identifier, pin, false);
-        if (responseCode == 200) {
-          Navigator.of(context).pushReplacement(MaterialPageRoute(
-            builder: (context) => const HomePage(),
-          ));
-        } else {
-          _errorMessage = Provider.of<LoginRespository>(context, listen: false)
-              .errorMessage;
-          Helper.toastMessage(_errorMessage);
-        }
-      } else {
-        Helper.toastMessage(AppLocalizations.of(context)!.inValidPin);
       }
     } catch (err) {
       throw Exception(err);
@@ -153,7 +124,7 @@ class _LoginEmailPageState extends State<LoginEmailPage> {
                               child: Align(
                                   alignment: Alignment.center,
                                   child: Text(
-                                    AppLocalizations.of(context)!.login,
+                                    AppLocalizations.of(context)!.createPin,
                                     textAlign: TextAlign.center,
                                     style: GoogleFonts.lato(
                                         color: AppColors.black87,
@@ -184,7 +155,7 @@ class _LoginEmailPageState extends State<LoginEmailPage> {
                               top: 0,
                             ),
                             child: Padding(
-                              padding: const EdgeInsets.fromLTRB(0, 5, 0, 30),
+                              padding: const EdgeInsets.fromLTRB(0, 5, 0, 10),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -243,52 +214,11 @@ class _LoginEmailPageState extends State<LoginEmailPage> {
                             ),
                           ),
                           Padding(
-                            padding: const EdgeInsets.only(bottom: 10),
-                            child: InkWell(
-                                // ignore: avoid_print
-                                onTap: () => _generateOtp(),
-                                child: SizedBox(
-                                    width:
-                                        MediaQuery.of(context).size.width - 80,
-                                    height: 50,
-                                    child: Stack(children: <Widget>[
-                                      Align(
-                                          alignment: Alignment.bottomCenter,
-                                          child: Container(
-                                              width: MediaQuery.of(context)
-                                                      .size
-                                                      .width -
-                                                  80,
-                                              height: 50,
-                                              decoration: BoxDecoration(
-                                                color: AppColors.primaryBlue,
-                                                borderRadius:
-                                                    BorderRadius.circular(4),
-                                              ))),
-                                      Align(
-                                          alignment: Alignment.center,
-                                          child: Text(
-                                            AppLocalizations.of(context)!
-                                                .getOtp,
-                                            textAlign: TextAlign.center,
-                                            style: GoogleFonts.lato(
-                                                color: Colors.white,
-                                                fontSize: 17,
-                                                letterSpacing:
-                                                    0 /*percentages not used in flutter. defaulting to zero*/,
-                                                fontWeight: FontWeight.normal,
-                                                height:
-                                                    1.5 /*PERCENT not supported*/
-                                                ),
-                                          )),
-                                    ]))),
-                          ),
-                          Padding(
                               padding: const EdgeInsets.only(
                                 top: 20,
                               ),
                               child: Text(
-                                AppLocalizations.of(context)!.orEnterPin,
+                                AppLocalizations.of(context)!.enterPin,
                                 textAlign: TextAlign.left,
                                 style: GoogleFonts.lato(
                                     color: AppColors.black87,
@@ -318,17 +248,103 @@ class _LoginEmailPageState extends State<LoginEmailPage> {
                                 fieldStyle: FieldStyle.underline,
                                 onCompleted: (pin) {
                                   setState(() {
-                                    _pin = pin;
+                                    _pin1 = pin;
                                   });
                                 },
                                 onChanged: (String? pin) {
                                   if (pin?.length == 4) {
                                     setState(() {
-                                      _pin = pin.toString();
+                                      _pin1 = pin.toString();
                                     });
-                                    _validatePin();
                                   }
                                 }),
+                          ),
+                          Padding(
+                              padding: const EdgeInsets.only(
+                                top: 20,
+                              ),
+                              child: Text(
+                                AppLocalizations.of(context)!.confirmPin,
+                                textAlign: TextAlign.left,
+                                style: GoogleFonts.lato(
+                                    color: AppColors.black87,
+                                    fontSize: 16,
+                                    letterSpacing:
+                                        0.25 /*percentages not used in flutter. defaulting to zero*/,
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.4),
+                              )),
+                          Container(
+                            alignment: Alignment.centerLeft,
+                            height: 30.0,
+                            margin: const EdgeInsets.only(top: 5),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(4),
+                              // border:
+                              //     Border.all(color: AppColors.black16),
+                              color: Colors.white,
+                            ),
+                            child: OTPTextField(
+                                length: 4,
+                                width: MediaQuery.of(context).size.width / 2,
+                                fieldWidth: 38,
+                                style: const TextStyle(fontSize: 14),
+                                textFieldAlignment:
+                                    MainAxisAlignment.spaceAround,
+                                fieldStyle: FieldStyle.underline,
+                                onCompleted: (pin) {
+                                  setState(() {
+                                    _pin2 = pin;
+                                  });
+                                },
+                                onChanged: (String? pin) {
+                                  if (pin?.length == 4) {
+                                    setState(() {
+                                      _pin2 = pin.toString();
+                                    });
+                                  }
+                                }),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(top: 40),
+                            child: InkWell(
+                                // ignore: avoid_print
+                                onTap: () => _generateOtp(),
+                                child: SizedBox(
+                                    width:
+                                        MediaQuery.of(context).size.width - 80,
+                                    height: 50,
+                                    child: Stack(children: <Widget>[
+                                      Align(
+                                          alignment: Alignment.bottomCenter,
+                                          child: Container(
+                                              width: MediaQuery.of(context)
+                                                      .size
+                                                      .width -
+                                                  80,
+                                              height: 50,
+                                              decoration: BoxDecoration(
+                                                color: AppColors.primaryBlue,
+                                                borderRadius:
+                                                    BorderRadius.circular(4),
+                                              ))),
+                                      Align(
+                                          alignment: Alignment.center,
+                                          child: Text(
+                                            AppLocalizations.of(context)!
+                                                .submit,
+                                            textAlign: TextAlign.center,
+                                            style: GoogleFonts.lato(
+                                                color: Colors.white,
+                                                fontSize: 17,
+                                                letterSpacing:
+                                                    0 /*percentages not used in flutter. defaulting to zero*/,
+                                                fontWeight: FontWeight.normal,
+                                                height:
+                                                    1.5 /*PERCENT not supported*/
+                                                ),
+                                          )),
+                                    ]))),
                           ),
                           const Padding(
                               padding: EdgeInsets.only(
@@ -340,7 +356,7 @@ class _LoginEmailPageState extends State<LoginEmailPage> {
                           InkWell(
                             onTap: () => Navigator.of(context)
                                 .pushReplacement(MaterialPageRoute(
-                              builder: (context) => const CreatePinPage(),
+                              builder: (context) => const LoginEmailPage(),
                             )),
                             child: Container(
                                 width: double.infinity,
@@ -348,7 +364,7 @@ class _LoginEmailPageState extends State<LoginEmailPage> {
                                   top: 10,
                                 ),
                                 child: Text(
-                                  AppLocalizations.of(context)!.createPin,
+                                  AppLocalizations.of(context)!.goBack,
                                   textAlign: TextAlign.center,
                                   style: GoogleFonts.lato(
                                       color: AppColors.primaryBlue,

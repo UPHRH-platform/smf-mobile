@@ -12,6 +12,9 @@ import 'package:smf_mobile/util/helper.dart';
 import 'package:smf_mobile/widgets/people_card.dart';
 import 'inspection_completed.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'dart:async';
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:smf_mobile/util/connectivity_helper.dart';
 
 class InspectionSummaryPage extends StatefulWidget {
   static const route = AppUrl.inspectionSummary;
@@ -32,6 +35,8 @@ class InspectionSummaryPage extends StatefulWidget {
 }
 
 class _InspectionSummaryPageState extends State<InspectionSummaryPage> {
+  Map _source = {ConnectivityResult.none: false};
+  final MyConnectivity _connectivity = MyConnectivity.instance;
   final TextEditingController _summaryController = TextEditingController();
   final List<Map> _inspectors = [];
   int _leadInspectorId = 0;
@@ -44,8 +49,18 @@ class _InspectionSummaryPageState extends State<InspectionSummaryPage> {
   @override
   void initState() {
     super.initState();
+    _connectivity.initialise();
+    _connectivity.myStream.listen((source) {
+      setState(() => _source = source);
+    });
     _populateApplicationInspectors();
   }
+
+  // @override
+  // void dispose() {
+  //   // _connectivity.disposeStream();
+  //   super.dispose();
+  // }
 
   Future<void> _populateApplicationInspectors() async {
     if (widget.leadInspector.isNotEmpty) {
@@ -109,7 +124,7 @@ class _InspectionSummaryPageState extends State<InspectionSummaryPage> {
       };
       final responseCode =
           await Provider.of<ApplicationRespository>(context, listen: false)
-              .submitInspection(data);
+              .submitInspection(Helper.isInternetConnected(_source), data);
       if (responseCode != 0) {
         Navigator.of(context).pushReplacement(MaterialPageRoute(
             builder: (context) => const InspectionCompletedPage()));

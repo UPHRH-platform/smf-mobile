@@ -9,12 +9,16 @@ import 'package:smf_mobile/repositories/form_repository.dart';
 import 'package:smf_mobile/repositories/login_repository.dart';
 import 'package:smf_mobile/repositories/user_repository.dart';
 import 'package:smf_mobile/util/helper.dart';
+import 'package:smf_mobile/util/notification_helper.dart';
+// import 'package:smf_mobile/util/notification_helper.dart';
 import 'constants/app_constants.dart';
 import 'constants/app_urls.dart';
 import 'constants/color_constants.dart';
 import 'routes.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+// import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class LandingPage extends StatefulWidget {
   static const route = AppUrl.landingPage;
@@ -27,10 +31,23 @@ class LandingPage extends StatefulWidget {
       context.findAncestorStateOfType<_LandingPageState>();
 }
 
+Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  print("Handling a background message...");
+  // BuildContext context;
+  // if (message.notification != null) {
+  //   String applicationId = message.data['applicationId'] ?? '';
+  //   String body = message.notification!.body.toString();
+  // for (int i = 0; i < 10; i++) {
+  // NotificationHelper.scheduleNotification(DateTime.now(), 0,
+  //     message.notification!.title.toString(), body, applicationId);
+  // }
+}
+
 class _LandingPageState extends State<LandingPage> {
   final client = HttpClient();
   Locale _locale = const Locale('en', 'US');
   bool _isTokenExpired = false;
+  // final _storage = const FlutterSecureStorage();
 
   @override
   void initState() {
@@ -43,7 +60,7 @@ class _LandingPageState extends State<LandingPage> {
     });
   }
 
-  Future<dynamic> _initilizeApp() async {
+  Future<dynamic> _initilizeApp(context) async {
     _isTokenExpired = await Helper.isTokenExpired();
     await Firebase.initializeApp();
     // await Future.delayed(const Duration(microseconds: 100));
@@ -56,7 +73,7 @@ class _LandingPageState extends State<LandingPage> {
         color: AppColors.scaffoldBackground,
         child: FutureBuilder(
             // Initialize FlutterFire
-            future: _initilizeApp(),
+            future: _initilizeApp(context),
             builder: (context, AsyncSnapshot<dynamic> snapshot) {
               // Check for errors
               if (snapshot.hasData) {

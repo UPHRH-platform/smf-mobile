@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
@@ -92,5 +93,24 @@ class Helper {
     }
     // print(_inspectionStatus);
     return _inspectionStatus;
+  }
+
+  static bool isInternetConnected(source) {
+    bool connected;
+    switch (source.keys.toList()[0]) {
+      case ConnectivityResult.mobile:
+        // print('connected to mobile...');
+        connected = true;
+        break;
+      case ConnectivityResult.wifi:
+        // print('connected to wifi...');
+        connected = true;
+        break;
+      case ConnectivityResult.none:
+      default:
+        // print('offline...');
+        connected = false;
+    }
+    return connected;
   }
 }
