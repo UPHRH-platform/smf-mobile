@@ -9,6 +9,7 @@ class OfflineModel {
     return sql.openDatabase(path.join(dbPath, AppDatabase.name),
         onCreate: (db, version) async {
       const String applicationsTable = AppDatabase.applicationsTable;
+      const String formsTable = AppDatabase.formsTable;
       const String inspectionTable = AppDatabase.inspectionTable;
       const String loginPinsTable = AppDatabase.loginPinsTable;
 
@@ -16,6 +17,11 @@ class OfflineModel {
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username VARCHAR(64),
             application_data TEXT
+            )''');
+      await db.execute('''CREATE TABLE $formsTable (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username VARCHAR(64),
+            form_data TEXT
             )''');
       await db.execute('''CREATE TABLE $inspectionTable (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -51,6 +57,30 @@ class OfflineModel {
     Database db = await OfflineModel.database();
     List<dynamic> whereArgs = [username];
     await db.delete(AppDatabase.applicationsTable,
+        where: 'username = ?', whereArgs: whereArgs);
+  }
+
+  static Future<void> saveForms(Map<String, Object> data) async {
+    final db = await OfflineModel.database();
+    db.insert(
+      AppDatabase.formsTable,
+      data,
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  static Future<Map> getForms(String username) async {
+    final db = await OfflineModel.database();
+    List<dynamic> whereArgs = [username];
+    List<Map> rows = await db.query(AppDatabase.formsTable,
+        where: 'username = ?', orderBy: 'id DESC', whereArgs: whereArgs);
+    return rows[0];
+  }
+
+  static Future<void> deleteForms(String username) async {
+    Database db = await OfflineModel.database();
+    List<dynamic> whereArgs = [username];
+    await db.delete(AppDatabase.formsTable,
         where: 'username = ?', whereArgs: whereArgs);
   }
 

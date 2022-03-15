@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:smf_mobile/constants/api_endpoints.dart';
 import 'package:smf_mobile/constants/app_constants.dart';
 import 'package:smf_mobile/services/base_service.dart';
-import 'dart:developer' as developer;
+// import 'dart:developer' as developer;
 
 class ApplicationService extends BaseService {
   ApplicationService(HttpClient client) : super(client);
@@ -32,15 +32,39 @@ class ApplicationService extends BaseService {
     return response;
   }
 
+  static Future<dynamic> submitBulkInspection(List data) async {
+    var body = json.encode(data);
+    Map<String, String> headers = await BaseService.getHeaders();
+
+    final response = await http.post(Uri.parse(ApiUrl.submitBulkInspection),
+        headers: headers, body: body);
+    // developer.log(ApiUrl.submitInspection);
+    // developer.log(body);
+    // developer.log(response.body);
+    return response;
+  }
+
   static Future<dynamic> submitConcent(Map data) async {
     var body = json.encode(data);
     Map<String, String> headers = await BaseService.getHeaders();
 
     final response = await http.post(Uri.parse(ApiUrl.submitConcent),
         headers: headers, body: body);
-    developer.log(ApiUrl.submitConcent);
-    developer.log(body);
-    developer.log(response.body);
+    // developer.log(ApiUrl.submitConcent);
+    // developer.log(body);
+    // developer.log(response.body);
+    return response;
+  }
+
+  static Future<dynamic> submitBulkConsent(List data) async {
+    var body = json.encode(data);
+    Map<String, String> headers = await BaseService.getHeaders();
+
+    final response = await http.post(Uri.parse(ApiUrl.submitBulkConcent),
+        headers: headers, body: body);
+    // developer.log(ApiUrl.submitInspection);
+    // developer.log(body);
+    // developer.log(response.body);
     return response;
   }
 }

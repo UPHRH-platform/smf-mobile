@@ -48,7 +48,6 @@ class LoginRespository with ChangeNotifier {
 
   Future<dynamic> validateOtp(context, String username, String otp,
       String identifier, String pin, bool isOtp) async {
-    print('res validateOtp');
     try {
       Map requestData = {};
       if (isOtp) {
@@ -83,7 +82,7 @@ class LoginRespository with ChangeNotifier {
         _data = json.decode(request.body);
         // print(_data);
         if (_data['statusInfo']['statusCode'] == 200) {
-          print('_configureMessaging...');
+          // print('_configureMessaging...');
           _configureMessaging(context);
         }
       });

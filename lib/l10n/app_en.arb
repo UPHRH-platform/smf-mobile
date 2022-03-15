@@ -19,6 +19,7 @@
     "signIn": "SIGN IN",
     "goBack": "Go back",
     "goBackText": "Go back, re-enter the email",
+    "youAreOffline": "You are offline",
     "pendingApplications": "Pending applications",
     "today": "Today",
     "upcoming": "Upcoming",
@@ -45,5 +46,9 @@
     "leadInspector": "Lead inspector",
     "assistingInspectors": "Assisting inspectors",
     "iDisagree": "I disagree",
-    "iConsent": "I consent"
+    "iConsent": "I consent",
+    "acceptTermsAndConditions": "Please accept terms and conditions",
+    "dataSynchoronized": "Data synchoronized",
+    "dataSynchoronizedText": "Data has been synchoronized"
+
 }

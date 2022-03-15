@@ -28,7 +28,11 @@ class MyConnectivity {
     } on SocketException catch (_) {
       isOnline = false;
     }
-    _controller.sink.add({result: isOnline});
+    try {
+      _controller.sink.add({result: isOnline});
+    } catch (_) {
+      return;
+    }
   }
 
   void disposeStream() => _controller.close();

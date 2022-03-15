@@ -50,6 +50,7 @@ dependencies:
   unique_identifier: ^0.2.2
   sqflite: ^2.0.2
   connectivity_plus: ^2.2.1
+  change_app_package_name: ^1.0.0
 
 dev_dependencies:
   flutter_test:

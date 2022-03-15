@@ -18,8 +18,8 @@ import 'package:smf_mobile/widgets/people_card.dart';
 import 'package:smf_mobile/widgets/silverappbar_delegate.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'dart:async';
-import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:smf_mobile/util/connectivity_helper.dart';
+// import 'package:connectivity_plus/connectivity_plus.dart';
+// import 'package:smf_mobile/util/connectivity_helper.dart';
 
 class ApplicationDetailsPage extends StatefulWidget {
   final Application application;
@@ -34,8 +34,8 @@ class ApplicationDetailsPage extends StatefulWidget {
 
 class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
     with SingleTickerProviderStateMixin {
-  Map _source = {ConnectivityResult.none: false};
-  final MyConnectivity _connectivity = MyConnectivity.instance;
+  // Map _source = {ConnectivityResult.none: false};
+  // final MyConnectivity _connectivity = MyConnectivity.instance;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   TabController? _tabController;
   late FormData _formData;
@@ -61,18 +61,24 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
   @override
   void initState() {
     super.initState();
-    _connectivity.initialise();
-    _connectivity.myStream.listen((source) {
-      setState(() => _source = source);
-    });
+    // _connectivity.initialise();
+    // _connectivity.myStream.listen((source) {
+    //   if (mounted) {
+    //     setState(() => _source = source);
+    //   }
+    // });
     widget.application.dataObject.forEach((key, value) => _tabs.add(key));
     _tabController = TabController(vsync: this, length: _tabs.length);
     _tabController!.addListener(_setActiveTabIndex);
-    _checkInspectorRole();
+    _getData();
+  }
+
+  _getData() async {
+    await _checkInspectorRole();
     _populateFields();
   }
 
-  Future<void> _checkInspectorRole() async {
+  Future<dynamic> _checkInspectorRole() async {
     String id = await Helper.getUser(Storage.userId);
     _userId = int.parse(id);
     if (widget.application.leadInspector.isNotEmpty) {
@@ -101,7 +107,7 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
       if (widget.application.inspectors[i]['id'] == _userId &&
           !_isleadInspector) {
         _note = widget.application.inspectors[i]['comments'] ?? '';
-        _inspectionStatus = widget.application.inspectors[i]['status'] ?? false;
+        _inspectionStatus = widget.application.inspectors[i]['status'] ?? '';
         _iConcent =
             widget.application.inspectors[i]['consentApplication'] ?? false;
         if (widget.application.inspectors[i]['consentApplication'] != null) {
@@ -112,13 +118,12 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
       }
       setState(() {});
     }
+    return;
   }
 
   Future<dynamic> _getFormDetails() async {
-    _validateUser();
     _formData = await Provider.of<FormRespository>(context, listen: false)
         .getFormDetails(widget.application.formId);
-    // print('object');
     _errorMessage =
         Provider.of<FormRespository>(context, listen: false).errorMessage;
     if (_errorMessage != '') {
@@ -145,16 +150,61 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
 
   void _populateFields() async {
     Map updatedFields = {};
-    widget.application.dataObject.forEach((key, value) => {
-          updatedFields = {},
-          value.forEach((childKey, childValue) => {
-                updatedFields[childKey] = {
-                  childValue: {'value': 'Correct', 'comments': ''}
-                }
-              }),
-          _data[key] = updatedFields
-        });
-    _data.forEach((key, value) => _fields.add(value));
+    // print(widget.application.inspectionStatus);
+    if (widget.application.inspectionStatus !=
+            InspectionStatus.leadInspectorCompleted &&
+        widget.application.status != InspectionStatus.inspectionCompleted &&
+        widget.application.status != InspectionStatus.approved) {
+      widget.application.dataObject.forEach((key, value) => {
+            updatedFields = {},
+            value.forEach((childKey, childValue) => {
+                  updatedFields[childKey] = {
+                    childValue: {'value': 'Correct', 'comments': ''}
+                  }
+                }),
+            _data[key] = updatedFields
+          });
+      _data.forEach((key, value) => _fields.add(value));
+    } else {
+      Map existingData = {};
+      print(_leadInspectorId);
+      widget.application.dataObject.forEach((key, value) => {
+            updatedFields = {},
+            existingData = widget.application.inspectorDataObject[key],
+            value.forEach((childKey, childValue) => {
+                  updatedFields[childKey] = {
+                    childValue: {
+                      'value': _isleadInspector
+                          ? existingData[childKey]
+                                  [existingData[childKey].keys.elementAt(0)]
+                              ['value']
+                          : '',
+                      'comments': _isleadInspector
+                          ? existingData[childKey]
+                                  [existingData[childKey].keys.elementAt(0)]
+                              ['comments']
+                          : ''
+                    }
+                  }
+                }),
+            _data[key] = updatedFields
+          });
+      _data.forEach((key, value) => _fields.add(value));
+    }
+
+    // widget.application.inspectorDataObject.forEach((key, value) => {
+    //       // updatedFields = {},
+    //       value.forEach((childKey, childValue) => {
+    //             print(childValue),
+    //             test = childValue[childValue.keys.elementAt(0)],
+    //             print(test['comments']),
+    //             // updatedFields[childKey] = {
+    //             // childValue: {'value': 'Correct', 'comments': ''}
+    //             // }
+    //           }),
+    //       // _data[key] = updatedFields
+    //     });
+
     if (!_isleadInspector) {
       updatedFields = {};
       widget.application.inspectorDataObject.forEach((key, value) => {
@@ -197,7 +247,11 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
   }
 
   Future<void> _submitInspection() async {
-    _validateUser();
+    bool isInternetConnected = await Helper.isInternetConnected();
+    // await Future.delayed(const Duration(milliseconds: 10));
+    if (isInternetConnected) {
+      _validateUser();
+    }
     if (_isleadInspector) {
       Map data = {
         'applicationId': widget.application.applicationId,
@@ -211,6 +265,7 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
                 formId: 1645422297511,
                 inspectors: widget.application.inspectors,
                 leadInspector: widget.application.leadInspector,
+                inspectionFields: _formData.inspectionFields,
                 inspectionData: data,
               )));
     } else {
@@ -229,8 +284,8 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
 
         final responseCode =
             await Provider.of<ApplicationRespository>(context, listen: false)
-                .submitConcent(Helper.isInternetConnected(_source), data);
-        if (responseCode != 0) {
+                .submitConcent(isInternetConnected, data);
+        if (responseCode == 200) {
           Navigator.of(context).pushReplacement(MaterialPageRoute(
               builder: (context) => const InspectionCompletedPage()));
         } else {
@@ -910,10 +965,17 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
                                   )
                                 ],
                               ))
-                          : widget.application.status !=
-                                      InspectionStatus.inspectionCompleted &&
-                                  widget.application.inspectionStatus !=
-                                      InspectionStatus.leadInspectorCompleted
+                          : (widget.application.status !=
+                                          InspectionStatus
+                                              .inspectionCompleted &&
+                                      widget.application.inspectionStatus !=
+                                          InspectionStatus
+                                              .leadInspectorCompleted &&
+                                      widget.application.status !=
+                                          InspectionStatus.approved) ||
+                                  (widget.application.status ==
+                                          InspectionStatus.sentForInspection &&
+                                      !_isleadInspector)
                               ? TextButton(
                                   onPressed: () {
                                     _submitInspection();

@@ -1,5 +1,6 @@
 import 'dart:math';
-import 'package:connectivity_plus/connectivity_plus.dart';
+import 'dart:io';
+// import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
@@ -28,6 +29,10 @@ class Helper {
     return value;
   }
 
+  static Future<void> setUser(String key, String value) async {
+    _storage.write(key: key, value: value);
+  }
+
   static int getDateDiffence(DateTime today, DateTime dateTimeCreatedAt) {
     // print('$today, $dateTimeCreatedAt');
     // String month = today.month < 10 ? '0${today.month}' : '${today.month}';
@@ -39,7 +44,7 @@ class Helper {
   static Future<bool> isTokenExpired() async {
     bool isTokenExpired = true;
     var authToken = await _storage.read(key: Storage.authtoken);
-    if (authToken != null) {
+    if (authToken != null && authToken != '') {
       isTokenExpired = JwtDecoder.isExpired(authToken);
     }
     return isTokenExpired;
@@ -95,22 +100,33 @@ class Helper {
     return _inspectionStatus;
   }
 
-  static bool isInternetConnected(source) {
-    bool connected;
-    switch (source.keys.toList()[0]) {
-      case ConnectivityResult.mobile:
-        // print('connected to mobile...');
-        connected = true;
-        break;
-      case ConnectivityResult.wifi:
-        // print('connected to wifi...');
-        connected = true;
-        break;
-      case ConnectivityResult.none:
-      default:
-        // print('offline...');
-        connected = false;
+  // static bool isInternetConnected(source) {
+  //   bool connected;
+  //   switch (source.keys.toList()[0]) {
+  //     case ConnectivityResult.mobile:
+  //       print('connected to mobile...');
+  //       connected = true;
+  //       break;
+  //     case ConnectivityResult.wifi:
+  //       print('connected to wifi...');
+  //       connected = true;
+  //       break;
+  //     case ConnectivityResult.none:
+  //     default:
+  //       print('offline mode...');
+  //       connected = false;
+  //   }
+  //   return connected;
+  // }
+
+  static Future<bool> isInternetConnected() async {
+    bool _isConnectionSuccessful;
+    try {
+      final response = await InternetAddress.lookup('www.google.com');
+      _isConnectionSuccessful = response.isNotEmpty;
+    } on SocketException catch (e) {
+      _isConnectionSuccessful = false;
     }
-    return connected;
+    return _isConnectionSuccessful;
   }
 }

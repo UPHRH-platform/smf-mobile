@@ -1,4 +1,4 @@
-package com.example.smf_mobile
+package com.upsmf.beta
 
 import io.flutter.embedding.android.FlutterActivity
 

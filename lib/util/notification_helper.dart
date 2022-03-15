@@ -43,7 +43,7 @@ class NotificationHelper {
       enableLights: true,
       playSound: true,
       // sound: RawResourceAndroidNotificationSound('mixkit_happy_bell'),
-      // largeIcon: DrawableResourceAndroidBitmap('flutter_devs'),
+      largeIcon: DrawableResourceAndroidBitmap('flutter_devs'),
       styleInformation: BigTextStyleInformation(''),
     );
 

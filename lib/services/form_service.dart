@@ -7,6 +7,15 @@ import 'package:smf_mobile/services/base_service.dart';
 class FormService extends BaseService {
   FormService(HttpClient client) : super(client);
 
+  static Future<dynamic> getAllForms() async {
+    Map<String, String> headers = await BaseService.getHeaders();
+
+    final response =
+        await http.get(Uri.parse(ApiUrl.getAllForms), headers: headers);
+    // developer.log(response.body);
+    return response;
+  }
+
   static Future<dynamic> getFormDetails(int formId) async {
     Map<String, String> headers = await BaseService.getHeaders();
 

@@ -4,23 +4,24 @@ import 'package:provider/provider.dart';
 import 'package:smf_mobile/constants/app_constants.dart';
 import 'package:smf_mobile/constants/app_urls.dart';
 import 'package:smf_mobile/constants/color_constants.dart';
-import 'package:smf_mobile/models/form_model.dart';
+// import 'package:smf_mobile/models/form_model.dart';
 import 'package:smf_mobile/pages/login_email_page.dart';
 import 'package:smf_mobile/repositories/application_repository.dart';
-import 'package:smf_mobile/repositories/form_repository.dart';
+// import 'package:smf_mobile/repositories/form_repository.dart';
 import 'package:smf_mobile/util/helper.dart';
 import 'package:smf_mobile/widgets/people_card.dart';
 import 'inspection_completed.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'dart:async';
-import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:smf_mobile/util/connectivity_helper.dart';
+// import 'package:connectivity_plus/connectivity_plus.dart';
+// import 'package:smf_mobile/util/connectivity_helper.dart';
 
 class InspectionSummaryPage extends StatefulWidget {
   static const route = AppUrl.inspectionSummary;
   final int formId;
   final List inspectors;
   final List leadInspector;
+  final List inspectionFields;
   final Map inspectionData;
 
   const InspectionSummaryPage(
@@ -28,6 +29,7 @@ class InspectionSummaryPage extends StatefulWidget {
       required this.formId,
       required this.inspectors,
       required this.leadInspector,
+      required this.inspectionFields,
       required this.inspectionData})
       : super(key: key);
   @override
@@ -35,13 +37,13 @@ class InspectionSummaryPage extends StatefulWidget {
 }
 
 class _InspectionSummaryPageState extends State<InspectionSummaryPage> {
-  Map _source = {ConnectivityResult.none: false};
-  final MyConnectivity _connectivity = MyConnectivity.instance;
+  // Map _source = {ConnectivityResult.none: false};
+  // final MyConnectivity _connectivity = MyConnectivity.instance;
   final TextEditingController _summaryController = TextEditingController();
   final List<Map> _inspectors = [];
   int _leadInspectorId = 0;
   bool _iAgree = false;
-  late FormData _formData;
+  // late FormData _formData;
   String _errorMessage = '';
   late Map _summaryField;
   late Map _termsField;
@@ -49,18 +51,20 @@ class _InspectionSummaryPageState extends State<InspectionSummaryPage> {
   @override
   void initState() {
     super.initState();
-    _connectivity.initialise();
-    _connectivity.myStream.listen((source) {
-      setState(() => _source = source);
-    });
+    // _connectivity.initialise();
+    // _connectivity.myStream.listen((source) {
+    //   if (mounted) {
+    //     setState(() => _source = source);
+    //   }
+    // });
     _populateApplicationInspectors();
   }
 
-  // @override
-  // void dispose() {
-  //   // _connectivity.disposeStream();
-  //   super.dispose();
-  // }
+  @override
+  void dispose() {
+    // _connectivity.disposeStream();
+    super.dispose();
+  }
 
   Future<void> _populateApplicationInspectors() async {
     if (widget.leadInspector.isNotEmpty) {
@@ -87,32 +91,49 @@ class _InspectionSummaryPageState extends State<InspectionSummaryPage> {
     }
   }
 
+  // Future<dynamic> _getFormDetails(context) async {
+  //   _validateUser();
+  //   _formData = await Provider.of<FormRespository>(context, listen: false)
+  //       .getFormDetails(widget.formId);
+  //   // print('object');
+  //   String _errorMessage =
+  //       Provider.of<FormRespository>(context, listen: false).errorMessage;
+  //   if (_errorMessage != '') {
+  //     Helper.toastMessage(_errorMessage);
+  //   } else {
+  //     for (int i = 0; i < _formData.inspectionFields.length; i++) {
+  //       if (_formData.inspectionFields[i]['fieldType'] == FieldType.heading) {
+  //         _summaryField = _formData.inspectionFields[i];
+  //       } else if (_formData.inspectionFields[i]['fieldType'] ==
+  //           FieldType.checkbox) {
+  //         _termsField = _formData.inspectionFields[i];
+  //       }
+  //     }
+  //   }
+  //   return _formData;
+  // }
+
   Future<dynamic> _getFormDetails(context) async {
-    _validateUser();
-    _formData = await Provider.of<FormRespository>(context, listen: false)
-        .getFormDetails(widget.formId);
-    // print('object');
-    String _errorMessage =
-        Provider.of<FormRespository>(context, listen: false).errorMessage;
-    if (_errorMessage != '') {
-      Helper.toastMessage(_errorMessage);
-    } else {
-      for (int i = 0; i < _formData.inspectionFields.length; i++) {
-        if (_formData.inspectionFields[i]['fieldType'] == FieldType.heading) {
-          _summaryField = _formData.inspectionFields[i];
-        } else if (_formData.inspectionFields[i]['fieldType'] ==
-            FieldType.checkbox) {
-          _termsField = _formData.inspectionFields[i];
-        }
+    for (int i = 0; i < widget.inspectionFields.length; i++) {
+      if (widget.inspectionFields[i]['fieldType'] == FieldType.heading) {
+        _summaryField = widget.inspectionFields[i];
+      } else if (widget.inspectionFields[i]['fieldType'] ==
+          FieldType.checkbox) {
+        _termsField = widget.inspectionFields[i];
       }
     }
-    return _formData;
+    return widget.inspectionFields;
   }
 
   Future<void> _submitInspection() async {
-    _validateUser();
+    bool isInternetConnected = await Helper.isInternetConnected();
+    // await Future.delayed(const Duration(milliseconds: 10));
+    if (isInternetConnected) {
+      _validateUser();
+    }
     if (!_iAgree) {
-      Helper.toastMessage('Please accept terms and conditions');
+      Helper.toastMessage(
+          AppLocalizations.of(context)!.acceptTermsAndConditions);
       return;
     }
     try {
@@ -124,8 +145,8 @@ class _InspectionSummaryPageState extends State<InspectionSummaryPage> {
       };
       final responseCode =
           await Provider.of<ApplicationRespository>(context, listen: false)
-              .submitInspection(Helper.isInternetConnected(_source), data);
-      if (responseCode != 0) {
+              .submitInspection(isInternetConnected, data);
+      if (responseCode == 200) {
         Navigator.of(context).pushReplacement(MaterialPageRoute(
             builder: (context) => const InspectionCompletedPage()));
       } else {
@@ -148,7 +169,7 @@ class _InspectionSummaryPageState extends State<InspectionSummaryPage> {
           titleSpacing: 20,
           backgroundColor: Colors.white,
           title: Text(
-            'Inspection Summary',
+            AppLocalizations.of(context)!.inspectionSummary,
             style: GoogleFonts.lato(
               color: AppColors.black87,
               fontSize: 16.0,

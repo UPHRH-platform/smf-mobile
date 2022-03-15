@@ -284,16 +284,21 @@ class _LeadInspectorApplicationFieldState
                                               _displayCommentDialog();
                                             }
                                           },
-                                          icon:
-                                              _radioValue != FieldValue.correct
-                                                  ? const Icon(
-                                                      Icons.edit,
-                                                      color: AppColors.black40,
-                                                    )
-                                                  : const Icon(
-                                                      Icons.message,
-                                                      color: AppColors.black40,
-                                                    ),
+                                          icon: _radioValue !=
+                                                      FieldValue.correct &&
+                                                  widget.applicationStatus !=
+                                                      InspectionStatus
+                                                          .inspectionCompleted &&
+                                                  widget.applicationStatus !=
+                                                      InspectionStatus.approved
+                                              ? const Icon(
+                                                  Icons.edit,
+                                                  color: AppColors.black40,
+                                                )
+                                              : const Icon(
+                                                  Icons.message,
+                                                  color: AppColors.black40,
+                                                ),
                                         ),
                                       )
                                     ],

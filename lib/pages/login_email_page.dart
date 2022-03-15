@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:otp_text_field/style.dart';
 import 'package:provider/provider.dart';
+import 'package:smf_mobile/constants/app_constants.dart';
 import 'package:smf_mobile/constants/app_urls.dart';
 import 'package:smf_mobile/constants/color_constants.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -14,6 +15,9 @@ import 'package:smf_mobile/util/helper.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:otp_text_field/otp_field.dart';
 import 'package:unique_identifier/unique_identifier.dart';
+import 'dart:async';
+// import 'package:connectivity_plus/connectivity_plus.dart';
+// import 'package:smf_mobile/util/connectivity_helper.dart';
 
 class LoginEmailPage extends StatefulWidget {
   static const route = AppUrl.loginEmailPage;
@@ -26,6 +30,8 @@ class LoginEmailPage extends StatefulWidget {
 class _LoginEmailPageState extends State<LoginEmailPage> {
   final TextEditingController _emailController = TextEditingController();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  // Map _source = {ConnectivityResult.none: false};
+  // final MyConnectivity _connectivity = MyConnectivity.instance;
   String _errorMessage = '';
   late Locale locale;
   String _pin = '';
@@ -34,6 +40,14 @@ class _LoginEmailPageState extends State<LoginEmailPage> {
   @override
   void initState() {
     super.initState();
+    // _connectivity.initialise();
+    // _connectivity.myStream.listen((source) {
+    //   if (mounted) {
+    //     setState(() {
+    //       _source = source;
+    //     });
+    //   }
+    // });
     initUniqueIdentifierState();
   }
 
@@ -78,16 +92,16 @@ class _LoginEmailPageState extends State<LoginEmailPage> {
   }
 
   Future<void> _validatePin() async {
-    print('_validatePin...');
-    String pin = _pin;
+    bool isInternetConnected = await Helper.isInternetConnected();
+    // await Future.delayed(const Duration(milliseconds: 10));
     try {
-      Map pinDetails = await OfflineModel.getPinDetails(pin);
-      print(pinDetails);
-      if (pinDetails['username'] != null) {
+      Map pinDetails = await OfflineModel.getPinDetails(_pin);
+      // print(pinDetails);
+      if (isInternetConnected && pinDetails['username'] != null) {
         final responseCode = await Provider.of<LoginRespository>(context,
                 listen: false)
             .validateOtp(
-                context, pinDetails['username'], '', _identifier, pin, false);
+                context, pinDetails['username'], '', _identifier, _pin, false);
         if (responseCode == 200) {
           Navigator.of(context).pushReplacement(MaterialPageRoute(
             builder: (context) => const HomePage(),
@@ -97,6 +111,13 @@ class _LoginEmailPageState extends State<LoginEmailPage> {
               .errorMessage;
           Helper.toastMessage(_errorMessage);
         }
+      } else if (pinDetails['username'] != null) {
+        Helper.setUser(Storage.username, pinDetails['username']);
+        Helper.setUser(Storage.authtoken, '');
+        Helper.toastMessage(AppLocalizations.of(context)!.youAreOffline);
+        Navigator.of(context).pushReplacement(MaterialPageRoute(
+          builder: (context) => const HomePage(),
+        ));
       } else {
         Helper.toastMessage(AppLocalizations.of(context)!.inValidPin);
       }
@@ -107,6 +128,7 @@ class _LoginEmailPageState extends State<LoginEmailPage> {
 
   @override
   void dispose() {
+    // _connectivity.disposeStream();
     super.dispose();
   }
 
@@ -337,27 +359,27 @@ class _LoginEmailPageState extends State<LoginEmailPage> {
                               child: Divider(
                                 color: AppColors.black16,
                               )),
-                          InkWell(
-                            onTap: () => Navigator.of(context)
-                                .pushReplacement(MaterialPageRoute(
-                              builder: (context) => const CreatePinPage(),
-                            )),
+                          Center(
                             child: Container(
-                                width: double.infinity,
                                 padding: const EdgeInsets.only(
                                   top: 10,
                                 ),
-                                child: Text(
-                                  AppLocalizations.of(context)!.createPin,
-                                  textAlign: TextAlign.center,
-                                  style: GoogleFonts.lato(
-                                      color: AppColors.primaryBlue,
-                                      fontSize: 14,
-                                      letterSpacing:
-                                          0.5 /*percentages not used in flutter. defaulting to zero*/,
-                                      fontWeight: FontWeight.w700,
-                                      height: 1.4),
-                                )),
+                                child: InkWell(
+                                    onTap: () => Navigator.of(context)
+                                            .pushReplacement(MaterialPageRoute(
+                                          builder: (context) =>
+                                              const CreatePinPage(),
+                                        )),
+                                    child: Text(
+                                      AppLocalizations.of(context)!.createPin,
+                                      style: GoogleFonts.lato(
+                                          color: AppColors.primaryBlue,
+                                          fontSize: 14,
+                                          letterSpacing:
+                                              0.5 /*percentages not used in flutter. defaulting to zero*/,
+                                          fontWeight: FontWeight.w700,
+                                          height: 1.4),
+                                    ))),
                           )
                         ]),
                   )

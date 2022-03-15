@@ -24,6 +24,7 @@ class InspectionStatus {
   static const String leadInspectorCompleted = 'LEADINSCOMPLETED';
   static const String inspectionPending = 'PENDING';
   static const String returned = 'RETURNED';
+  static const String approved = 'APPROVED';
 }
 
 class FieldValue {
@@ -34,6 +35,7 @@ class FieldValue {
 class AppDatabase {
   static const String name = 'smf_db';
   static const String applicationsTable = 'applications';
+  static const String formsTable = 'forms';
   static const String inspectionTable = 'inspections';
   static const String loginPinsTable = 'login_pins';
 }

@@ -23,7 +23,7 @@ class FormData {
         version: json['version'],
         title: json['title'],
         description: json['description'],
-        fields: json['fields'] ?? [],
+        fields: json['fields'],
         inspectionFields: json['inspectionFields'] ?? [],
         updatedDate: json['updatedDate']);
   }

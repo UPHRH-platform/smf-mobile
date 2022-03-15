@@ -5,14 +5,12 @@ import 'package:provider/provider.dart';
 import 'package:smf_mobile/constants/app_urls.dart';
 import 'package:smf_mobile/constants/color_constants.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:smf_mobile/pages/home_page.dart';
 import 'package:smf_mobile/pages/login_email_page.dart';
 import 'package:smf_mobile/pages/login_otp_page.dart';
 import 'package:smf_mobile/repositories/login_repository.dart';
 import 'package:smf_mobile/util/helper.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:otp_text_field/otp_field.dart';
-import 'package:unique_identifier/unique_identifier.dart';
 
 class CreatePinPage extends StatefulWidget {
   static const route = AppUrl.loginEmailPage;
@@ -353,19 +351,20 @@ class _CreatePinPageState extends State<CreatePinPage> {
                               child: Divider(
                                 color: AppColors.black16,
                               )),
-                          InkWell(
-                            onTap: () => Navigator.of(context)
-                                .pushReplacement(MaterialPageRoute(
-                              builder: (context) => const LoginEmailPage(),
-                            )),
-                            child: Container(
-                                width: double.infinity,
-                                padding: const EdgeInsets.only(
-                                  top: 10,
-                                ),
+                          Center(
+                              child: Container(
+                            padding: const EdgeInsets.only(
+                              top: 10,
+                            ),
+                            child: InkWell(
+                                onTap: () => Navigator.of(context)
+                                        .pushReplacement(MaterialPageRoute(
+                                      builder: (context) =>
+                                          const LoginEmailPage(),
+                                    )),
                                 child: Text(
                                   AppLocalizations.of(context)!.goBack,
-                                  textAlign: TextAlign.center,
+                                  // textAlign: TextAlign.center,
                                   style: GoogleFonts.lato(
                                       color: AppColors.primaryBlue,
                                       fontSize: 14,
@@ -374,7 +373,7 @@ class _CreatePinPageState extends State<CreatePinPage> {
                                       fontWeight: FontWeight.w700,
                                       height: 1.4),
                                 )),
-                          )
+                          ))
                         ]),
                   )
                 ],

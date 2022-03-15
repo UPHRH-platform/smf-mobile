@@ -5,18 +5,24 @@ import 'package:provider/provider.dart';
 import 'package:smf_mobile/constants/app_constants.dart';
 import 'package:smf_mobile/constants/app_urls.dart';
 import 'package:smf_mobile/constants/color_constants.dart';
+// import 'package:smf_mobile/database/offline_model.dart';
 import 'package:smf_mobile/models/application_model.dart';
 import 'package:smf_mobile/pages/application_details_page.dart';
 import 'package:smf_mobile/pages/login_email_page.dart';
 import 'package:smf_mobile/pages/past_applications.dart';
 import 'package:smf_mobile/repositories/application_repository.dart';
+import 'package:smf_mobile/repositories/form_repository.dart';
 import 'package:smf_mobile/repositories/login_repository.dart';
 import 'package:smf_mobile/util/helper.dart';
+import 'package:smf_mobile/util/notification_helper.dart';
 import 'package:smf_mobile/widgets/application_card.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'dart:async';
-import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:smf_mobile/util/connectivity_helper.dart';
+// import 'package:connectivity_plus/connectivity_plus.dart';
+// import 'package:smf_mobile/util/connectivity_helper.dart';
+
+// import 'dart:async';
+// import 'dart:convert';
 
 // import 'dart:developer' as developer;
 
@@ -29,8 +35,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
-  Map _source = {ConnectivityResult.none: false};
-  final MyConnectivity _connectivity = MyConnectivity.instance;
+  // Map _source = {ConnectivityResult.none: false};
+  // final MyConnectivity _connectivity = MyConnectivity.instance;
   List<Application> _allApplications = [];
   final List<Application> _pendingApplications = [];
   final List<Application> _upcomingApplications = [];
@@ -40,18 +46,20 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
-    _connectivity.initialise();
-    _connectivity.myStream.listen((source) {
-      setState(() {
-        _source = source;
-      });
-    });
+    // _connectivity.initialise();
+    // _connectivity.myStream.listen((source) {
+    //   if (mounted) {
+    //     setState(() {
+    //       _source = source;
+    //     });
+    //   }
+    // });
     // print('applicationId:' + widget.applicationId);
     WidgetsBinding.instance!.addObserver(this);
   }
 
   void _checkNewApplication(String applicationId) {
-    print('applicationId $applicationId');
+    // print('applicationId $applicationId');
     if (applicationId != '') {
       for (Application application in _allApplications) {
         if (application.applicationId == applicationId) {
@@ -79,11 +87,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           _checkNewApplication(message.data['applicationId']);
         }
       });
-      // setState(() {});
-      // print('_isInForeground...');
-      // Future.delayed(const Duration(milliseconds: 500), () {
-      //   _checkNewApplication();
-      // });
     }
   }
 
@@ -104,11 +107,35 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     }
   }
 
+  Future<dynamic> _getForms() async {
+    await Provider.of<FormRespository>(context, listen: false).getAllForms();
+  }
+
+  Future<dynamic> _syncApplications() async {
+    var synced =
+        await Provider.of<ApplicationRespository>(context, listen: false)
+            .submitBulkInspection();
+    if (synced) {
+      NotificationHelper.scheduleNotification(
+          DateTime.now(),
+          0,
+          AppLocalizations.of(context)!.dataSynchoronized,
+          AppLocalizations.of(context)!.dataSynchoronizedText,
+          '');
+    }
+  }
+
   Future<dynamic> _getApplications() async {
-    _validateUser();
+    bool isInternetConnected = await Helper.isInternetConnected();
+    // await Future.delayed(const Duration(milliseconds: 10));
+    if (isInternetConnected) {
+      _validateUser();
+      _getForms();
+      _syncApplications();
+    }
     _allApplications =
         await Provider.of<ApplicationRespository>(context, listen: false)
-            .getApplications(Helper.isInternetConnected(_source));
+            .getApplications(isInternetConnected);
     String _errorMessage =
         Provider.of<ApplicationRespository>(context, listen: false)
             .errorMessage;
@@ -123,15 +150,18 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           temp = List.from(temp.reversed);
           int days = Helper.getDateDiffence(
               DateTime.now(), DateTime.parse(temp.join("-")));
-          if (days == 0) {
+          if ((days == 0 || days > 0) &&
+              application.status == InspectionStatus.sentForInspection) {
             _pendingApplications.add(application);
-          } else if (days > 0) {
+          } else if ((days == 0 || days > 0) &&
+              application.status != InspectionStatus.sentForInspection) {
             _pastApplications.add(application);
           } else {
             _upcomingApplications.add(application);
           }
         }
       }
+      // print(_pendingApplications[1].inspectorDataObject);
     } else if (_errorMessage.isNotEmpty) {
       Helper.toastMessage(_errorMessage);
     }

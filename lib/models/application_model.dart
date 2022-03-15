@@ -1,5 +1,3 @@
-import 'package:intl/intl.dart';
-
 class Application {
   final int formId;
   final String applicationId;
