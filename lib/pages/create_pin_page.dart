@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:otp_text_field/style.dart';
 import 'package:provider/provider.dart';
 import 'package:smf_mobile/constants/app_urls.dart';
 import 'package:smf_mobile/constants/color_constants.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:smf_mobile/database/offline_model.dart';
 import 'package:smf_mobile/pages/login_email_page.dart';
 import 'package:smf_mobile/pages/login_otp_page.dart';
 import 'package:smf_mobile/repositories/login_repository.dart';
 import 'package:smf_mobile/util/helper.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:otp_text_field/otp_field.dart';
+import 'package:smf_mobile/widgets/otp_input_field.dart';
 
 class CreatePinPage extends StatefulWidget {
   static const route = AppUrl.loginEmailPage;
@@ -25,12 +25,37 @@ class _CreatePinPageState extends State<CreatePinPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   String _errorMessage = '';
   late Locale locale;
-  String _pin1 = '';
-  String _pin2 = '';
+
+  final TextEditingController _pinOneFieldOne = TextEditingController();
+  final TextEditingController _pinOneFieldTwo = TextEditingController();
+  final TextEditingController _pinOneFieldThree = TextEditingController();
+  final TextEditingController _pinOneFieldFour = TextEditingController();
+  final TextEditingController _pinTwoFieldOne = TextEditingController();
+  final TextEditingController _pinTwoFieldTwo = TextEditingController();
+  final TextEditingController _pinTwoFieldThree = TextEditingController();
+  final TextEditingController _pinTwoFieldFour = TextEditingController();
+  String _pin1 = '', _pin2 = '';
 
   @override
   void initState() {
     super.initState();
+    _pinOneFieldOne.addListener(_setPin);
+    _pinOneFieldTwo.addListener(_setPin);
+    _pinOneFieldThree.addListener(_setPin);
+    _pinOneFieldFour.addListener(_setPin);
+    _pinTwoFieldOne.addListener(_setPin);
+    _pinTwoFieldTwo.addListener(_setPin);
+    _pinTwoFieldThree.addListener(_setPin);
+    _pinTwoFieldFour.addListener(_setPin);
+  }
+
+  void _setPin() {
+    setState(() {
+      _pin1 =
+          '${_pinOneFieldOne.text}${_pinOneFieldTwo.text}${_pinOneFieldThree.text}${_pinOneFieldFour.text}';
+      _pin2 =
+          '${_pinTwoFieldOne.text}${_pinTwoFieldTwo.text}${_pinTwoFieldThree.text}${_pinTwoFieldFour.text}';
+    });
   }
 
   Future<void> _generateOtp() async {
@@ -50,6 +75,13 @@ class _CreatePinPageState extends State<CreatePinPage> {
     if (_pin1 != _pin2) {
       Helper.toastMessage(AppLocalizations.of(context)!.pleaseMatchPin);
       return;
+    }
+    if (_pin1 == _pin2 && _pin1.length == 4) {
+      Map pinDetails = await OfflineModel.getPinDetails(_pin1);
+      if (pinDetails['username'] != null) {
+        Helper.toastMessage(AppLocalizations.of(context)!.pinAlreadyExists);
+        return;
+      }
     }
     SystemChannels.textInput.invokeMethod('TextInput.hide');
     try {
@@ -228,34 +260,23 @@ class _CreatePinPageState extends State<CreatePinPage> {
                               )),
                           Container(
                             alignment: Alignment.centerLeft,
-                            height: 30.0,
-                            margin: const EdgeInsets.only(top: 5),
+                            height: 45.0,
+                            margin: const EdgeInsets.only(top: 10),
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(4),
                               // border:
                               //     Border.all(color: AppColors.black16),
                               color: Colors.white,
                             ),
-                            child: OTPTextField(
-                                length: 4,
-                                width: MediaQuery.of(context).size.width / 2,
-                                fieldWidth: 38,
-                                style: const TextStyle(fontSize: 14),
-                                textFieldAlignment:
-                                    MainAxisAlignment.spaceAround,
-                                fieldStyle: FieldStyle.underline,
-                                onCompleted: (pin) {
-                                  setState(() {
-                                    _pin1 = pin;
-                                  });
-                                },
-                                onChanged: (String? pin) {
-                                  if (pin?.length == 4) {
-                                    setState(() {
-                                      _pin1 = pin.toString();
-                                    });
-                                  }
-                                }),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                OtpInputField(_pinOneFieldOne, true),
+                                OtpInputField(_pinOneFieldTwo, false),
+                                OtpInputField(_pinOneFieldThree, false),
+                                OtpInputField(_pinOneFieldFour, false)
+                              ],
+                            ),
                           ),
                           Padding(
                               padding: const EdgeInsets.only(
@@ -274,34 +295,23 @@ class _CreatePinPageState extends State<CreatePinPage> {
                               )),
                           Container(
                             alignment: Alignment.centerLeft,
-                            height: 30.0,
-                            margin: const EdgeInsets.only(top: 5),
+                            height: 45.0,
+                            margin: const EdgeInsets.only(top: 10),
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(4),
                               // border:
                               //     Border.all(color: AppColors.black16),
                               color: Colors.white,
                             ),
-                            child: OTPTextField(
-                                length: 4,
-                                width: MediaQuery.of(context).size.width / 2,
-                                fieldWidth: 38,
-                                style: const TextStyle(fontSize: 14),
-                                textFieldAlignment:
-                                    MainAxisAlignment.spaceAround,
-                                fieldStyle: FieldStyle.underline,
-                                onCompleted: (pin) {
-                                  setState(() {
-                                    _pin2 = pin;
-                                  });
-                                },
-                                onChanged: (String? pin) {
-                                  if (pin?.length == 4) {
-                                    setState(() {
-                                      _pin2 = pin.toString();
-                                    });
-                                  }
-                                }),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                OtpInputField(_pinTwoFieldOne, true),
+                                OtpInputField(_pinTwoFieldTwo, false),
+                                OtpInputField(_pinTwoFieldThree, false),
+                                OtpInputField(_pinTwoFieldFour, false)
+                              ],
+                            ),
                           ),
                           Padding(
                             padding: const EdgeInsets.only(top: 40),

@@ -6,11 +6,10 @@ import 'package:smf_mobile/database/offline_model.dart';
 import 'package:smf_mobile/pages/home_page.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:smf_mobile/pages/login_email_page.dart';
-import 'package:otp_text_field/otp_field.dart';
-import 'package:otp_text_field/style.dart';
 import 'package:smf_mobile/repositories/login_repository.dart';
 import 'package:smf_mobile/util/helper.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:smf_mobile/widgets/otp_input_field.dart';
 import 'package:unique_identifier/unique_identifier.dart';
 import 'package:flutter/services.dart';
 
@@ -34,13 +33,33 @@ class LoginOtpPage extends StatefulWidget {
 class _LoginOtpPageState extends State<LoginOtpPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   String _errorMessage = '';
-  String _otp = '';
   late String _identifier;
+
+  final TextEditingController _fieldOne = TextEditingController();
+  final TextEditingController _fieldTwo = TextEditingController();
+  final TextEditingController _fieldThree = TextEditingController();
+  final TextEditingController _fieldFour = TextEditingController();
+  final TextEditingController _fieldFive = TextEditingController();
+  final TextEditingController _fieldSix = TextEditingController();
+  String _otp = '';
 
   @override
   void initState() {
     super.initState();
+    _fieldOne.addListener(_setOtp);
+    _fieldTwo.addListener(_setOtp);
+    _fieldThree.addListener(_setOtp);
+    _fieldFour.addListener(_setOtp);
+    _fieldFive.addListener(_setOtp);
+    _fieldSix.addListener(_setOtp);
     initUniqueIdentifierState();
+  }
+
+  void _setOtp() {
+    setState(() {
+      _otp =
+          '${_fieldOne.text}${_fieldTwo.text}${_fieldThree.text}${_fieldFour.text}${_fieldFive.text}${_fieldSix.text}';
+    });
   }
 
   Future<void> initUniqueIdentifierState() async {
@@ -59,17 +78,27 @@ class _LoginOtpPageState extends State<LoginOtpPage> {
   }
 
   Future<void> _validateOtp() async {
-    String otp = _otp;
     try {
+      if (_otp == '') {
+        Helper.toastMessage(AppLocalizations.of(context)!.pleaseEnterOtp);
+        return;
+      }
       if (widget.loginRequest) {
         final responseCode = await Provider.of<LoginRespository>(context,
                 listen: false)
-            .validateOtp(context, widget.username, otp, _identifier, '', true);
+            .validateOtp(context, widget.username, _otp, _identifier, '', true);
         if (responseCode == 200) {
           Navigator.of(context).pushReplacement(MaterialPageRoute(
             builder: (context) => const HomePage(),
           ));
         } else {
+          _fieldOne.text = '';
+          _fieldTwo.text = '';
+          _fieldThree.text = '';
+          _fieldFour.text = '';
+          _fieldFive.text = '';
+          _fieldSix.text = '';
+          _otp = '';
           _errorMessage = Provider.of<LoginRespository>(context, listen: false)
               .errorMessage;
           Helper.toastMessage(_errorMessage);
@@ -77,7 +106,7 @@ class _LoginOtpPageState extends State<LoginOtpPage> {
       } else {
         final responseData =
             await Provider.of<LoginRespository>(context, listen: false)
-                .generatePin(widget.username, widget.pin, otp);
+                .generatePin(widget.username, widget.pin, _otp);
         if (responseData) {
           Helper.toastMessage(
               AppLocalizations.of(context)!.pinGeneratedMessage);
@@ -91,6 +120,13 @@ class _LoginOtpPageState extends State<LoginOtpPage> {
             builder: (context) => const LoginEmailPage(),
           ));
         } else {
+          _fieldOne.text = '';
+          _fieldTwo.text = '';
+          _fieldThree.text = '';
+          _fieldFour.text = '';
+          _fieldFive.text = '';
+          _fieldSix.text = '';
+          _otp = '';
           _errorMessage = Provider.of<LoginRespository>(context, listen: false)
               .errorMessage;
           Helper.toastMessage(_errorMessage);
@@ -195,28 +231,19 @@ class _LoginOtpPageState extends State<LoginOtpPage> {
                                       //     Border.all(color: AppColors.black16),
                                       color: Colors.white,
                                     ),
-                                    child: OTPTextField(
-                                        length: 6,
-                                        width:
-                                            MediaQuery.of(context).size.width,
-                                        fieldWidth: 38,
-                                        style: const TextStyle(fontSize: 14),
-                                        textFieldAlignment:
-                                            MainAxisAlignment.spaceAround,
-                                        fieldStyle: FieldStyle.underline,
-                                        onCompleted: (pin) {
-                                          setState(() {
-                                            _otp = pin;
-                                          });
-                                        },
-                                        onChanged: (String? pin) {
-                                          if (pin?.length == 6) {
-                                            setState(() {
-                                              _otp = pin.toString();
-                                            });
-                                          }
-                                        }),
-                                  )
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceEvenly,
+                                      children: [
+                                        OtpInputField(_fieldOne, true),
+                                        OtpInputField(_fieldTwo, false),
+                                        OtpInputField(_fieldThree, false),
+                                        OtpInputField(_fieldFour, false),
+                                        OtpInputField(_fieldFive, false),
+                                        OtpInputField(_fieldSix, false)
+                                      ],
+                                    ),
+                                  ),
                                 ],
                               ),
                             ),

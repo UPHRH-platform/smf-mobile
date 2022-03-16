@@ -68,6 +68,7 @@ class ApplicationRespository with ChangeNotifier {
           if (applications[i]['applicationId'] == data['applicationId']) {
             applications[i]['inspection']['status'] =
                 InspectionStatus.leadInspectorCompleted;
+            applications[i]['inspectorDataObject'] = data;
           }
         }
         applicationFieldData['responseData'] = applications;

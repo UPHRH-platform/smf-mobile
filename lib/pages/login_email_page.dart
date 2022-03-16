@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:otp_text_field/style.dart';
 import 'package:provider/provider.dart';
 import 'package:smf_mobile/constants/app_constants.dart';
 import 'package:smf_mobile/constants/app_urls.dart';
@@ -13,7 +12,7 @@ import 'package:smf_mobile/pages/login_otp_page.dart';
 import 'package:smf_mobile/repositories/login_repository.dart';
 import 'package:smf_mobile/util/helper.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:otp_text_field/otp_field.dart';
+import 'package:smf_mobile/widgets/otp_input_field.dart';
 import 'package:unique_identifier/unique_identifier.dart';
 import 'dart:async';
 // import 'package:connectivity_plus/connectivity_plus.dart';
@@ -30,12 +29,18 @@ class LoginEmailPage extends StatefulWidget {
 class _LoginEmailPageState extends State<LoginEmailPage> {
   final TextEditingController _emailController = TextEditingController();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
   // Map _source = {ConnectivityResult.none: false};
   // final MyConnectivity _connectivity = MyConnectivity.instance;
   String _errorMessage = '';
   late Locale locale;
-  String _pin = '';
   late String _identifier;
+
+  final TextEditingController _fieldOne = TextEditingController();
+  final TextEditingController _fieldTwo = TextEditingController();
+  final TextEditingController _fieldThree = TextEditingController();
+  final TextEditingController _fieldFour = TextEditingController();
+  String _oldPin = '';
 
   @override
   void initState() {
@@ -48,6 +53,10 @@ class _LoginEmailPageState extends State<LoginEmailPage> {
     //     });
     //   }
     // });
+    _fieldOne.addListener(_validatePin);
+    _fieldTwo.addListener(_validatePin);
+    _fieldThree.addListener(_validatePin);
+    _fieldFour.addListener(_validatePin);
     initUniqueIdentifierState();
   }
 
@@ -92,37 +101,44 @@ class _LoginEmailPageState extends State<LoginEmailPage> {
   }
 
   Future<void> _validatePin() async {
-    bool isInternetConnected = await Helper.isInternetConnected();
-    // await Future.delayed(const Duration(milliseconds: 10));
-    try {
-      Map pinDetails = await OfflineModel.getPinDetails(_pin);
-      // print(pinDetails);
-      if (isInternetConnected && pinDetails['username'] != null) {
-        final responseCode = await Provider.of<LoginRespository>(context,
-                listen: false)
-            .validateOtp(
-                context, pinDetails['username'], '', _identifier, _pin, false);
-        if (responseCode == 200) {
+    String pin =
+        '${_fieldOne.text}${_fieldTwo.text}${_fieldThree.text}${_fieldFour.text}';
+    // print(_oldPin + ", " + pin);
+    if (pin.length == 4 && pin != _oldPin) {
+      _oldPin = pin;
+      bool isInternetConnected = await Helper.isInternetConnected();
+      // await Future.delayed(const Duration(milliseconds: 10));
+      try {
+        Map pinDetails = await OfflineModel.getPinDetails(pin);
+        // print(pinDetails);
+        if (isInternetConnected && pinDetails['username'] != null) {
+          final responseCode = await Provider.of<LoginRespository>(context,
+                  listen: false)
+              .validateOtp(
+                  context, pinDetails['username'], '', _identifier, pin, false);
+          if (responseCode == 200) {
+            Navigator.of(context).pushReplacement(MaterialPageRoute(
+              builder: (context) => const HomePage(),
+            ));
+          } else {
+            _errorMessage =
+                Provider.of<LoginRespository>(context, listen: false)
+                    .errorMessage;
+            Helper.toastMessage(_errorMessage);
+          }
+        } else if (pinDetails['username'] != null) {
+          Helper.setUser(Storage.username, pinDetails['username']);
+          Helper.setUser(Storage.authtoken, '');
+          Helper.toastMessage(AppLocalizations.of(context)!.youAreOffline);
           Navigator.of(context).pushReplacement(MaterialPageRoute(
             builder: (context) => const HomePage(),
           ));
         } else {
-          _errorMessage = Provider.of<LoginRespository>(context, listen: false)
-              .errorMessage;
-          Helper.toastMessage(_errorMessage);
+          Helper.toastMessage(AppLocalizations.of(context)!.inValidPin);
         }
-      } else if (pinDetails['username'] != null) {
-        Helper.setUser(Storage.username, pinDetails['username']);
-        Helper.setUser(Storage.authtoken, '');
-        Helper.toastMessage(AppLocalizations.of(context)!.youAreOffline);
-        Navigator.of(context).pushReplacement(MaterialPageRoute(
-          builder: (context) => const HomePage(),
-        ));
-      } else {
-        Helper.toastMessage(AppLocalizations.of(context)!.inValidPin);
+      } catch (err) {
+        throw Exception(err);
       }
-    } catch (err) {
-      throw Exception(err);
     }
   }
 
@@ -321,36 +337,24 @@ class _LoginEmailPageState extends State<LoginEmailPage> {
                                     height: 1.4),
                               )),
                           Container(
-                            alignment: Alignment.centerLeft,
-                            height: 30.0,
-                            margin: const EdgeInsets.only(top: 5),
+                            // alignment: Alignment.centerLeft,
+                            height: 45.0,
+                            margin: const EdgeInsets.only(top: 10),
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(4),
                               // border:
                               //     Border.all(color: AppColors.black16),
                               color: Colors.white,
                             ),
-                            child: OTPTextField(
-                                length: 4,
-                                width: MediaQuery.of(context).size.width / 2,
-                                fieldWidth: 38,
-                                style: const TextStyle(fontSize: 14),
-                                textFieldAlignment:
-                                    MainAxisAlignment.spaceAround,
-                                fieldStyle: FieldStyle.underline,
-                                onCompleted: (pin) {
-                                  setState(() {
-                                    _pin = pin;
-                                  });
-                                },
-                                onChanged: (String? pin) {
-                                  if (pin?.length == 4) {
-                                    setState(() {
-                                      _pin = pin.toString();
-                                    });
-                                    _validatePin();
-                                  }
-                                }),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                OtpInputField(_fieldOne, true),
+                                OtpInputField(_fieldTwo, false),
+                                OtpInputField(_fieldThree, false),
+                                OtpInputField(_fieldFour, false)
+                              ],
+                            ),
                           ),
                           const Padding(
                               padding: EdgeInsets.only(
