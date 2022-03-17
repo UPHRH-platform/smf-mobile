@@ -28,6 +28,7 @@ class _DropdownQuestionState extends State<DropdownQuestion> {
   }
 
   void initializeDropdown() {
+    _dropdownItems.add('Please select any option');
     for (var item in widget.items) {
       _dropdownItems.add(item['value']);
     }
@@ -75,9 +76,12 @@ class _DropdownQuestionState extends State<DropdownQuestion> {
             }).toList();
           },
           onChanged: (newValue) {
+            String optionSelected = newValue.toString();
             setState(() {
-              _dropdownValue = newValue.toString();
-              widget.parentAction(newValue.toString());
+              _dropdownValue = optionSelected;
+              widget.parentAction(optionSelected == 'Please select any option'
+                  ? ''
+                  : optionSelected);
             });
           },
           items: _dropdownItems.map<DropdownMenuItem<String>>((String value) {

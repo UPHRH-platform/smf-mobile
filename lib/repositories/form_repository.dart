@@ -61,10 +61,16 @@ class FormRespository with ChangeNotifier {
       var rawData = await OfflineModel.getForms(username);
       Map formData = json.decode(rawData['form_data']);
       List forms = formData['responseData'];
+      // print('formId: $formId');
       for (var form in forms) {
+        // print(form['id']);
         if (form['id'] == formId) {
+          // print(form.toString());
           formDetails = form;
         }
+      }
+      if (formDetails['id'] == null) {
+        Helper.toastMessage('Form not available');
       }
     } catch (_) {
       return _;

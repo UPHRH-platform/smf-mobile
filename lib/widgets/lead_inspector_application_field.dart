@@ -50,15 +50,45 @@ class _LeadInspectorApplicationFieldState
   }
 
   triggerUpdate(Map dialogData) {
-    Map data = {
-      widget.fieldName: {
-        widget.fieldData.keys.elementAt(0): {
-          'value': _radioValue,
-          'comments': dialogData['summaryText'],
-          'inspectionValue': dialogData['inspectionValue']
-        }
+    Map data = {};
+    if (dialogData['cancelStatus'] != null) {
+      if (dialogData['cancelStatus'] &&
+          (dialogData['summaryText'] == '' ||
+              dialogData['inspectionValue'] == '')) {
+        setState(() {
+          _radioValue = FieldValue.correct;
+        });
+        data = {
+          widget.fieldName: {
+            widget.fieldData.keys.elementAt(0): {
+              'value': FieldValue.correct,
+              'comments': '',
+              'inspectionValue': ''
+            }
+          }
+        };
+      } else {
+        data = {
+          widget.fieldName: {
+            widget.fieldData.keys.elementAt(0): {
+              'value': _radioValue,
+              'comments': dialogData['summaryText'],
+              'inspectionValue': dialogData['inspectionValue']
+            }
+          }
+        };
       }
-    };
+    } else {
+      data = {
+        widget.fieldName: {
+          widget.fieldData.keys.elementAt(0): {
+            'value': _radioValue,
+            'comments': dialogData['summaryText'],
+            'inspectionValue': dialogData['inspectionValue']
+          }
+        }
+      };
+    }
     // print(data);
     setState(() {
       _summaryText = dialogData['summaryText'];
@@ -69,6 +99,7 @@ class _LeadInspectorApplicationFieldState
 
   Future _displayCommentDialog() {
     return showDialog(
+        barrierDismissible: false,
         context: context,
         builder: (context) => StatefulBuilder(builder: (context, setState) {
               return LeadInspectorDialog(

@@ -1,3 +1,4 @@
+import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -106,6 +107,16 @@ class _CreatePinPageState extends State<CreatePinPage> {
     }
   }
 
+  _validateEmail() {
+    String email = _emailController.text;
+    final bool isValid = EmailValidator.validate(email);
+    SystemChannels.textInput.invokeMethod('TextInput.hide');
+    if (!isValid) {
+      _emailController.text = '';
+      Helper.toastMessage(AppLocalizations.of(context)!.inValidEmailId);
+    }
+  }
+
   @override
   void dispose() {
     super.dispose();
@@ -201,6 +212,8 @@ class _CreatePinPageState extends State<CreatePinPage> {
                                     ),
                                     child: Focus(
                                       child: TextFormField(
+                                        onEditingComplete: () =>
+                                            _validateEmail(),
                                         textCapitalization:
                                             TextCapitalization.none,
                                         textInputAction: TextInputAction.done,
@@ -271,10 +284,10 @@ class _CreatePinPageState extends State<CreatePinPage> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: [
-                                OtpInputField(_pinOneFieldOne, true),
-                                OtpInputField(_pinOneFieldTwo, false),
-                                OtpInputField(_pinOneFieldThree, false),
-                                OtpInputField(_pinOneFieldFour, false)
+                                OtpInputField(_pinOneFieldOne, true, false),
+                                OtpInputField(_pinOneFieldTwo, false, false),
+                                OtpInputField(_pinOneFieldThree, false, false),
+                                OtpInputField(_pinOneFieldFour, false, true)
                               ],
                             ),
                           ),
@@ -306,10 +319,10 @@ class _CreatePinPageState extends State<CreatePinPage> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: [
-                                OtpInputField(_pinTwoFieldOne, true),
-                                OtpInputField(_pinTwoFieldTwo, false),
-                                OtpInputField(_pinTwoFieldThree, false),
-                                OtpInputField(_pinTwoFieldFour, false)
+                                OtpInputField(_pinTwoFieldOne, true, false),
+                                OtpInputField(_pinTwoFieldTwo, false, false),
+                                OtpInputField(_pinTwoFieldThree, false, false),
+                                OtpInputField(_pinTwoFieldFour, false, true)
                               ],
                             ),
                           ),

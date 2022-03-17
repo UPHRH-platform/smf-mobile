@@ -167,7 +167,6 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
       _data.forEach((key, value) => _fields.add(value));
     } else {
       Map existingData = {};
-      print(_leadInspectorId);
       widget.application.dataObject.forEach((key, value) => {
             updatedFields = {},
             existingData = widget.application.inspectorDataObject[key],
@@ -183,6 +182,11 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
                           ? existingData[childKey]
                                   [existingData[childKey].keys.elementAt(0)]
                               ['comments']
+                          : '',
+                      'inspectionValue': _isleadInspector
+                          ? existingData[childKey]
+                                  [existingData[childKey].keys.elementAt(0)]
+                              ['inspectionValue']
                           : ''
                     }
                   }

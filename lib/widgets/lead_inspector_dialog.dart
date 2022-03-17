@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:smf_mobile/constants/app_constants.dart';
 import 'package:smf_mobile/constants/color_constants.dart';
+import 'package:smf_mobile/util/helper.dart';
 import 'package:smf_mobile/widgets/questions/dropdown_question.dart';
 import 'package:smf_mobile/widgets/questions/multi_select_question.dart';
 import 'package:smf_mobile/widgets/questions/radio_question.dart';
@@ -42,6 +43,14 @@ class _LeadInspectorDialogState extends State<LeadInspectorDialog> {
   }
 
   saveData(String inspectionValue) {
+    // if (_summaryController.text == '') {
+    //   Helper.toastMessage('Please enter reason');
+    //   return;
+    // }
+    // if (inspectionValue == '') {
+    //   Helper.toastMessage('Please enter actual value');
+    //   return;
+    // }
     setState(() {
       _inspectionValue = inspectionValue;
     });
@@ -52,8 +61,20 @@ class _LeadInspectorDialogState extends State<LeadInspectorDialog> {
     widget.parentAction(data);
   }
 
-  _submitData() {
+  _submitData(bool cancel) {
+    if (!cancel) {
+      if (_summaryController.text == '') {
+        Helper.toastMessage('Please enter reason');
+        return;
+      }
+      if (_inspectionValue == '') {
+        Helper.toastMessage('Please enter actual value');
+        return;
+      }
+    }
+    Navigator.of(context).pop(false);
     data = {
+      'cancelStatus': cancel,
       'summaryText': _summaryController.text,
       'inspectionValue': _inspectionValue
     };
@@ -192,8 +213,7 @@ class _LeadInspectorDialogState extends State<LeadInspectorDialog> {
                             ButtonTheme(
                               child: OutlinedButton(
                                 onPressed: () {
-                                  Navigator.of(context).pop(false);
-                                  _submitData();
+                                  _submitData(true);
                                 },
                                 style: OutlinedButton.styleFrom(
                                   // primary: Colors.white,
@@ -217,8 +237,7 @@ class _LeadInspectorDialogState extends State<LeadInspectorDialog> {
                               padding: const EdgeInsets.only(left: 10),
                               child: TextButton(
                                 onPressed: () {
-                                  Navigator.of(context).pop(false);
-                                  _submitData();
+                                  _submitData(false);
                                 },
                                 style: TextButton.styleFrom(
                                   // primary: Colors.white,

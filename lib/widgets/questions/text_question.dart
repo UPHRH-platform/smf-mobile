@@ -46,7 +46,7 @@ class _TextQuestionState extends State<TextQuestion> {
       child: Focus(
         child: TextFormField(
           onEditingComplete: () {
-            // widget.parentAction(_textController.text.toString());
+            widget.parentAction(_textController.text.toString());
             SystemChannels.textInput.invokeMethod('TextInput.hide');
             // return;
           },

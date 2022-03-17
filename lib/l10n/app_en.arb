@@ -9,6 +9,7 @@
     "pinAlreadyExists": "Pin already exists, please choose different one",
     "createPin": "Create PIN",
     "inValidPin": "Invalid PIN",
+    "inValidEmailId": "Invalid Email Id",
     "getOtp": "GET OTP",
     "enterOtp": "Enter OTP",
     "otpFieldDescription": "Enter the 6 digit OTP sent to your email address.",
@@ -51,6 +52,7 @@
     "iConsent": "I consent",
     "acceptTermsAndConditions": "Please accept terms and conditions",
     "dataSynchoronized": "Data synchoronized",
-    "dataSynchoronizedText": "Data has been synchoronized"
+    "dataSynchoronizedText": "Data has been synchoronized",
+    "formNotAvailable": "Form not available"
 
 }

@@ -15,6 +15,8 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:smf_mobile/widgets/otp_input_field.dart';
 import 'package:unique_identifier/unique_identifier.dart';
 import 'dart:async';
+import 'package:email_validator/email_validator.dart';
+
 // import 'package:connectivity_plus/connectivity_plus.dart';
 // import 'package:smf_mobile/util/connectivity_helper.dart';
 
@@ -40,6 +42,7 @@ class _LoginEmailPageState extends State<LoginEmailPage> {
   final TextEditingController _fieldTwo = TextEditingController();
   final TextEditingController _fieldThree = TextEditingController();
   final TextEditingController _fieldFour = TextEditingController();
+
   String _oldPin = '';
 
   @override
@@ -134,11 +137,25 @@ class _LoginEmailPageState extends State<LoginEmailPage> {
             builder: (context) => const HomePage(),
           ));
         } else {
+          _fieldOne.text = '';
+          _fieldTwo.text = '';
+          _fieldThree.text = '';
+          _fieldFour.text = '';
           Helper.toastMessage(AppLocalizations.of(context)!.inValidPin);
         }
       } catch (err) {
         throw Exception(err);
       }
+    }
+  }
+
+  _validateEmail() {
+    String email = _emailController.text;
+    final bool isValid = EmailValidator.validate(email);
+    SystemChannels.textInput.invokeMethod('TextInput.hide');
+    if (!isValid) {
+      _emailController.text = '';
+      Helper.toastMessage(AppLocalizations.of(context)!.inValidEmailId);
     }
   }
 
@@ -238,6 +255,8 @@ class _LoginEmailPageState extends State<LoginEmailPage> {
                                     ),
                                     child: Focus(
                                       child: TextFormField(
+                                        onEditingComplete: () =>
+                                            _validateEmail(),
                                         textCapitalization:
                                             TextCapitalization.none,
                                         textInputAction: TextInputAction.done,
@@ -349,10 +368,10 @@ class _LoginEmailPageState extends State<LoginEmailPage> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: [
-                                OtpInputField(_fieldOne, true),
-                                OtpInputField(_fieldTwo, false),
-                                OtpInputField(_fieldThree, false),
-                                OtpInputField(_fieldFour, false)
+                                OtpInputField(_fieldOne, true, false),
+                                OtpInputField(_fieldTwo, false, false),
+                                OtpInputField(_fieldThree, false, false),
+                                OtpInputField(_fieldFour, false, true)
                               ],
                             ),
                           ),

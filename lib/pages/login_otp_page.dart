@@ -235,12 +235,13 @@ class _LoginOtpPageState extends State<LoginOtpPage> {
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceEvenly,
                                       children: [
-                                        OtpInputField(_fieldOne, true),
-                                        OtpInputField(_fieldTwo, false),
-                                        OtpInputField(_fieldThree, false),
-                                        OtpInputField(_fieldFour, false),
-                                        OtpInputField(_fieldFive, false),
-                                        OtpInputField(_fieldSix, false)
+                                        OtpInputField(_fieldOne, true, false),
+                                        OtpInputField(_fieldTwo, false, false),
+                                        OtpInputField(
+                                            _fieldThree, false, false),
+                                        OtpInputField(_fieldFour, false, false),
+                                        OtpInputField(_fieldFive, false, false),
+                                        OtpInputField(_fieldSix, false, true)
                                       ],
                                     ),
                                   ),

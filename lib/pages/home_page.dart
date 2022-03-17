@@ -126,6 +126,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   }
 
   Future<dynamic> _getApplications() async {
+    String rawUserId = await Helper.getUser(Storage.userId);
+    int userId = int.parse(rawUserId);
     bool isInternetConnected = await Helper.isInternetConnected();
     // await Future.delayed(const Duration(milliseconds: 10));
     if (isInternetConnected) {
@@ -152,7 +154,13 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               DateTime.now(), DateTime.parse(temp.join("-")));
           if ((days == 0 || days > 0) &&
               application.status == InspectionStatus.sentForInspection) {
-            _pendingApplications.add(application);
+            if (application.leadInspector[0] == userId &&
+                application.inspectionStatus ==
+                    InspectionStatus.leadInspectorCompleted) {
+              _pastApplications.add(application);
+            } else {
+              _pendingApplications.add(application);
+            }
           } else if ((days == 0 || days > 0) &&
               application.status != InspectionStatus.sentForInspection) {
             _pastApplications.add(application);
