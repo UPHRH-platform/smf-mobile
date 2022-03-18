@@ -67,7 +67,7 @@ class _LeadInspectorDialogState extends State<LeadInspectorDialog> {
         Helper.toastMessage('Please enter reason');
         return;
       }
-      if (_inspectionValue == '') {
+      if (_inspectionValue == '' && widget.fieldType != FieldType.file) {
         Helper.toastMessage('Please enter actual value');
         return;
       }

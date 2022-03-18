@@ -17,8 +17,9 @@ samples, guidance on mobile development, and a full API reference.
 
 ## Configuration Details
 
-* Flutter 2.10.0 • channel stable • https://github.com/flutter/flutter.git
-* Framework • revision 5f105a6ca7 (6 days ago) • 2022-02-01 14:15:42 -0800
-* Engine • revision 776efd2034
-* Tools • Dart 2.16.0 • DevTools 2.9.2
+* Flutter 2.10.3 • channel stable • https://github.com/flutter/flutter.git
+* Framework • revision 7e9793dee1 (2 weeks ago) • 2022-03-02 11:23:12 -0600
+* Engine • revision bd539267b4
+* Tools • Dart 2.16.1 • DevTools 2.9.2
+
 

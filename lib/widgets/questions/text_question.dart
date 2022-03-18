@@ -50,6 +50,10 @@ class _TextQuestionState extends State<TextQuestion> {
             SystemChannels.textInput.invokeMethod('TextInput.hide');
             // return;
           },
+          onChanged: (text) {
+            widget.parentAction(_textController.text.toString());
+            // SystemChannels.textInput.invokeMethod('TextInput.hide');
+          },
           controller: _textController,
           style: GoogleFonts.lato(fontSize: 14.0),
           textInputAction: TextInputAction.done,

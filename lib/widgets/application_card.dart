@@ -115,7 +115,9 @@ class _ApplicationCardState extends State<ApplicationCard> {
                                 widget.application.inspectionStatus,
                                 widget.application.status)),
                         style: GoogleFonts.lato(
-                          color: AppColors.black60,
+                          color: Helper.getColorByStatus(
+                              widget.application.inspectionStatus,
+                              widget.application.status),
                           fontSize: 14.0,
                           letterSpacing: 0.12,
                           fontWeight: FontWeight.w700,

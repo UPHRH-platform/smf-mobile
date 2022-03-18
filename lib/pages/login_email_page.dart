@@ -68,7 +68,7 @@ class _LoginEmailPageState extends State<LoginEmailPage> {
     try {
       identifier = await UniqueIdentifier.serial;
     } on PlatformException {
-      identifier = 'Failed to get Unique Identifier';
+      identifier = AppLocalizations.of(context)!.failedToGetUniqueIdentifier;
     }
 
     if (!mounted) return;

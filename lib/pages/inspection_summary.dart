@@ -146,6 +146,7 @@ class _InspectionSummaryPageState extends State<InspectionSummaryPage> {
       final responseCode =
           await Provider.of<ApplicationRespository>(context, listen: false)
               .submitInspection(isInternetConnected, data);
+      // print(responseCode.toString());
       if (responseCode == 200) {
         Navigator.of(context).pushReplacement(MaterialPageRoute(
             builder: (context) => const InspectionCompletedPage()));
@@ -153,7 +154,7 @@ class _InspectionSummaryPageState extends State<InspectionSummaryPage> {
         _errorMessage =
             Provider.of<ApplicationRespository>(context, listen: false)
                 .errorMessage;
-        Helper.toastMessage(_errorMessage);
+        Helper.toastMessage(AppLocalizations.of(context)!.invalidResponse);
       }
     } catch (err) {
       throw Exception(err);

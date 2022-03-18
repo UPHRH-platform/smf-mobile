@@ -12,4 +12,8 @@ class AppColors {
   static const black40 = Color.fromRGBO(0, 0, 0, 0.40);
   static const black60 = Color.fromRGBO(0, 0, 0, 0.60);
   static const black87 = Color.fromRGBO(0, 0, 0, 0.87);
+  static const returned = Color.fromARGB(209, 57, 36, 1);
+  static const sentForIns = Color.fromARGB(233, 158, 56, 1);
+  static const insCompleted = Color.fromRGBO(29, 137, 35, 1);
+  static const leadInsCompleted = Color.fromRGBO(29, 137, 35, 1);
 }

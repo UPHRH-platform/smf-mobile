@@ -25,6 +25,7 @@ class InspectionStatus {
   static const String inspectionPending = 'PENDING';
   static const String returned = 'RETURNED';
   static const String approved = 'APPROVED';
+  static const String rejected = 'REJECTED';
 }
 
 class FieldValue {

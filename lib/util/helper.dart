@@ -8,6 +8,7 @@ import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:smf_mobile/constants/app_constants.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:smf_mobile/constants/color_constants.dart';
 
 const _storage = FlutterSecureStorage();
 
@@ -128,5 +129,27 @@ class Helper {
       _isConnectionSuccessful = false;
     }
     return _isConnectionSuccessful;
+  }
+
+  static Color getColorByStatus(String inspectionStatus, String actualStatus) {
+    Color color;
+    switch (actualStatus) {
+      case InspectionStatus.sentForInspection:
+        if (inspectionStatus == InspectionStatus.leadInspectorCompleted) {
+          color = AppColors.insCompleted;
+        } else {
+          color = AppColors.sentForIns;
+        }
+        break;
+      case InspectionStatus.returned:
+        color = AppColors.returned;
+        break;
+      case InspectionStatus.rejected:
+        color = AppColors.returned;
+        break;
+      default:
+        color = AppColors.insCompleted;
+    }
+    return color;
   }
 }

@@ -53,6 +53,7 @@
     "acceptTermsAndConditions": "Please accept terms and conditions",
     "dataSynchoronized": "Data synchoronized",
     "dataSynchoronizedText": "Data has been synchoronized",
-    "formNotAvailable": "Form not available"
-
+    "formNotAvailable": "Form not available",
+    "failedToGetUniqueIdentifier": "Failed to get Unique Identifier",
+    "invalidResponse": "Invalid response recieved from the server"
 }

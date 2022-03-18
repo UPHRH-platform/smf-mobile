@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:smf_mobile/constants/app_constants.dart';
+import 'package:smf_mobile/constants/app_urls.dart';
 import 'package:smf_mobile/constants/color_constants.dart';
 import 'package:smf_mobile/models/application_model.dart';
 import 'package:smf_mobile/models/form_model.dart';
@@ -122,22 +123,25 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
   }
 
   Future<dynamic> _getFormDetails() async {
-    _formData = await Provider.of<FormRespository>(context, listen: false)
-        .getFormDetails(widget.application.formId);
-    _errorMessage =
-        Provider.of<FormRespository>(context, listen: false).errorMessage;
-    if (_errorMessage != '') {
-      Helper.toastMessage(_errorMessage);
-    } else {
-      for (int i = 0; i < _formData.fields.length; i++) {
-        if (_formData.fields[i]['fieldType'] != FieldType.heading) {
-          _fieldTypes[_formData.fields[i]['name']] =
-              _formData.fields[i]['fieldType'];
-          _fieldOptions[_formData.fields[i]['name']] =
-              _formData.fields[i]['values'];
-        }
+    try {
+      _formData = await Provider.of<FormRespository>(context, listen: false)
+          .getFormDetails(widget.application.formId);
+    } catch (_) {
+      if (mounted) {
+        Helper.toastMessage(AppLocalizations.of(context)!.formNotAvailable);
+        Navigator.popAndPushNamed(context, AppUrl.homePage);
       }
     }
+
+    for (int i = 0; i < _formData.fields.length; i++) {
+      if (_formData.fields[i]['fieldType'] != FieldType.heading) {
+        _fieldTypes[_formData.fields[i]['name']] =
+            _formData.fields[i]['fieldType'];
+        _fieldOptions[_formData.fields[i]['name']] =
+            _formData.fields[i]['values'];
+      }
+    }
+
     // print(_fieldTypes);
     return _fieldTypes;
   }
@@ -296,7 +300,7 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
           _errorMessage =
               Provider.of<ApplicationRespository>(context, listen: false)
                   .errorMessage;
-          Helper.toastMessage(_errorMessage);
+          Helper.toastMessage(AppLocalizations.of(context)!.invalidResponse);
         }
       } catch (err) {
         throw Exception(err);
