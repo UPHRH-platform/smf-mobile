@@ -3,7 +3,7 @@
     "logout": "Logout", 
     "emailId": "Email Id",
     "enterHere": "Enter here",
-    "orEnterPin": "Or, Enter your 4 Digit Login Pin",
+    "enterPin": "Enter your 4 Digit Login Pin",
     "enterPin": "Enter 4 Digit Login Pin",
     "confirmPin": "Confirm 4 Digit Login Pin",
     "pinAlreadyExists": "Pin already exists, please choose different one",
@@ -19,6 +19,9 @@
     "pleaseMatchPin": "Please match pin to proceed",
     "pleaseEnterValidPin": "Please enter valid pin to proceed",
     "pinGeneratedMessage": "Pin generated successfully, please login",
+    "moreLoginOptions": "More login options",
+    "loginWithPin": "Login with your PIN",
+    "createResetPin": "Create/reset PIN",
     "signIn": "SIGN IN",
     "goBack": "Go back",
     "goBackText": "Go back, re-enter the email",
@@ -55,5 +58,8 @@
     "dataSynchoronizedText": "Data has been synchoronized",
     "formNotAvailable": "Form not available",
     "failedToGetUniqueIdentifier": "Failed to get Unique Identifier",
-    "invalidResponse": "Invalid response recieved from the server"
+    "invalidResponse": "Invalid response recieved from the server",
+    "takeAPicture": "Take a picture",
+    "goToFiles": "Go to files",
+    "cropImage": "Crop image"
 }

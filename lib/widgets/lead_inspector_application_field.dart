@@ -1,9 +1,12 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:smf_mobile/constants/app_constants.dart';
 import 'package:smf_mobile/constants/color_constants.dart';
 import 'package:smf_mobile/widgets/lead_inspector_dialog.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:image_cropper/image_cropper.dart';
 
 class LeadInspectorApplicationField extends StatefulWidget {
   final String fieldName;
@@ -33,6 +36,9 @@ class _LeadInspectorApplicationFieldState
   String _inspectionValue = '';
   String _summaryText = '';
   final List<String> _options = [FieldValue.correct, FieldValue.inCorrect];
+  late File _selectedFile;
+  final _picker = ImagePicker();
+  bool _inProcess = false;
 
   @override
   void initState() {
@@ -112,12 +118,123 @@ class _LeadInspectorApplicationFieldState
             }));
   }
 
+  Future<dynamic> _photoOptions(contextMain) {
+    return showDialog(
+        context: context,
+        builder: (context) => Stack(
+              children: [
+                Positioned(
+                    child: Align(
+                        alignment: FractionalOffset.bottomCenter,
+                        child: Container(
+                          padding: const EdgeInsets.all(20),
+                          width: double.infinity,
+                          height: 120.0,
+                          color: Colors.white,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: GestureDetector(
+                                  onTap: () {
+                                    Navigator.of(context).pop(true);
+                                    _getImage(ImageSource.camera);
+                                  },
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: [
+                                      const Icon(
+                                        Icons.photo_camera,
+                                        color: AppColors.primaryBlue,
+                                      ),
+                                      Padding(
+                                        padding:
+                                            const EdgeInsets.only(left: 8.0),
+                                        child: Text(
+                                          'Take a picture',
+                                          style: GoogleFonts.montserrat(
+                                              decoration: TextDecoration.none,
+                                              color: Colors.black87,
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w500),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: GestureDetector(
+                                  onTap: () {
+                                    Navigator.of(context).pop(true);
+                                    _getImage(ImageSource.gallery);
+                                  },
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: [
+                                      const Icon(Icons.photo),
+                                      Padding(
+                                        padding:
+                                            const EdgeInsets.only(left: 8.0),
+                                        child: Text(
+                                          'Go to files',
+                                          style: GoogleFonts.montserrat(
+                                              decoration: TextDecoration.none,
+                                              color: Colors.black87,
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.w500),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        )))
+              ],
+            ));
+  }
+
+  Future<dynamic> _getImage(ImageSource source) async {
+    _inProcess = true;
+    XFile? image = await _picker.pickImage(source: source);
+
+    if (image != null) {
+      try {
+        File? cropped = await ImageCropper().cropImage(
+            sourcePath: image.path,
+            aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
+            compressQuality: 100,
+            maxWidth: 700,
+            maxHeight: 700,
+            compressFormat: ImageCompressFormat.jpg,
+            androidUiSettings: AndroidUiSettings(
+              toolbarColor: AppColors.primaryBlue,
+              toolbarTitle: 'Crop image',
+              toolbarWidgetColor: Colors.white,
+              statusBarColor: Colors.grey.shade900,
+              backgroundColor: Colors.white,
+            ));
+        print(cropped!.path);
+        setState(() {
+          _selectedFile = cropped;
+          _inProcess = false;
+        });
+      } catch (e) {
+        print(e);
+      }
+    } else {
+      setState(() {
+        _inProcess = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    // if (_data != widget.fieldData[widget.fieldData.keys.elementAt(0)]) {
-    //   _radioValue = _data[_data.keys.elementAt(0)];
-    //   _summaryText = _data[_data.keys.elementAt(1)];
-    // }
     return SingleChildScrollView(
         reverse: true,
         child: Container(
@@ -240,9 +357,9 @@ class _LeadInspectorApplicationFieldState
                                             },
                                             child: Container(
                                                 padding: const EdgeInsets.only(
-                                                    right: 15),
+                                                    right: 10),
                                                 margin: const EdgeInsets.only(
-                                                    right: 15),
+                                                    right: 10),
                                                 decoration: BoxDecoration(
                                                   color: _radioValue ==
                                                           _options[i]
@@ -261,6 +378,10 @@ class _LeadInspectorApplicationFieldState
                                                 child: Row(children: [
                                                   Radio(
                                                     value: _options[i],
+                                                    visualDensity:
+                                                        const VisualDensity(
+                                                            horizontal: -2.5),
+                                                    // dense: true,
                                                     groupValue: _radioValue,
                                                     activeColor:
                                                         AppColors.primaryBlue,
@@ -297,7 +418,7 @@ class _LeadInspectorApplicationFieldState
                                                       color: AppColors.black87,
                                                       fontWeight:
                                                           FontWeight.w400,
-                                                      fontSize: 14.0,
+                                                      fontSize: 13.0,
                                                       letterSpacing: 0.25,
                                                     ),
                                                   ),
@@ -330,6 +451,30 @@ class _LeadInspectorApplicationFieldState
                                                   Icons.message,
                                                   color: AppColors.black40,
                                                 ),
+                                        ),
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.only(left: 0),
+                                        child: IconButton(
+                                          onPressed: () {
+                                            // if (widget.applicationStatus !=
+                                            //         InspectionStatus
+                                            //             .inspectionCompleted &&
+                                            //     _radioValue !=
+                                            //         FieldValue.correct) {
+                                            _photoOptions(context);
+                                            // }
+                                          },
+                                          icon:
+                                              _radioValue != FieldValue.correct
+                                                  ? const Icon(
+                                                      Icons.camera_alt,
+                                                      color: AppColors.black40,
+                                                    )
+                                                  : const Icon(
+                                                      Icons.camera_alt_outlined,
+                                                      color: AppColors.black40,
+                                                    ),
                                         ),
                                       )
                                     ],
@@ -396,9 +541,9 @@ class _LeadInspectorApplicationFieldState
                                         ),
                                       ),
                                     )
-                                  : const Center()
+                                  : const Center(),
                             ],
-                          )))
+                          ))),
                 ])));
   }
 }

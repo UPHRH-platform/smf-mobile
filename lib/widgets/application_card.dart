@@ -94,37 +94,37 @@ class _ApplicationCardState extends State<ApplicationCard> {
                       fontWeight: FontWeight.w400,
                     )),
               ),
-              Row(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 10),
-                    child: Text(AppLocalizations.of(context)!.status + ': ',
-                        style: GoogleFonts.lato(
-                          color: AppColors.black60,
-                          fontSize: 14.0,
-                          letterSpacing: 0.12,
-                          fontWeight: FontWeight.w400,
-                        )),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 10),
-                    child: Text(
-                        Helper.getInspectionStatus(
-                            context,
-                            _getApplicationStatus(
-                                widget.application.inspectionStatus,
-                                widget.application.status)),
-                        style: GoogleFonts.lato(
-                          color: Helper.getColorByStatus(
-                              widget.application.inspectionStatus,
-                              widget.application.status),
-                          fontSize: 14.0,
-                          letterSpacing: 0.12,
-                          fontWeight: FontWeight.w700,
-                        )),
-                  ),
-                ],
-              )
+              // Row(
+              //   children: [
+              //     Padding(
+              //       padding: const EdgeInsets.only(bottom: 10),
+              //       child: Text(AppLocalizations.of(context)!.status + ': ',
+              //           style: GoogleFonts.lato(
+              //             color: AppColors.black60,
+              //             fontSize: 14.0,
+              //             letterSpacing: 0.12,
+              //             fontWeight: FontWeight.w400,
+              //           )),
+              //     ),
+              // Padding(
+              //   padding: const EdgeInsets.only(bottom: 10),
+              //   child: Text(
+              //       Helper.getInspectionStatus(
+              //           context,
+              //           _getApplicationStatus(
+              //               widget.application.inspectionStatus,
+              //               widget.application.status)),
+              //       style: GoogleFonts.lato(
+              //         color: Helper.getColorByStatus(
+              //             widget.application.inspectionStatus,
+              //             widget.application.status),
+              //         fontSize: 14.0,
+              //         letterSpacing: 0.12,
+              //         fontWeight: FontWeight.w700,
+              //       )),
+              // ),
+              //   ],
+              // )
             ],
           ),
         ));

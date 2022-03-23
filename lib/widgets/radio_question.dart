@@ -19,7 +19,7 @@ class RadioQuestion extends StatefulWidget {
 
 class _RadioQuestionState extends State<RadioQuestion> {
   int _radioValue = 0;
-  final List<String> _options = ['Correct', 'Incorrect'];
+  // final List<String> _options = ['Correct', 'Incorrect'];
 
   @override
   void initState() {

@@ -123,11 +123,13 @@ class OfflineModel {
         where: 'username = ?', whereArgs: whereArgs);
   }
 
-  static Future<Map> getPinDetails(String pin) async {
+  static Future<Map> getPinDetails(String username, String pin) async {
     final db = await OfflineModel.database();
-    List<dynamic> whereArgs = [pin];
+    List<dynamic> whereArgs = [username, pin];
     List<Map> rows = await db.query(AppDatabase.loginPinsTable,
-        where: 'pin = ?', orderBy: 'id DESC', whereArgs: whereArgs);
+        where: 'username = ? AND pin = ?',
+        orderBy: 'id DESC',
+        whereArgs: whereArgs);
     return rows.isNotEmpty ? rows[0] : {};
   }
 }

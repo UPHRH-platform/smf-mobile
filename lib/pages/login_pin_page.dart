@@ -1,60 +1,102 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:smf_mobile/constants/app_constants.dart';
 import 'package:smf_mobile/constants/app_urls.dart';
 import 'package:smf_mobile/constants/color_constants.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:smf_mobile/pages/create_pin_page.dart';
-import 'package:smf_mobile/pages/login_otp_page.dart';
-import 'package:smf_mobile/pages/login_pin_page.dart';
+import 'package:smf_mobile/database/offline_model.dart';
+import 'package:smf_mobile/pages/home_page.dart';
+import 'package:smf_mobile/pages/login_email_page.dart';
 import 'package:smf_mobile/repositories/login_repository.dart';
 import 'package:smf_mobile/util/helper.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:smf_mobile/widgets/otp_input_field.dart';
 import 'package:unique_identifier/unique_identifier.dart';
 import 'dart:async';
 import 'package:email_validator/email_validator.dart';
 
-// import 'package:connectivity_plus/connectivity_plus.dart';
-// import 'package:smf_mobile/util/connectivity_helper.dart';
-
-class LoginEmailPage extends StatefulWidget {
+class LoginPinPage extends StatefulWidget {
   static const route = AppUrl.loginEmailPage;
 
-  const LoginEmailPage({Key? key}) : super(key: key);
+  const LoginPinPage({Key? key}) : super(key: key);
   @override
-  _LoginEmailPageState createState() => _LoginEmailPageState();
+  _LoginPinPageState createState() => _LoginPinPageState();
 }
 
-class _LoginEmailPageState extends State<LoginEmailPage> {
+class _LoginPinPageState extends State<LoginPinPage> {
   final TextEditingController _emailController = TextEditingController();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
   String _errorMessage = '';
   late Locale locale;
+  late String _identifier;
+
+  final TextEditingController _fieldOne = TextEditingController();
+  final TextEditingController _fieldTwo = TextEditingController();
+  final TextEditingController _fieldThree = TextEditingController();
+  final TextEditingController _fieldFour = TextEditingController();
 
   @override
   void initState() {
     super.initState();
+    initUniqueIdentifierState();
   }
 
-  Future<void> _generateOtp() async {
+  Future<void> initUniqueIdentifierState() async {
+    String? identifier;
+    try {
+      identifier = await UniqueIdentifier.serial;
+    } on PlatformException {
+      identifier = AppLocalizations.of(context)!.failedToGetUniqueIdentifier;
+    }
+
+    if (!mounted) return;
+
+    setState(() {
+      _identifier = identifier!;
+    });
+  }
+
+  Future<void> _validatePin() async {
     final email = _emailController.text.trim();
     if (email == '') {
       Helper.toastMessage(AppLocalizations.of(context)!.pleaseEnterEmail);
       return;
     }
-    SystemChannels.textInput.invokeMethod('TextInput.hide');
+    String pin =
+        '${_fieldOne.text}${_fieldTwo.text}${_fieldThree.text}${_fieldFour.text}';
+    bool isInternetConnected = await Helper.isInternetConnected();
+    // await Future.delayed(const Duration(milliseconds: 10));
     try {
-      final responseCode =
-          await Provider.of<LoginRespository>(context, listen: false)
-              .getOtp(email.trim());
-      if (responseCode == 200) {
+      Map pinDetails = await OfflineModel.getPinDetails(email, pin);
+      if (isInternetConnected && pinDetails['username'] != null) {
+        final responseCode = await Provider.of<LoginRespository>(context,
+                listen: false)
+            .validateOtp(
+                context, pinDetails['username'], '', _identifier, pin, false);
+        if (responseCode == 200) {
+          Navigator.of(context).pushReplacement(MaterialPageRoute(
+            builder: (context) => const HomePage(),
+          ));
+        } else {
+          _errorMessage = Provider.of<LoginRespository>(context, listen: false)
+              .errorMessage;
+          Helper.toastMessage(_errorMessage);
+        }
+      } else if (pinDetails['username'] != null) {
+        Helper.setUser(Storage.username, pinDetails['username']);
+        Helper.setUser(Storage.authtoken, '');
+        Helper.toastMessage(AppLocalizations.of(context)!.youAreOffline);
         Navigator.of(context).pushReplacement(MaterialPageRoute(
-          builder: (context) => LoginOtpPage(username: email),
+          builder: (context) => const HomePage(),
         ));
       } else {
-        _errorMessage =
-            Provider.of<LoginRespository>(context, listen: false).errorMessage;
-        Helper.toastMessage(_errorMessage);
+        _fieldOne.text = '';
+        _fieldTwo.text = '';
+        _fieldThree.text = '';
+        _fieldFour.text = '';
+        Helper.toastMessage(AppLocalizations.of(context)!.inValidPin);
       }
     } catch (err) {
       throw Exception(err);
@@ -62,7 +104,7 @@ class _LoginEmailPageState extends State<LoginEmailPage> {
   }
 
   _validateEmail() {
-    String email = _emailController.text;
+    String email = _emailController.text.trim();
     if (email != '') {
       final bool isValid = EmailValidator.validate(email);
       SystemChannels.textInput.invokeMethod('TextInput.hide');
@@ -102,7 +144,7 @@ class _LoginEmailPageState extends State<LoginEmailPage> {
                   ),
                   Container(
                     padding:
-                        const EdgeInsets.only(left: 40, right: 40, bottom: 50),
+                        const EdgeInsets.only(left: 40, right: 40, bottom: 40),
                     margin: const EdgeInsets.only(left: 20, right: 20),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(4),
@@ -153,7 +195,7 @@ class _LoginEmailPageState extends State<LoginEmailPage> {
                               top: 0,
                             ),
                             child: Padding(
-                              padding: const EdgeInsets.fromLTRB(0, 5, 0, 30),
+                              padding: const EdgeInsets.only(top: 5),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -214,10 +256,45 @@ class _LoginEmailPageState extends State<LoginEmailPage> {
                             ),
                           ),
                           Padding(
-                            padding: const EdgeInsets.only(bottom: 10),
+                              padding: const EdgeInsets.only(
+                                top: 20,
+                              ),
+                              child: Text(
+                                AppLocalizations.of(context)!.enterPin,
+                                textAlign: TextAlign.left,
+                                style: GoogleFonts.lato(
+                                    color: AppColors.black87,
+                                    fontSize: 16,
+                                    letterSpacing:
+                                        0.25 /*percentages not used in flutter. defaulting to zero*/,
+                                    fontWeight: FontWeight.w400,
+                                    height: 1.4),
+                              )),
+                          Container(
+                            // alignment: Alignment.centerLeft,
+                            height: 45.0,
+                            margin: const EdgeInsets.only(top: 10),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(4),
+                              // border:
+                              //     Border.all(color: AppColors.black16),
+                              color: Colors.white,
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                OtpInputField(_fieldOne, true, false),
+                                OtpInputField(_fieldTwo, false, false),
+                                OtpInputField(_fieldThree, false, false),
+                                OtpInputField(_fieldFour, false, true)
+                              ],
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(top: 30, bottom: 10),
                             child: InkWell(
                                 // ignore: avoid_print
-                                onTap: () => _generateOtp(),
+                                onTap: () => _validatePin(),
                                 child: SizedBox(
                                     width:
                                         MediaQuery.of(context).size.width - 80,
@@ -239,8 +316,7 @@ class _LoginEmailPageState extends State<LoginEmailPage> {
                                       Align(
                                           alignment: Alignment.center,
                                           child: Text(
-                                            AppLocalizations.of(context)!
-                                                .getOtp,
+                                            AppLocalizations.of(context)!.login,
                                             textAlign: TextAlign.center,
                                             style: GoogleFonts.lato(
                                                 color: Colors.white,
@@ -254,65 +330,30 @@ class _LoginEmailPageState extends State<LoginEmailPage> {
                                           )),
                                     ]))),
                           ),
+                          Center(
+                            child: Container(
+                                padding: const EdgeInsets.only(
+                                  top: 10,
+                                ),
+                                child: InkWell(
+                                    onTap: () => Navigator.of(context)
+                                            .pushReplacement(MaterialPageRoute(
+                                          builder: (context) =>
+                                              const LoginEmailPage(),
+                                        )),
+                                    child: Text(
+                                      AppLocalizations.of(context)!.goBack,
+                                      style: GoogleFonts.lato(
+                                          color: AppColors.primaryBlue,
+                                          fontSize: 14,
+                                          letterSpacing:
+                                              0.5 /*percentages not used in flutter. defaulting to zero*/,
+                                          fontWeight: FontWeight.w700,
+                                          height: 1.4),
+                                    ))),
+                          )
                         ]),
-                  ),
-                  const Spacer(),
-                  Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(top: 10, bottom: 20),
-                        child: Text(
-                          AppLocalizations.of(context)!.moreLoginOptions,
-                          style: GoogleFonts.lato(
-                              color: AppColors.black87,
-                              fontSize: 16,
-                              letterSpacing:
-                                  0.25 /*percentages not used in flutter. defaulting to zero*/,
-                              fontWeight: FontWeight.w400,
-                              height: 1.4),
-                        ),
-                      ),
-                      Container(
-                          width: double.infinity,
-                          color: AppColors.primaryBlue,
-                          padding: const EdgeInsets.only(top: 15, bottom: 15),
-                          child: InkWell(
-                            onTap: () => Navigator.of(context)
-                                .pushReplacement(MaterialPageRoute(
-                              builder: (context) => const LoginPinPage(),
-                            )),
-                            child: Text(
-                              AppLocalizations.of(context)!.loginWithPin,
-                              textAlign: TextAlign.center,
-                              style: GoogleFonts.lato(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  letterSpacing:
-                                      0.25 /*percentages not used in flutter. defaulting to zero*/,
-                                  fontWeight: FontWeight.w400,
-                                  height: 1.4),
-                            ),
-                          )),
-                      Padding(
-                          padding: const EdgeInsets.only(top: 20, bottom: 30),
-                          child: InkWell(
-                            onTap: () => Navigator.of(context)
-                                .pushReplacement(MaterialPageRoute(
-                              builder: (context) => const CreatePinPage(),
-                            )),
-                            child: Text(
-                              AppLocalizations.of(context)!.createResetPin,
-                              style: GoogleFonts.lato(
-                                  color: AppColors.primaryBlue,
-                                  fontSize: 16,
-                                  letterSpacing:
-                                      0.25 /*percentages not used in flutter. defaulting to zero*/,
-                                  fontWeight: FontWeight.w400,
-                                  height: 1.4),
-                            ),
-                          )),
-                    ],
-                  ),
+                  )
                 ],
               )),
         ));

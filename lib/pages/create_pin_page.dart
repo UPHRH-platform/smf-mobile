@@ -78,7 +78,7 @@ class _CreatePinPageState extends State<CreatePinPage> {
       return;
     }
     if (_pin1 == _pin2 && _pin1.length == 4) {
-      Map pinDetails = await OfflineModel.getPinDetails(_pin1);
+      Map pinDetails = await OfflineModel.getPinDetails(email, _pin1);
       if (pinDetails['username'] != null) {
         Helper.toastMessage(AppLocalizations.of(context)!.pinAlreadyExists);
         return;
