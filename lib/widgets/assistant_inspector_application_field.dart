@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:smf_mobile/constants/app_constants.dart';
 import 'package:smf_mobile/constants/color_constants.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:smf_mobile/util/helper.dart';
@@ -26,6 +27,7 @@ class _AssistantInspectorApplicationFieldState
   String _radioValue = '';
   String _inspectionValue = '';
   String _inspectionComment = '';
+  String _attachment = '';
   String _noteText = '';
 
   @override
@@ -35,6 +37,7 @@ class _AssistantInspectorApplicationFieldState
       _inspectionComment = widget.leadInspectorData['comments'];
       _radioValue = widget.leadInspectorData['value'];
       _inspectionValue = widget.leadInspectorData['inspectionValue'];
+      _attachment = widget.leadInspectorData['attachment'];
     } catch (_) {
       return;
     }
@@ -180,7 +183,8 @@ class _AssistantInspectorApplicationFieldState
                                   ),
                                 ),
                               ),
-                              _radioValue == 'incorrect'
+                              _radioValue.toLowerCase() ==
+                                      FieldValue.inCorrect.toLowerCase()
                                   ? Wrap(children: [
                                       Container(
                                           width:
@@ -188,7 +192,8 @@ class _AssistantInspectorApplicationFieldState
                                           padding:
                                               const EdgeInsets.only(top: 20),
                                           child: Text(
-                                            'Reason for the incorrect selection',
+                                            AppLocalizations.of(context)!
+                                                .reasonForIncorrectSelection,
                                             style: GoogleFonts.lato(
                                               color: AppColors.black60,
                                               fontWeight: FontWeight.w700,
@@ -271,50 +276,33 @@ class _AssistantInspectorApplicationFieldState
                                           ),
                                         ),
                                       ),
-                                      // Container(
-                                      //     width:
-                                      //         MediaQuery.of(context).size.width,
-                                      //     padding:
-                                      //         const EdgeInsets.only(top: 20),
-                                      //     child: Text(
-                                      //       "Instiute's comment",
-                                      //       style: GoogleFonts.lato(
-                                      //         color: AppColors.black60,
-                                      //         fontWeight: FontWeight.w700,
-                                      //         fontSize: 14.0,
-                                      //         letterSpacing: 0.25,
-                                      //       ),
-                                      //     )),
-                                      // Container(
-                                      //   width:
-                                      //       MediaQuery.of(context).size.width,
-                                      //   margin:
-                                      //       const EdgeInsets.only(bottom: 0),
-                                      //   child: Container(
-                                      //     padding: const EdgeInsets.fromLTRB(
-                                      //         15, 10, 15, 10),
-                                      //     margin:
-                                      //         const EdgeInsets.only(top: 10),
-                                      //     decoration: BoxDecoration(
-                                      //       color: Colors.white,
-                                      //       borderRadius:
-                                      //           const BorderRadius.all(
-                                      //               Radius.circular(4.0)),
-                                      //       border: Border.all(
-                                      //         color: AppColors.black08,
-                                      //       ),
-                                      //     ),
-                                      //     child: Text(
-                                      //       'Omne animal, simul atque integre iudicante itaque turbent.',
-                                      //       style: GoogleFonts.lato(
-                                      //         color: AppColors.black87,
-                                      //         fontWeight: FontWeight.w400,
-                                      //         fontSize: 14.0,
-                                      //         letterSpacing: 0.25,
-                                      //       ),
-                                      //     ),
-                                      //   ),
-                                      // ),
+                                      _attachment != ''
+                                          ? Container(
+                                              width: MediaQuery.of(context)
+                                                  .size
+                                                  .width,
+                                              margin: const EdgeInsets.only(
+                                                  bottom: 0),
+                                              child: Container(
+                                                padding:
+                                                    const EdgeInsets.fromLTRB(
+                                                        15, 10, 15, 10),
+                                                margin: const EdgeInsets.only(
+                                                    top: 10),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.white,
+                                                  borderRadius:
+                                                      const BorderRadius.all(
+                                                          Radius.circular(4.0)),
+                                                  border: Border.all(
+                                                    color: AppColors.black08,
+                                                  ),
+                                                ),
+                                                child:
+                                                    Image.network(_attachment),
+                                              ),
+                                            )
+                                          : const Center(),
                                     ])
                                   : const Center()
                             ],

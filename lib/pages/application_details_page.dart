@@ -191,6 +191,11 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
                           ? existingData[childKey]
                                   [existingData[childKey].keys.elementAt(0)]
                               ['inspectionValue']
+                          : '',
+                      'attachment': _isleadInspector
+                          ? existingData[childKey]
+                                  [existingData[childKey].keys.elementAt(0)]
+                              ['attachment']
                           : ''
                     }
                   }

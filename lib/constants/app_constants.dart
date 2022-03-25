@@ -14,6 +14,8 @@ class FieldType {
   static const String radio = "radio";
   static const String boolean = "boolean";
   static const String file = "file";
+  static const String image = "image";
+  static const String pdf = "pdf";
   static const String heading = 'heading';
 }
 

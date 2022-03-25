@@ -67,7 +67,7 @@ class _LeadInspectorDialogState extends State<LeadInspectorDialog> {
         Helper.toastMessage('Please enter reason');
         return;
       }
-      if (_inspectionValue == '' && widget.fieldType != FieldType.file) {
+      if (_inspectionValue == '') {
         Helper.toastMessage('Please enter actual value');
         return;
       }
@@ -157,24 +157,23 @@ class _LeadInspectorDialogState extends State<LeadInspectorDialog> {
                                 ),
                               ),
                             ),
-                            widget.fieldType != FieldType.file
-                                ? Padding(
-                                    padding: const EdgeInsets.only(top: 20),
-                                    child: Text(
-                                      'Actual value(s)',
-                                      style: GoogleFonts.lato(
-                                        color: AppColors.black87,
-                                        fontWeight: FontWeight.w700,
-                                        fontSize: 14,
-                                        letterSpacing: 0.25,
-                                      ),
-                                    ))
-                                : const Center(),
+                            Padding(
+                                padding: const EdgeInsets.only(top: 20),
+                                child: Text(
+                                  'Actual value(s)',
+                                  style: GoogleFonts.lato(
+                                    color: AppColors.black87,
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 14,
+                                    letterSpacing: 0.25,
+                                  ),
+                                )),
                             widget.fieldType == FieldType.text ||
                                     widget.fieldType == FieldType.numeric ||
                                     widget.fieldType == FieldType.email ||
                                     widget.fieldType == FieldType.date ||
-                                    widget.fieldType == FieldType.textarea
+                                    widget.fieldType == FieldType.textarea ||
+                                    widget.fieldType == FieldType.file
                                 ? TextQuestion(
                                     fieldType: widget.fieldType,
                                     answerGiven: widget.inspectionValue,

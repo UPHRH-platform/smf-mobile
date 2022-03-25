@@ -61,5 +61,10 @@
     "invalidResponse": "Invalid response recieved from the server",
     "takeAPicture": "Take a picture",
     "goToFiles": "Go to files",
-    "cropImage": "Crop image"
+    "cropImage": "Crop image",
+    "reasonForIncorrectSelection": "Reason for incorrect selection",
+    "fileViewer": "File viewer",
+    "preview": "Preview",
+    "remove": "Remove",
+    "attachment": "Attachment"
 }

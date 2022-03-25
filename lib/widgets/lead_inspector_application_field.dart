@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:smf_mobile/constants/app_constants.dart';
 import 'package:smf_mobile/constants/color_constants.dart';
+import 'package:smf_mobile/pages/file_viewer.dart';
+import 'package:smf_mobile/services/application_service.dart';
+import 'package:smf_mobile/util/helper.dart';
 import 'package:smf_mobile/widgets/lead_inspector_dialog.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:image_picker/image_picker.dart';
@@ -34,11 +37,19 @@ class _LeadInspectorApplicationFieldState
   late Map _data;
   late String _radioValue;
   String _inspectionValue = '';
+  String _attachment = '';
   String _summaryText = '';
   final List<String> _options = [FieldValue.correct, FieldValue.inCorrect];
-  late File _selectedFile;
   final _picker = ImagePicker();
-  bool _inProcess = false;
+  final List<String> _imageExtensions = [
+    'apng',
+    'png',
+    'jpg',
+    'jpeg',
+    'avif',
+    'gif',
+    'svg'
+  ];
 
   @override
   void initState() {
@@ -50,6 +61,7 @@ class _LeadInspectorApplicationFieldState
     _summaryText = _data[_data.keys.elementAt(1)];
     try {
       _inspectionValue = _data[_data.keys.elementAt(2)];
+      _attachment = _data[_data.keys.elementAt(3)];
     } catch (_) {
       return;
     }
@@ -69,7 +81,8 @@ class _LeadInspectorApplicationFieldState
             widget.fieldData.keys.elementAt(0): {
               'value': FieldValue.correct,
               'comments': '',
-              'inspectionValue': ''
+              'inspectionValue': '',
+              'attachment': _attachment
             }
           }
         };
@@ -79,7 +92,8 @@ class _LeadInspectorApplicationFieldState
             widget.fieldData.keys.elementAt(0): {
               'value': _radioValue,
               'comments': dialogData['summaryText'],
-              'inspectionValue': dialogData['inspectionValue']
+              'inspectionValue': dialogData['inspectionValue'],
+              'attachment': _attachment
             }
           }
         };
@@ -90,7 +104,8 @@ class _LeadInspectorApplicationFieldState
           widget.fieldData.keys.elementAt(0): {
             'value': _radioValue,
             'comments': dialogData['summaryText'],
-            'inspectionValue': dialogData['inspectionValue']
+            'inspectionValue': dialogData['inspectionValue'],
+            'attachment': _attachment
           }
         }
       };
@@ -99,6 +114,24 @@ class _LeadInspectorApplicationFieldState
     setState(() {
       _summaryText = dialogData['summaryText'];
       _inspectionValue = dialogData['inspectionValue'];
+    });
+    widget.parentAction(data);
+  }
+
+  _triggerAttachmentUpdate(String attachment) {
+    Map data = {
+      widget.fieldName: {
+        widget.fieldData.keys.elementAt(0): {
+          'value': _radioValue,
+          'comments': _summaryText,
+          'inspectionValue': _inspectionValue,
+          'attachment': attachment
+        }
+      }
+    };
+    // print(data);
+    setState(() {
+      _attachment = attachment;
     });
     widget.parentAction(data);
   }
@@ -199,9 +232,7 @@ class _LeadInspectorApplicationFieldState
   }
 
   Future<dynamic> _getImage(ImageSource source) async {
-    _inProcess = true;
     XFile? image = await _picker.pickImage(source: source);
-
     if (image != null) {
       try {
         File? cropped = await ImageCropper().cropImage(
@@ -218,18 +249,48 @@ class _LeadInspectorApplicationFieldState
               statusBarColor: Colors.grey.shade900,
               backgroundColor: Colors.white,
             ));
-        print(cropped!.path);
-        setState(() {
-          _selectedFile = cropped;
-          _inProcess = false;
-        });
+        String fileUrl = await ApplicationService.uploadImage(cropped!.path);
+        _triggerAttachmentUpdate(fileUrl);
       } catch (e) {
-        print(e);
+        // print(e);
+        return;
       }
-    } else {
+    }
+  }
+
+  Future<void> _deleteAttachment(String attachment) async {
+    List data = [attachment];
+    final bool fileDeleted = await ApplicationService.deleteImage(data);
+    if (fileDeleted) {
+      Helper.toastMessage('Attachment removed');
       setState(() {
-        _inProcess = false;
+        _attachment = '';
       });
+    }
+  }
+
+  void _viewFile(String fileUrl) {
+    String extension = fileUrl.split('.').last.toLowerCase();
+    if (_imageExtensions.contains(extension) || extension == FieldType.pdf) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => FileViewer(
+                  fileType: extension == FieldType.pdf
+                      ? FieldType.pdf
+                      : FieldType.image,
+                  fileUrl: fileUrl,
+                )),
+      );
+    } else {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => FileViewer(
+                  fileType: '',
+                  fileUrl: fileUrl,
+                )),
+      );
     }
   }
 
@@ -275,22 +336,46 @@ class _LeadInspectorApplicationFieldState
                           ),
                         ),
                         Container(
-                          margin: const EdgeInsets.only(top: 10),
-                          padding: const EdgeInsets.fromLTRB(15, 10, 15, 10),
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                            border: Border.all(color: AppColors.black16),
-                          ),
-                          child: Text(
-                            widget.fieldData.keys.elementAt(0),
-                            style: GoogleFonts.lato(
-                              color: AppColors.black87,
-                              fontSize: 14.0,
-                              letterSpacing: 0.25,
-                              fontWeight: FontWeight.w400,
+                            margin: const EdgeInsets.only(top: 10),
+                            padding: widget.fieldType == FieldType.file
+                                ? const EdgeInsets.fromLTRB(10, 10, 10, 10)
+                                : const EdgeInsets.fromLTRB(15, 10, 15, 10),
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              border: Border.all(color: AppColors.black16),
                             ),
-                          ),
-                        )
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  widget.fieldData.keys.elementAt(0),
+                                  style: GoogleFonts.lato(
+                                    color: AppColors.black87,
+                                    fontSize: 14.0,
+                                    letterSpacing: 0.25,
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                ),
+                                widget.fieldType == FieldType.file
+                                    ? InkWell(
+                                        onTap: () => _viewFile(
+                                            widget.fieldData.keys.elementAt(0)),
+                                        child: Padding(
+                                            padding:
+                                                const EdgeInsets.only(top: 10),
+                                            child: Text(
+                                              AppLocalizations.of(context)!
+                                                  .preview,
+                                              style: GoogleFonts.lato(
+                                                color: AppColors.primaryBlue,
+                                                fontSize: 14.0,
+                                                letterSpacing: 0.25,
+                                                fontWeight: FontWeight.w700,
+                                              ),
+                                            )))
+                                    : const Center(),
+                              ],
+                            ))
                       ],
                     ),
                   ),
@@ -457,13 +542,13 @@ class _LeadInspectorApplicationFieldState
                                         padding: const EdgeInsets.only(left: 0),
                                         child: IconButton(
                                           onPressed: () {
-                                            // if (widget.applicationStatus !=
-                                            //         InspectionStatus
-                                            //             .inspectionCompleted &&
-                                            //     _radioValue !=
-                                            //         FieldValue.correct) {
-                                            _photoOptions(context);
-                                            // }
+                                            if (widget.applicationStatus !=
+                                                    InspectionStatus
+                                                        .inspectionCompleted &&
+                                                _radioValue !=
+                                                    FieldValue.correct) {
+                                              _photoOptions(context);
+                                            }
                                           },
                                           icon:
                                               _radioValue != FieldValue.correct
@@ -479,6 +564,22 @@ class _LeadInspectorApplicationFieldState
                                       )
                                     ],
                                   )),
+                              _radioValue != FieldValue.correct &&
+                                      _summaryText != ''
+                                  ? Container(
+                                      width: MediaQuery.of(context).size.width,
+                                      padding: const EdgeInsets.only(top: 20),
+                                      child: Text(
+                                        AppLocalizations.of(context)!
+                                            .reasonForIncorrectSelection,
+                                        style: GoogleFonts.lato(
+                                          color: AppColors.black60,
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 14.0,
+                                          letterSpacing: 0.25,
+                                        ),
+                                      ))
+                                  : const Center(),
                               _radioValue != FieldValue.correct &&
                                       _summaryText != ''
                                   ? Container(
@@ -509,7 +610,8 @@ class _LeadInspectorApplicationFieldState
                                       width: MediaQuery.of(context).size.width,
                                       padding: const EdgeInsets.only(top: 20),
                                       child: Text(
-                                        widget.fieldName,
+                                        AppLocalizations.of(context)!
+                                            .actualValue,
                                         style: GoogleFonts.lato(
                                           color: AppColors.black60,
                                           fontWeight: FontWeight.w700,
@@ -541,6 +643,110 @@ class _LeadInspectorApplicationFieldState
                                         ),
                                       ),
                                     )
+                                  : const Center(),
+                              _radioValue != FieldValue.correct &&
+                                      _attachment != ''
+                                  ? Container(
+                                      width: MediaQuery.of(context).size.width,
+                                      padding: const EdgeInsets.only(top: 20),
+                                      child: Text(
+                                        AppLocalizations.of(context)!
+                                            .attachment,
+                                        style: GoogleFonts.lato(
+                                          color: AppColors.black60,
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 14.0,
+                                          letterSpacing: 0.25,
+                                        ),
+                                      ))
+                                  : const Center(),
+                              _radioValue != FieldValue.correct &&
+                                      _attachment != ''
+                                  ? Container(
+                                      margin: const EdgeInsets.only(
+                                        top: 10,
+                                      ),
+                                      padding: const EdgeInsets.fromLTRB(
+                                          10, 10, 10, 10),
+                                      width: double.infinity,
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        border: Border.all(
+                                            color: AppColors.black16),
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                      child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              _attachment,
+                                              style: GoogleFonts.lato(
+                                                color: AppColors.black87,
+                                                fontSize: 14.0,
+                                                letterSpacing: 0.25,
+                                                fontWeight: FontWeight.w400,
+                                              ),
+                                            ),
+                                            Row(
+                                              children: [
+                                                InkWell(
+                                                    onTap: () => Navigator.push(
+                                                        context,
+                                                        MaterialPageRoute(
+                                                            builder:
+                                                                (context) =>
+                                                                    FileViewer(
+                                                                      fileType:
+                                                                          FieldType
+                                                                              .image,
+                                                                      fileUrl:
+                                                                          _attachment,
+                                                                    ))),
+                                                    child: Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .only(top: 10),
+                                                        child: Text(
+                                                          AppLocalizations.of(
+                                                                  context)!
+                                                              .preview,
+                                                          style:
+                                                              GoogleFonts.lato(
+                                                            color: AppColors
+                                                                .primaryBlue,
+                                                            fontSize: 14.0,
+                                                            letterSpacing: 0.25,
+                                                            fontWeight:
+                                                                FontWeight.w700,
+                                                          ),
+                                                        ))),
+                                                const Spacer(),
+                                                InkWell(
+                                                    onTap: () =>
+                                                        _deleteAttachment(
+                                                            _attachment),
+                                                    child: Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .only(top: 10),
+                                                        child: Text(
+                                                          AppLocalizations.of(
+                                                                  context)!
+                                                              .remove,
+                                                          style:
+                                                              GoogleFonts.lato(
+                                                            color: AppColors
+                                                                .sentForIns,
+                                                            fontSize: 14.0,
+                                                            letterSpacing: 0.25,
+                                                            fontWeight:
+                                                                FontWeight.w700,
+                                                          ),
+                                                        ))),
+                                              ],
+                                            ),
+                                          ]))
                                   : const Center(),
                             ],
                           ))),

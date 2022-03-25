@@ -13,4 +13,6 @@ class ApiUrl {
   static const submitConcent = '$baseUrl/api/forms/consentApplication';
   static const submitBulkConcent = '$baseUrl/api/forms/consentBulkApplication';
   static const getAllForms = '$baseUrl/api/forms/getAllForms?isDetail=true';
+  static const fileUpload = '$baseUrl/api/forms/fileUpload';
+  static const deleteFile = '$baseUrl/api/forms/deleteCloudFile';
 }
