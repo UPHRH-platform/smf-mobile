@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:smf_mobile/constants/app_constants.dart';
 import 'package:smf_mobile/constants/app_urls.dart';
 import 'package:smf_mobile/constants/color_constants.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -10,7 +11,7 @@ import 'package:smf_mobile/pages/login_pin_page.dart';
 import 'package:smf_mobile/repositories/login_repository.dart';
 import 'package:smf_mobile/util/helper.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:unique_identifier/unique_identifier.dart';
+// import 'package:unique_identifier/unique_identifier.dart';
 import 'dart:async';
 import 'package:email_validator/email_validator.dart';
 
@@ -255,6 +256,19 @@ class _LoginEmailPageState extends State<LoginEmailPage> {
                                     ]))),
                           ),
                         ]),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 10, bottom: 20),
+                    child: Text(
+                      AppLocalizations.of(context)!.version + ' ' + appVersion,
+                      style: GoogleFonts.lato(
+                          color: AppColors.black87,
+                          fontSize: 12,
+                          letterSpacing:
+                              0.25 /*percentages not used in flutter. defaulting to zero*/,
+                          fontWeight: FontWeight.w700,
+                          height: 1.4),
+                    ),
                   ),
                   const Spacer(),
                   Column(

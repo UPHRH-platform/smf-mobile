@@ -1,12 +1,12 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:dio/dio.dart';
-import 'package:dio/adapter.dart';
+// import 'package:dio/adapter.dart';
 import 'package:http/http.dart' as http;
 import 'package:smf_mobile/constants/api_endpoints.dart';
 import 'package:smf_mobile/constants/app_constants.dart';
 import 'package:smf_mobile/services/base_service.dart';
-import 'dart:developer' as developer;
+// import 'dart:developer' as developer;
 
 class ApplicationService extends BaseService {
   ApplicationService(HttpClient client) : super(client);

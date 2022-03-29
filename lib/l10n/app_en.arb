@@ -32,7 +32,7 @@
     "pastApplications": "Past applications",
     "viewPastApplications": "View past applications",
     "next": "Next",
-    "previous": "previous",
+    "previous": "Previous",
     "inspectionCompleted": "Inspection completed",
     "leadInspectorCompleted": "Lead inspector completed",
     "completed": "Completed",
@@ -66,5 +66,6 @@
     "fileViewer": "File viewer",
     "preview": "Preview",
     "remove": "Remove",
-    "attachment": "Attachment"
+    "attachment": "Attachment",
+    "version": "Version"
 }

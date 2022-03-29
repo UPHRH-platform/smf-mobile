@@ -41,6 +41,7 @@ class AppDatabase {
   static const String formsTable = 'forms';
   static const String inspectionTable = 'inspections';
   static const String loginPinsTable = 'login_pins';
+  static const String attachmentsTable = 'attachments';
 }
 
 class Storage {

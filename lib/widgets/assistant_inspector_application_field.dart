@@ -3,17 +3,20 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:smf_mobile/constants/app_constants.dart';
 import 'package:smf_mobile/constants/color_constants.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:smf_mobile/pages/file_viewer.dart';
 import 'package:smf_mobile/util/helper.dart';
 
 class AssistantInspectorApplicationField extends StatefulWidget {
   final String fieldName;
   final Map fieldData;
+  final String fieldType;
   final Map leadInspectorData;
   final ValueChanged<Map> parentAction;
   const AssistantInspectorApplicationField({
     Key? key,
     required this.fieldName,
     required this.fieldData,
+    required this.fieldType,
     required this.leadInspectorData,
     required this.parentAction,
   }) : super(key: key);
@@ -29,13 +32,27 @@ class _AssistantInspectorApplicationFieldState
   String _inspectionComment = '';
   String _attachment = '';
   String _noteText = '';
+  final List<String> _imageExtensions = [
+    'apng',
+    'png',
+    'jpg',
+    'jpeg',
+    'avif',
+    'gif',
+    'svg'
+  ];
 
   @override
   void initState() {
     super.initState();
+    // print(widget.leadInspectorData['value']);
+
+    _radioValue = widget.leadInspectorData['value'] == null ||
+            widget.leadInspectorData['value'] == ''
+        ? FieldValue.correct
+        : widget.leadInspectorData['value'];
     try {
       _inspectionComment = widget.leadInspectorData['comments'];
-      _radioValue = widget.leadInspectorData['value'];
       _inspectionValue = widget.leadInspectorData['inspectionValue'];
       _attachment = widget.leadInspectorData['attachment'];
     } catch (_) {
@@ -60,6 +77,31 @@ class _AssistantInspectorApplicationFieldState
       _inspectionValue = dialogData['inspectionValue'];
     });
     widget.parentAction(data);
+  }
+
+  void _viewFile(String fileUrl) {
+    String extension = fileUrl.split('.').last.toLowerCase();
+    if (_imageExtensions.contains(extension) || extension == FieldType.pdf) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => FileViewer(
+                  fileType: extension == FieldType.pdf
+                      ? FieldType.pdf
+                      : FieldType.image,
+                  fileUrl: fileUrl,
+                )),
+      );
+    } else {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => FileViewer(
+                  fileType: '',
+                  fileUrl: fileUrl,
+                )),
+      );
+    }
   }
 
   @override
@@ -105,22 +147,44 @@ class _AssistantInspectorApplicationFieldState
                           ),
                         ),
                         Container(
-                          margin: const EdgeInsets.only(top: 10),
-                          padding: const EdgeInsets.fromLTRB(15, 10, 15, 10),
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                            border: Border.all(color: AppColors.black16),
-                          ),
-                          child: Text(
-                            widget.fieldData.keys.elementAt(0),
-                            style: GoogleFonts.lato(
-                              color: AppColors.black87,
-                              fontSize: 14.0,
-                              letterSpacing: 0.25,
-                              fontWeight: FontWeight.w400,
+                            margin: const EdgeInsets.only(top: 10),
+                            padding: const EdgeInsets.fromLTRB(15, 10, 15, 10),
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              border: Border.all(color: AppColors.black16),
                             ),
-                          ),
-                        )
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  widget.fieldData.keys.elementAt(0),
+                                  style: GoogleFonts.lato(
+                                    color: AppColors.black87,
+                                    fontSize: 14.0,
+                                    letterSpacing: 0.25,
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                ),
+                                widget.fieldType == FieldType.file
+                                    ? InkWell(
+                                        onTap: () => _viewFile(
+                                            widget.fieldData.keys.elementAt(0)),
+                                        child: Padding(
+                                            padding:
+                                                const EdgeInsets.only(top: 10),
+                                            child: Text(
+                                              AppLocalizations.of(context)!
+                                                  .preview,
+                                              style: GoogleFonts.lato(
+                                                color: AppColors.primaryBlue,
+                                                fontSize: 14.0,
+                                                letterSpacing: 0.25,
+                                                fontWeight: FontWeight.w700,
+                                              ),
+                                            )))
+                                    : const Center(),
+                              ],
+                            ))
                       ],
                     ),
                   ),
@@ -298,8 +362,60 @@ class _AssistantInspectorApplicationFieldState
                                                     color: AppColors.black08,
                                                   ),
                                                 ),
-                                                child:
-                                                    Image.network(_attachment),
+                                                child: Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      Text(
+                                                        _attachment,
+                                                        style: GoogleFonts.lato(
+                                                          color:
+                                                              AppColors.black87,
+                                                          fontSize: 14.0,
+                                                          letterSpacing: 0.25,
+                                                          fontWeight:
+                                                              FontWeight.w400,
+                                                        ),
+                                                      ),
+                                                      Row(
+                                                        children: [
+                                                          InkWell(
+                                                              onTap: () => Navigator
+                                                                  .push(
+                                                                      context,
+                                                                      MaterialPageRoute(
+                                                                          builder: (context) =>
+                                                                              FileViewer(
+                                                                                fileType: FieldType.image,
+                                                                                fileUrl: _attachment,
+                                                                              ))),
+                                                              child: Padding(
+                                                                  padding: const EdgeInsets
+                                                                          .only(
+                                                                      top: 10),
+                                                                  child: Text(
+                                                                    AppLocalizations.of(
+                                                                            context)!
+                                                                        .preview,
+                                                                    style:
+                                                                        GoogleFonts
+                                                                            .lato(
+                                                                      color: AppColors
+                                                                          .primaryBlue,
+                                                                      fontSize:
+                                                                          14.0,
+                                                                      letterSpacing:
+                                                                          0.25,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .w700,
+                                                                    ),
+                                                                  ))),
+                                                          const Spacer(),
+                                                        ],
+                                                      ),
+                                                    ]),
                                               ),
                                             )
                                           : const Center(),

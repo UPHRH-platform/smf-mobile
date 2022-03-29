@@ -112,6 +112,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   }
 
   Future<dynamic> _syncApplications() async {
+    // print('_syncApplications...');
     var synced =
         await Provider.of<ApplicationRespository>(context, listen: false)
             .submitBulkInspection();

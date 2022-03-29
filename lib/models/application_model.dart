@@ -39,14 +39,18 @@ class Application {
       email: json['email'] ?? '',
       status: json['status'],
       dataObject: json['dataObject'],
-      inspectors: json['inspection']['assignedTo'] ?? [],
-      leadInspector: json['inspection']['leadInspector'] ?? [],
+      inspectors:
+          json['inspection'] != null ? json['inspection']['assignedTo'] : [],
+      leadInspector:
+          json['inspection'] != null ? json['inspection']['leadInspector'] : [],
       inspectorDataObject: json['inspectorDataObject'] != null
           ? json['inspectorDataObject']['dataObject']
           : {},
       inspectorSummaryDataObject: json['inspectorSummaryDataObject'] ?? {},
-      inspectionStatus: json['inspection']['status'] ?? '',
-      scheduledDate: json['inspection']['scheduledDate'] ?? '',
+      inspectionStatus:
+          json['inspection'] != null ? json['inspection']['status'] : '',
+      scheduledDate:
+          json['inspection'] != null ? json['inspection']['scheduledDate'] : '',
       createdDate: json['createdDate'],
       createdBy: json['createdBy'],
     );

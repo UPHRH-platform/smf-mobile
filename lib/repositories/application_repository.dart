@@ -54,16 +54,15 @@ class ApplicationRespository with ChangeNotifier {
       if (!internetConnected) {
         Map<String, Object> applicationData = {
           'inspector_type': Inspector.leadInspector,
-          'inspection_data': data
+          'inspection_data': json.encode(data)
         };
         await OfflineModel.saveInspection(applicationData);
 
         // Updating application status in the database
         String username = await Helper.getUser(Storage.username);
-        var rawData = await OfflineModel.getForms(username);
+        var rawData = await OfflineModel.getApplications(username);
         Map applicationFieldData = json.decode(rawData['application_data']);
         List applications = applicationFieldData['responseData'];
-
         for (int i = 0; i < applications.length; i++) {
           if (applications[i]['applicationId'] == data['applicationId']) {
             applications[i]['inspection']['status'] =
@@ -71,6 +70,7 @@ class ApplicationRespository with ChangeNotifier {
             applications[i]['inspectorDataObject'] = data;
           }
         }
+
         applicationFieldData['responseData'] = applications;
         _saveApplications(username, jsonEncode(applicationFieldData));
       } else {
@@ -97,13 +97,24 @@ class ApplicationRespository with ChangeNotifier {
     List<Map> consents = [];
     Map data1 = {}, data2 = {};
     bool response = false;
+    List<Map> attachments = [];
     try {
       List<Map> rawInspections = await OfflineModel.getInspections();
       for (var inspection in rawInspections) {
+        Map inspectionData = jsonDecode(inspection['inspection_data']);
+        attachments =
+            await OfflineModel.getAttachments(inspectionData['applicationId']);
+        for (var attachment in attachments) {
+          String temp = json.encode(inspectionData);
+          String fileUrl =
+              await ApplicationService.uploadImage(attachment['attachment']);
+          temp = temp.replaceAll(attachment['attachment'], fileUrl);
+          inspectionData = json.decode(temp);
+        }
         if (inspection['inspector_type'] == Inspector.leadInspector) {
-          inspections.add(jsonDecode(inspection['inspection_data']));
+          inspections.add(inspectionData);
         } else {
-          consents.add(jsonDecode(inspection['inspection_data']));
+          consents.add(inspectionData);
         }
       }
       if (inspections.isNotEmpty) {
@@ -116,14 +127,18 @@ class ApplicationRespository with ChangeNotifier {
         data2 = json.decode(request2.body);
       }
     } catch (_) {
-      return _;
+      return false;
     }
-    // if (data1['statusInfo']['statusCode'] != 200 ||
-    //     data2['statusInfo']['statusCode'] != 200) {
-    //   _errorMessage = _data['statusInfo']['errorMessage'];
-    // }
+    if (data1['statusInfo']['statusCode'] != 200 ||
+        data2['statusInfo']['statusCode'] != 200) {
+      _errorMessage = _data['statusInfo']['errorMessage'];
+    }
     if ((inspections.isNotEmpty && data1['statusInfo']['statusCode']) ||
         (consents.isNotEmpty && data2['statusInfo']['statusCode'])) {
+      for (var attachment in attachments) {
+        await OfflineModel.deleteAttachments(attachment['attachment']);
+      }
+      await OfflineModel.deleteInspections();
       response = true;
     }
     return response;

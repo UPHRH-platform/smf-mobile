@@ -24,29 +24,31 @@ class _ApplicationCardState extends State<ApplicationCard> {
     super.initState();
   }
 
-  String _getApplicationStatus(String inspetionStatus, String actualStatus) {
-    String status = '';
-    if (actualStatus == InspectionStatus.inspectionCompleted) {
-      status = InspectionStatus.inspectionCompleted;
-    }
-    if (inspetionStatus == InspectionStatus.leadInspectorCompleted) {
-      status = InspectionStatus.leadInspectorCompleted;
-    } else {
-      status = actualStatus;
-    }
-    return status;
-  }
+  // String _getApplicationStatus(String inspetionStatus, String actualStatus) {
+  //   String status = '';
+  //   if (actualStatus == InspectionStatus.inspectionCompleted) {
+  //     status = InspectionStatus.inspectionCompleted;
+  //   }
+  //   if (inspetionStatus == InspectionStatus.leadInspectorCompleted) {
+  //     status = InspectionStatus.leadInspectorCompleted;
+  //   } else {
+  //     status = actualStatus;
+  //   }
+  //   return status;
+  // }
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-        onTap: () => Navigator.push(
+        onTap: () {
+          // print(widget.application.inspectionStatus);
+          Navigator.push(
               context,
               MaterialPageRoute(
                   builder: (context) => ApplicationDetailsPage(
                         application: widget.application,
-                      )),
-            ),
+                      )));
+        },
         child: Container(
           width: double.infinity,
           margin: const EdgeInsets.only(bottom: 10),

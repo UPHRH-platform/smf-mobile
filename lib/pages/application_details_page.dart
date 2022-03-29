@@ -583,52 +583,71 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
                                                         CrossAxisAlignment
                                                             .start,
                                                     children: [
-                                                      Padding(
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .only(top: 5),
-                                                        child: Text(
-                                                          AppLocalizations.of(
-                                                                  context)!
-                                                              .inspectionSummary,
-                                                          style:
-                                                              GoogleFonts.lato(
-                                                            color: AppColors
-                                                                .black87,
-                                                            fontSize: 14.0,
-                                                            letterSpacing: 0.25,
-                                                            fontWeight:
-                                                                FontWeight.w700,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                      Container(
-                                                        margin: const EdgeInsets
-                                                            .only(top: 10),
-                                                        padding:
-                                                            const EdgeInsets
-                                                                    .fromLTRB(
-                                                                15, 10, 15, 10),
-                                                        width: double.infinity,
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          border: Border.all(
-                                                              color: AppColors
-                                                                  .black16),
-                                                        ),
-                                                        child: Text(
-                                                          _inspectionSummary,
-                                                          style:
-                                                              GoogleFonts.lato(
-                                                            color: AppColors
-                                                                .black87,
-                                                            fontSize: 14.0,
-                                                            letterSpacing: 0.25,
-                                                            fontWeight:
-                                                                FontWeight.w400,
-                                                          ),
-                                                        ),
-                                                      ),
+                                                      _inspectionSummary != ''
+                                                          ? Padding(
+                                                              padding:
+                                                                  const EdgeInsets
+                                                                          .only(
+                                                                      top: 5),
+                                                              child: Text(
+                                                                AppLocalizations.of(
+                                                                        context)!
+                                                                    .inspectionSummary,
+                                                                style:
+                                                                    GoogleFonts
+                                                                        .lato(
+                                                                  color: AppColors
+                                                                      .black87,
+                                                                  fontSize:
+                                                                      14.0,
+                                                                  letterSpacing:
+                                                                      0.25,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w700,
+                                                                ),
+                                                              ),
+                                                            )
+                                                          : const Center(),
+                                                      _inspectionSummary != ''
+                                                          ? Container(
+                                                              margin:
+                                                                  const EdgeInsets
+                                                                          .only(
+                                                                      top: 10),
+                                                              padding:
+                                                                  const EdgeInsets
+                                                                          .fromLTRB(
+                                                                      15,
+                                                                      10,
+                                                                      15,
+                                                                      10),
+                                                              width: double
+                                                                  .infinity,
+                                                              decoration:
+                                                                  BoxDecoration(
+                                                                border: Border.all(
+                                                                    color: AppColors
+                                                                        .black16),
+                                                              ),
+                                                              child: Text(
+                                                                _inspectionSummary,
+                                                                style:
+                                                                    GoogleFonts
+                                                                        .lato(
+                                                                  color: AppColors
+                                                                      .black87,
+                                                                  fontSize:
+                                                                      14.0,
+                                                                  letterSpacing:
+                                                                      0.25,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w400,
+                                                                ),
+                                                              ),
+                                                            )
+                                                          : const Center(),
                                                       _leadInspectorId != 0
                                                           ? Container(
                                                               margin: const EdgeInsets
@@ -717,6 +736,9 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
                                           itemBuilder: (context, i) {
                                             return _isleadInspector
                                                 ? LeadInspectorApplicationField(
+                                                    applicationId: widget
+                                                        .application
+                                                        .applicationId,
                                                     fieldName:
                                                         field.keys.elementAt(i),
                                                     fieldData: field[field.keys
@@ -739,14 +761,25 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
                                                     parentAction: updateField,
                                                   )
                                                 : widget.application.status ==
-                                                        InspectionStatus
-                                                            .inspectionCompleted
+                                                            InspectionStatus
+                                                                .inspectionCompleted ||
+                                                        widget.application
+                                                                .status ==
+                                                            InspectionStatus
+                                                                .approved ||
+                                                        widget.application
+                                                                .inspectionStatus ==
+                                                            InspectionStatus
+                                                                .leadInspectorCompleted
                                                     ? AssistantInspectorApplicationField(
                                                         fieldName: field.keys
                                                             .elementAt(i),
                                                         fieldData: field[field
                                                             .keys
                                                             .elementAt(i)],
+                                                        fieldType: _fieldTypes[
+                                                            field.keys
+                                                                .elementAt(i)],
                                                         leadInspectorData:
                                                             _leadInspectorFields[
                                                                 _leadInspectorFields
@@ -785,7 +818,9 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
                 ),
               ),
               child: Column(children: [
-                !_isleadInspector
+                !_isleadInspector &&
+                        widget.application.inspectionStatus ==
+                            InspectionStatus.leadInspectorCompleted
                     ? Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -978,7 +1013,8 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
                                   )
                                 ],
                               ))
-                          : (widget.application.status !=
+                          : (_isleadInspector &&
+                                      widget.application.status !=
                                           InspectionStatus
                                               .inspectionCompleted &&
                                       widget.application.inspectionStatus !=
@@ -986,9 +1022,12 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
                                               .leadInspectorCompleted &&
                                       widget.application.status !=
                                           InspectionStatus.approved) ||
-                                  (widget.application.status ==
-                                          InspectionStatus.sentForInspection &&
-                                      !_isleadInspector)
+                                  (widget.application.inspectionStatus ==
+                                          InspectionStatus
+                                              .leadInspectorCompleted &&
+                                      !_isleadInspector &&
+                                      widget.application.status !=
+                                          InspectionStatus.inspectionCompleted)
                               ? TextButton(
                                   onPressed: () {
                                     _submitInspection();

@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:smf_mobile/constants/app_constants.dart';
 import 'package:smf_mobile/constants/color_constants.dart';
+import 'package:smf_mobile/database/offline_model.dart';
+import 'package:smf_mobile/pages/attachment_viewer.dart';
 import 'package:smf_mobile/pages/file_viewer.dart';
 import 'package:smf_mobile/services/application_service.dart';
 import 'package:smf_mobile/util/helper.dart';
@@ -12,6 +14,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
 
 class LeadInspectorApplicationField extends StatefulWidget {
+  final String applicationId;
   final String fieldName;
   final Map fieldData;
   final String fieldType;
@@ -20,6 +23,7 @@ class LeadInspectorApplicationField extends StatefulWidget {
   final ValueChanged<Map> parentAction;
   const LeadInspectorApplicationField({
     Key? key,
+    required this.applicationId,
     required this.fieldName,
     required this.fieldData,
     required this.fieldType,
@@ -249,7 +253,22 @@ class _LeadInspectorApplicationFieldState
               statusBarColor: Colors.grey.shade900,
               backgroundColor: Colors.white,
             ));
-        String fileUrl = await ApplicationService.uploadImage(cropped!.path);
+
+        String fileUrl = '';
+        bool isInternetConnected = await Helper.isInternetConnected();
+        if (isInternetConnected) {
+          fileUrl = await ApplicationService.uploadImage(cropped!.path);
+        } else {
+          fileUrl = cropped!.path;
+          Map<String, Object> data = {
+            'application_id': widget.applicationId,
+            'attachment': fileUrl
+          };
+          await OfflineModel.saveAttachment(data);
+          // List<Map> attachments =
+          //     await OfflineModel.getAttachments(widget.applicationId);
+          // print(attachments);
+        }
         _triggerAttachmentUpdate(fileUrl);
       } catch (e) {
         // print(e);
@@ -259,14 +278,16 @@ class _LeadInspectorApplicationFieldState
   }
 
   Future<void> _deleteAttachment(String attachment) async {
-    List data = [attachment];
-    final bool fileDeleted = await ApplicationService.deleteImage(data);
-    if (fileDeleted) {
-      Helper.toastMessage('Attachment removed');
-      setState(() {
-        _attachment = '';
-      });
+    bool isInternetConnected = await Helper.isInternetConnected();
+    if (isInternetConnected) {
+      List data = [attachment];
+      await ApplicationService.deleteImage(data);
     }
+
+    Helper.toastMessage('Attachment removed');
+    setState(() {
+      _attachment = '';
+    });
   }
 
   void _viewFile(String fileUrl) {
@@ -691,18 +712,34 @@ class _LeadInspectorApplicationFieldState
                                             Row(
                                               children: [
                                                 InkWell(
-                                                    onTap: () => Navigator.push(
-                                                        context,
-                                                        MaterialPageRoute(
-                                                            builder:
-                                                                (context) =>
-                                                                    FileViewer(
-                                                                      fileType:
-                                                                          FieldType
-                                                                              .image,
-                                                                      fileUrl:
-                                                                          _attachment,
-                                                                    ))),
+                                                    onTap: () async {
+                                                      bool isInternetConnected =
+                                                          await Helper
+                                                              .isInternetConnected();
+                                                      if (isInternetConnected) {
+                                                        Navigator.push(
+                                                            context,
+                                                            MaterialPageRoute(
+                                                                builder:
+                                                                    (context) =>
+                                                                        FileViewer(
+                                                                          fileType:
+                                                                              FieldType.image,
+                                                                          fileUrl:
+                                                                              _attachment,
+                                                                        )));
+                                                      } else {
+                                                        Navigator.push(
+                                                            context,
+                                                            MaterialPageRoute(
+                                                                builder:
+                                                                    (context) =>
+                                                                        AttachmentViewer(
+                                                                          fileUrl:
+                                                                              _attachment,
+                                                                        )));
+                                                      }
+                                                    },
                                                     child: Padding(
                                                         padding:
                                                             const EdgeInsets
@@ -722,28 +759,35 @@ class _LeadInspectorApplicationFieldState
                                                           ),
                                                         ))),
                                                 const Spacer(),
-                                                InkWell(
-                                                    onTap: () =>
-                                                        _deleteAttachment(
-                                                            _attachment),
-                                                    child: Padding(
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .only(top: 10),
-                                                        child: Text(
-                                                          AppLocalizations.of(
-                                                                  context)!
-                                                              .remove,
-                                                          style:
-                                                              GoogleFonts.lato(
-                                                            color: AppColors
-                                                                .sentForIns,
-                                                            fontSize: 14.0,
-                                                            letterSpacing: 0.25,
-                                                            fontWeight:
-                                                                FontWeight.w700,
-                                                          ),
-                                                        ))),
+                                                widget.applicationStatus !=
+                                                        InspectionStatus
+                                                            .inspectionCompleted
+                                                    ? InkWell(
+                                                        onTap: () =>
+                                                            _deleteAttachment(
+                                                                _attachment),
+                                                        child: Padding(
+                                                            padding:
+                                                                const EdgeInsets
+                                                                        .only(
+                                                                    top: 10),
+                                                            child: Text(
+                                                              AppLocalizations.of(
+                                                                      context)!
+                                                                  .remove,
+                                                              style: GoogleFonts
+                                                                  .lato(
+                                                                color: AppColors
+                                                                    .sentForIns,
+                                                                fontSize: 14.0,
+                                                                letterSpacing:
+                                                                    0.25,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w700,
+                                                              ),
+                                                            )))
+                                                    : const Center(),
                                               ],
                                             ),
                                           ]))

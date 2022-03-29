@@ -12,6 +12,7 @@ class OfflineModel {
       const String formsTable = AppDatabase.formsTable;
       const String inspectionTable = AppDatabase.inspectionTable;
       const String loginPinsTable = AppDatabase.loginPinsTable;
+      const String attachmentsTable = AppDatabase.attachmentsTable;
 
       await db.execute('''CREATE TABLE $applicationsTable (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -32,6 +33,11 @@ class OfflineModel {
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username VARCHAR(64),
             pin VARCHAR(4)
+            )''');
+      await db.execute('''CREATE TABLE $attachmentsTable (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            application_id VARCHAR(64),
+            attachment VARCHAR(512)
             )''');
     }, version: 1);
   }
@@ -131,5 +137,29 @@ class OfflineModel {
         orderBy: 'id DESC',
         whereArgs: whereArgs);
     return rows.isNotEmpty ? rows[0] : {};
+  }
+
+  static Future<void> saveAttachment(Map<String, Object> data) async {
+    final db = await OfflineModel.database();
+    db.insert(
+      AppDatabase.attachmentsTable,
+      data,
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  static Future<List<Map>> getAttachments(String applicationId) async {
+    final db = await OfflineModel.database();
+    List<dynamic> whereArgs = [applicationId];
+    List<Map> rows = await db.query(AppDatabase.attachmentsTable,
+        where: 'application_id = ?', orderBy: 'id DESC', whereArgs: whereArgs);
+    return rows;
+  }
+
+  static Future<void> deleteAttachments(String applicationId) async {
+    Database db = await OfflineModel.database();
+    List<dynamic> whereArgs = [applicationId];
+    await db.delete(AppDatabase.attachmentsTable,
+        where: 'application_id = ?', whereArgs: whereArgs);
   }
 }
