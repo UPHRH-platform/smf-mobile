@@ -467,16 +467,20 @@ class _LeadInspectorApplicationFieldState
                                                 margin: const EdgeInsets.only(
                                                     right: 10),
                                                 decoration: BoxDecoration(
-                                                  color: _radioValue ==
+                                                  color: _radioValue
+                                                              .toLowerCase() ==
                                                           _options[i]
+                                                              .toLowerCase()
                                                       ? AppColors.radioSelected
                                                       : Colors.transparent,
                                                   borderRadius:
                                                       const BorderRadius.all(
                                                           Radius.circular(4.0)),
                                                   border: Border.all(
-                                                    color: _radioValue ==
+                                                    color: _radioValue
+                                                                .toLowerCase() ==
                                                             _options[i]
+                                                                .toLowerCase()
                                                         ? AppColors.primaryBlue
                                                         : AppColors.black16,
                                                   ),
@@ -537,13 +541,15 @@ class _LeadInspectorApplicationFieldState
                                             if (widget.applicationStatus !=
                                                     InspectionStatus
                                                         .inspectionCompleted &&
-                                                _radioValue !=
-                                                    FieldValue.correct) {
+                                                _radioValue.toLowerCase() !=
+                                                    FieldValue.correct
+                                                        .toLowerCase()) {
                                               _displayCommentDialog();
                                             }
                                           },
-                                          icon: _radioValue !=
-                                                      FieldValue.correct &&
+                                          icon: _radioValue.toLowerCase() !=
+                                                      FieldValue.correct
+                                                          .toLowerCase() &&
                                                   widget.applicationStatus !=
                                                       InspectionStatus
                                                           .inspectionCompleted &&
@@ -566,26 +572,29 @@ class _LeadInspectorApplicationFieldState
                                             if (widget.applicationStatus !=
                                                     InspectionStatus
                                                         .inspectionCompleted &&
-                                                _radioValue !=
-                                                    FieldValue.correct) {
+                                                _radioValue.toLowerCase() !=
+                                                    FieldValue.correct
+                                                        .toLowerCase()) {
                                               _photoOptions(context);
                                             }
                                           },
-                                          icon:
-                                              _radioValue != FieldValue.correct
-                                                  ? const Icon(
-                                                      Icons.camera_alt,
-                                                      color: AppColors.black40,
-                                                    )
-                                                  : const Icon(
-                                                      Icons.camera_alt_outlined,
-                                                      color: AppColors.black40,
-                                                    ),
+                                          icon: _radioValue.toLowerCase() !=
+                                                  FieldValue.correct
+                                                      .toLowerCase()
+                                              ? const Icon(
+                                                  Icons.camera_alt,
+                                                  color: AppColors.black40,
+                                                )
+                                              : const Icon(
+                                                  Icons.camera_alt_outlined,
+                                                  color: AppColors.black40,
+                                                ),
                                         ),
                                       )
                                     ],
                                   )),
-                              _radioValue != FieldValue.correct &&
+                              _radioValue.toLowerCase() !=
+                                          FieldValue.correct.toLowerCase() &&
                                       _summaryText != ''
                                   ? Container(
                                       width: MediaQuery.of(context).size.width,
@@ -601,7 +610,8 @@ class _LeadInspectorApplicationFieldState
                                         ),
                                       ))
                                   : const Center(),
-                              _radioValue != FieldValue.correct &&
+                              _radioValue.toLowerCase() !=
+                                          FieldValue.correct.toLowerCase() &&
                                       _summaryText != ''
                                   ? Container(
                                       margin: const EdgeInsets.only(top: 10),
@@ -625,7 +635,8 @@ class _LeadInspectorApplicationFieldState
                                       ),
                                     )
                                   : const Center(),
-                              _radioValue != FieldValue.correct &&
+                              _radioValue.toLowerCase() !=
+                                          FieldValue.correct.toLowerCase() &&
                                       _inspectionValue != ''
                                   ? Container(
                                       width: MediaQuery.of(context).size.width,
@@ -641,7 +652,8 @@ class _LeadInspectorApplicationFieldState
                                         ),
                                       ))
                                   : const Center(),
-                              _radioValue != FieldValue.correct &&
+                              _radioValue.toLowerCase() !=
+                                          FieldValue.correct.toLowerCase() &&
                                       _inspectionValue != ''
                                   ? Container(
                                       margin: const EdgeInsets.only(top: 10),
@@ -665,7 +677,8 @@ class _LeadInspectorApplicationFieldState
                                       ),
                                     )
                                   : const Center(),
-                              _radioValue != FieldValue.correct &&
+                              _radioValue.toLowerCase() !=
+                                          FieldValue.correct.toLowerCase() &&
                                       _attachment != ''
                                   ? Container(
                                       width: MediaQuery.of(context).size.width,
@@ -681,7 +694,8 @@ class _LeadInspectorApplicationFieldState
                                         ),
                                       ))
                                   : const Center(),
-                              _radioValue != FieldValue.correct &&
+                              _radioValue.toLowerCase() !=
+                                          FieldValue.correct.toLowerCase() &&
                                       _attachment != ''
                                   ? Container(
                                       margin: const EdgeInsets.only(

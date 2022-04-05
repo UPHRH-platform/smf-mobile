@@ -89,6 +89,7 @@ class ApplicationRespository with ChangeNotifier {
     } else {
       statusCode = 200;
     }
+    // print(_data);
     return statusCode;
   }
 
@@ -129,18 +130,22 @@ class ApplicationRespository with ChangeNotifier {
     } catch (_) {
       return false;
     }
-    if (data1['statusInfo']['statusCode'] != 200 ||
-        data2['statusInfo']['statusCode'] != 200) {
-      _errorMessage = _data['statusInfo']['errorMessage'];
+    if (data1['statusInfo'] != null && data2['statusInfo'] != null) {
+      if (data1['statusInfo']['statusCode'] != 200 ||
+          data2['statusInfo']['statusCode'] != 200) {
+        _errorMessage = _data['statusInfo']['errorMessage'];
+      }
     }
-    if ((inspections.isNotEmpty && data1['statusInfo']['statusCode']) ||
-        (consents.isNotEmpty && data2['statusInfo']['statusCode'])) {
+    if ((inspections.isNotEmpty && data1['statusInfo']['statusCode'] == 200) ||
+        (consents.isNotEmpty && data2['statusInfo']['statusCode'] == 200)) {
       for (var attachment in attachments) {
         await OfflineModel.deleteAttachments(attachment['attachment']);
       }
       await OfflineModel.deleteInspections();
       response = true;
     }
+    // print(_errorMessage);
+    // print('Data synced');
     return response;
   }
 

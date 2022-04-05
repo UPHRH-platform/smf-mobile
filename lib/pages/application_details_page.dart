@@ -127,7 +127,8 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
       _formData = await Provider.of<FormRespository>(context, listen: false)
           .getFormDetails(widget.application.formId);
     } catch (_) {
-      if (mounted) {
+      // ignore: unnecessary_null_comparison
+      if (mounted && _formData.id == null) {
         Helper.toastMessage(AppLocalizations.of(context)!.formNotAvailable);
         Navigator.popAndPushNamed(context, AppUrl.homePage);
       }
