@@ -133,9 +133,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     // await Future.delayed(const Duration(milliseconds: 10));
     if (isInternetConnected) {
       _validateUser();
-      _getForms();
-      _syncApplications();
+      await _getForms();
+      await _syncApplications();
     }
+
     _allApplications =
         await Provider.of<ApplicationRespository>(context, listen: false)
             .getApplications(isInternetConnected);

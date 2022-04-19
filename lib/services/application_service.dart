@@ -64,7 +64,7 @@ class ApplicationService extends BaseService {
 
     final response = await http.post(Uri.parse(ApiUrl.submitBulkConcent),
         headers: headers, body: body);
-    // developer.log(ApiUrl.submitInspection);
+    // developer.log(ApiUrl.submitBulkConcent);
     // developer.log(body);
     // developer.log(response.body);
     return response;

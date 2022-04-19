@@ -1,4 +1,4 @@
-const String appVersion = '1.0';
+const String appVersion = '1.3';
 const String appName = 'UP SMF';
 const int inspectorRoleId = 2093;
 
@@ -52,6 +52,7 @@ class Storage {
   static const String lastname = 'smf_user_last_name';
   static const String authtoken = 'smf_user_auth_token';
   static const String applicationId = 'smf_application_id';
+  static const String deviceIdentifier = 'smf_device_identifier';
 }
 
 class Inspector {

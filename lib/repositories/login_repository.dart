@@ -8,6 +8,7 @@ import 'package:smf_mobile/landing_page.dart';
 import 'package:smf_mobile/models/login_model.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:smf_mobile/services/login_service.dart';
+import 'package:smf_mobile/util/helper.dart';
 // import 'package:smf_mobile/util/notification_helper.dart';
 
 class LoginRespository with ChangeNotifier {
@@ -74,6 +75,7 @@ class LoginRespository with ChangeNotifier {
       _storage.write(key: Storage.firstname, value: _loginDetails.firstName);
       _storage.write(key: Storage.lastname, value: _loginDetails.lastName);
       _storage.write(key: Storage.authtoken, value: _loginDetails.authToken);
+      _storage.write(key: Storage.deviceIdentifier, value: identifier);
       _firebaseMessaging.getToken().then((token) async {
         final request = await LoginService.updateUserDeviceToken(
           token.toString(),
@@ -92,16 +94,16 @@ class LoginRespository with ChangeNotifier {
   }
 
   void _configureMessaging(context) async {
-    NotificationSettings settings = await _firebaseMessaging.requestPermission(
-      alert: true,
-      announcement: false,
-      badge: true,
-      carPlay: false,
-      criticalAlert: false,
-      provisional: false,
-      sound: true,
-    );
-    print('User granted permission: ${settings.authorizationStatus}');
+    // NotificationSettings settings = await _firebaseMessaging.requestPermission(
+    //   alert: true,
+    //   announcement: false,
+    //   badge: true,
+    //   carPlay: false,
+    //   criticalAlert: false,
+    //   provisional: false,
+    //   sound: true,
+    // );
+    // print('User granted permission: ${settings.authorizationStatus}');
 
     FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
@@ -114,6 +116,10 @@ class LoginRespository with ChangeNotifier {
   }
 
   Future<void> clearData() async {
+    String deviceIdentifier = await Helper.getUser(Storage.deviceIdentifier);
+    // print(deviceIdentifier);
+    await LoginService.deleteDeviceToken(deviceIdentifier);
+    // print(request.body);
     await _storage.deleteAll();
   }
 

@@ -100,7 +100,9 @@ class ApplicationRespository with ChangeNotifier {
     bool response = false;
     List<Map> attachments = [];
     try {
+      // await OfflineModel.deleteInspections();
       List<Map> rawInspections = await OfflineModel.getInspections();
+      // print(rawInspections);
       for (var inspection in rawInspections) {
         Map inspectionData = jsonDecode(inspection['inspection_data']);
         attachments =
@@ -118,11 +120,14 @@ class ApplicationRespository with ChangeNotifier {
           consents.add(inspectionData);
         }
       }
+      // print('inspections: ' + inspections.toString());
+      // print('concents: ' + consents.toString());
       if (inspections.isNotEmpty) {
         final request1 =
             await ApplicationService.submitBulkInspection(inspections);
         data1 = json.decode(request1.body);
       }
+
       if (consents.isNotEmpty) {
         final request2 = await ApplicationService.submitBulkConsent(consents);
         data2 = json.decode(request2.body);
@@ -154,7 +159,7 @@ class ApplicationRespository with ChangeNotifier {
       if (!internetConnected) {
         Map<String, Object> applicationData = {
           'inspector_type': Inspector.assistantInspector,
-          'inspection_data': data
+          'inspection_data': json.encode(data)
         };
         await OfflineModel.saveInspection(applicationData);
 

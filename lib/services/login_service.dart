@@ -61,4 +61,13 @@ class LoginService extends BaseService {
         headers: headers, body: body);
     return response;
   }
+
+  static Future<dynamic> deleteDeviceToken(String identifier) async {
+    Map<String, String> headers = await BaseService.getHeaders();
+    final response = await http.delete(
+      Uri.parse(ApiUrl.deleteDeviceToken + identifier),
+      headers: headers,
+    );
+    return response;
+  }
 }

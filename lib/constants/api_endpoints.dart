@@ -15,4 +15,6 @@ class ApiUrl {
   static const getAllForms = '$baseUrl/api/forms/getAllForms?isDetail=true';
   static const fileUpload = '$baseUrl/api/forms/fileUpload';
   static const deleteFile = '$baseUrl/api/forms/deleteCloudFile';
+  static const deleteDeviceToken =
+      '$baseUrl/api/user/deleteDeviceToken?deviceId=';
 }
