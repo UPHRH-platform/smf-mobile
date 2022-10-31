@@ -10,8 +10,10 @@ class ErrorPage extends StatelessWidget {
       body: BigTip(
         title: const Text('An error occurred'),
         subtitle: const Text('This page is not available'),
-        action: const Text('Go back'),
-        actionCallback: () => Navigator.pop(context),
+        action: TextButton(
+          child: const Text('Go back'),
+          onPressed: () => Navigator.pop(context),
+        ),
         child: const Icon(Icons.error_outline),
       ),
     );
