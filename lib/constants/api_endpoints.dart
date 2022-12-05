@@ -1,5 +1,5 @@
 class ApiUrl {
-  static const baseUrl = 'https://smfdev.idc.tarento.com';
+  static const baseUrl = 'http://157.230.176.228';
   static const getOtp = '$baseUrl/api/user/requestOTP';
   static const validateOtp = '$baseUrl/api/signIn';
   static const generatePin = '$baseUrl/api/user/generatePin';

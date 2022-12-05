@@ -239,20 +239,22 @@ class _LeadInspectorApplicationFieldState
     XFile? image = await _picker.pickImage(source: source);
     if (image != null) {
       try {
-        File? cropped = await ImageCropper().cropImage(
+        CroppedFile? cropped = await ImageCropper().cropImage(
             sourcePath: image.path,
             aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
             compressQuality: 100,
             maxWidth: 700,
             maxHeight: 700,
             compressFormat: ImageCompressFormat.jpg,
-            androidUiSettings: AndroidUiSettings(
-              toolbarColor: AppColors.primaryBlue,
-              toolbarTitle: 'Crop image',
-              toolbarWidgetColor: Colors.white,
-              statusBarColor: Colors.grey.shade900,
-              backgroundColor: Colors.white,
-            ));
+            uiSettings: [
+              AndroidUiSettings(
+                toolbarColor: AppColors.primaryBlue,
+                toolbarTitle: 'Crop image',
+                toolbarWidgetColor: Colors.white,
+                statusBarColor: Colors.grey.shade900,
+                backgroundColor: Colors.white,
+              )
+            ]);
 
         String fileUrl = '';
         bool isInternetConnected = await Helper.isInternetConnected();
