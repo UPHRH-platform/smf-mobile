@@ -30,7 +30,7 @@ class _InspectionCompletedPageState extends State<InspectionCompletedPage> {
           titleSpacing: 20,
           backgroundColor: Colors.white,
           title: Text(
-            'Inspection Completed',
+            'Assessment Completed',
             style: GoogleFonts.lato(
               color: AppColors.black87,
               fontSize: 16.0,
@@ -70,7 +70,7 @@ class _InspectionCompletedPageState extends State<InspectionCompletedPage> {
                       Padding(
                           padding: const EdgeInsets.only(bottom: 20),
                           child: Text(
-                            'Inspection completed',
+                            'Assessment completed',
                             style: GoogleFonts.lato(
                               color: AppColors.black87,
                               fontSize: 20.0,
