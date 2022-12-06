@@ -1,6 +1,6 @@
 # SMF Mobile
 
-Mobile application for Inspector.
+Mobile application for Assessor.
 
 ## Getting Started
 
