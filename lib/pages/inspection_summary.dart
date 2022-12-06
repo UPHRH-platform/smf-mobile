@@ -207,7 +207,10 @@ class _InspectionSummaryPageState extends State<InspectionSummaryPage> {
                       Container(
                           margin: const EdgeInsets.fromLTRB(20, 30, 20, 15),
                           child: Text(
-                            _summaryField['values'][0]['heading'] ?? '',
+                            _summaryField['values'][0]['heading'] ==
+                                    AssessmentSummary.inspectionSummary
+                                ? AssessmentSummary.assessmentSummary
+                                : _summaryField['values'][0]['heading'] ?? '',
                             style: GoogleFonts.lato(
                               color: AppColors.black87,
                               fontWeight: FontWeight.w700,
@@ -244,7 +247,7 @@ class _InspectionSummaryPageState extends State<InspectionSummaryPage> {
                           ? Container(
                               margin: const EdgeInsets.fromLTRB(20, 10, 20, 15),
                               child: Text(
-                                'Lead inspector',
+                                'Lead assessor',
                                 style: GoogleFonts.lato(
                                   color: AppColors.black87,
                                   fontWeight: FontWeight.w700,
@@ -263,7 +266,7 @@ class _InspectionSummaryPageState extends State<InspectionSummaryPage> {
                       Container(
                           margin: const EdgeInsets.fromLTRB(20, 10, 20, 15),
                           child: Text(
-                            'Assisting inspectors',
+                            'Assisting assessor',
                             style: GoogleFonts.lato(
                               color: AppColors.black87,
                               fontWeight: FontWeight.w700,

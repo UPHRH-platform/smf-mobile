@@ -59,3 +59,8 @@ class Inspector {
   static const String leadInspector = 'lead_inspector';
   static const String assistantInspector = 'assistant_inspector';
 }
+
+class AssessmentSummary {
+  static const String inspectionSummary = "Inspection Summary";
+  static const String assessmentSummary = "Assessment Summary";
+}
