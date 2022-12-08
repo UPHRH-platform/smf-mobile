@@ -326,7 +326,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                             itemCount: _upcomingApplications.length,
                             itemBuilder: (context, i) {
                               return ApplicationCard(
-                                  application: _upcomingApplications[i]);
+                                application: _upcomingApplications[i],
+                                isUpcomingApplication: true,
+                              );
                             },
                           ),
                           Container(

@@ -11,8 +11,10 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 class ApplicationCard extends StatefulWidget {
   static const route = AppUrl.homePage;
   final Application application;
+  final bool isUpcomingApplication;
 
-  const ApplicationCard({Key? key, required this.application})
+  const ApplicationCard(
+      {Key? key, required this.application, this.isUpcomingApplication = false})
       : super(key: key);
   @override
   _ApplicationCardState createState() => _ApplicationCardState();
@@ -41,13 +43,14 @@ class _ApplicationCardState extends State<ApplicationCard> {
   Widget build(BuildContext context) {
     return InkWell(
         onTap: () {
-          // print(widget.application.inspectionStatus);
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => ApplicationDetailsPage(
-                        application: widget.application,
-                      )));
+          if (!widget.isUpcomingApplication) {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => ApplicationDetailsPage(
+                          application: widget.application,
+                        )));
+          }
         },
         child: Container(
           width: double.infinity,
@@ -74,16 +77,18 @@ class _ApplicationCardState extends State<ApplicationCard> {
                       fontWeight: FontWeight.w600,
                     )),
               ),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: Text(widget.application.createdBy,
-                    style: GoogleFonts.lato(
-                      color: AppColors.black60,
-                      fontSize: 14.0,
-                      letterSpacing: 0.12,
-                      fontWeight: FontWeight.w700,
-                    )),
-              ),
+              widget.isUpcomingApplication
+                  ? const SizedBox()
+                  : Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: Text(widget.application.createdBy,
+                          style: GoogleFonts.lato(
+                            color: AppColors.black60,
+                            fontSize: 14.0,
+                            letterSpacing: 0.12,
+                            fontWeight: FontWeight.w700,
+                          )),
+                    ),
               Padding(
                 padding: const EdgeInsets.only(bottom: 10),
                 child: Text(
