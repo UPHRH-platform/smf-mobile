@@ -67,5 +67,6 @@
     "preview": "Preview",
     "remove": "Remove",
     "attachment": "Attachment",
-    "version": "Version"
+    "version": "Version",
+    "canNotSubmitEmptyForm": "Empty assessment can't be submitted"
 }

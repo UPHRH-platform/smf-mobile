@@ -164,7 +164,7 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
             updatedFields = {},
             value.forEach((childKey, childValue) => {
                   updatedFields[childKey] = {
-                    childValue: {'value': 'Correct', 'comments': ''}
+                    childValue: {'value': '', 'comments': ''}
                   }
                 }),
             _data[key] = updatedFields
@@ -266,12 +266,29 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
     if (isInternetConnected) {
       _validateUser();
     }
+
     if (_isleadInspector) {
       Map data = {
         'applicationId': widget.application.applicationId,
         'userId': _userId,
         'dataObject': _data
       };
+
+      //Validate assessment form to make sure some inputs are given by the assessor
+      int fieldsLength = _data.keys.length;
+      bool isValidForm = false;
+      for (int i = 0; i < fieldsLength; i++) {
+        _data[_data.keys.elementAt(i)].forEach((key, value) {
+          if (value[value.keys.elementAt(0)]["value"].isNotEmpty) {
+            isValidForm = true;
+          }
+        });
+      }
+
+      if (!isValidForm) {
+        Helper.toastMessage("Empty assessment can't be submitted");
+        return;
+      }
 
       Navigator.of(context).pushReplacement(MaterialPageRoute(
           builder: (context) => InspectionSummaryPage(

@@ -543,14 +543,14 @@ class _LeadInspectorApplicationFieldState
                                             if (widget.applicationStatus !=
                                                     InspectionStatus
                                                         .inspectionCompleted &&
-                                                _radioValue.toLowerCase() !=
-                                                    FieldValue.correct
+                                                _radioValue.toLowerCase() ==
+                                                    FieldValue.inCorrect
                                                         .toLowerCase()) {
                                               _displayCommentDialog();
                                             }
                                           },
-                                          icon: _radioValue.toLowerCase() !=
-                                                      FieldValue.correct
+                                          icon: _radioValue.toLowerCase() ==
+                                                      FieldValue.inCorrect
                                                           .toLowerCase() &&
                                                   widget.applicationStatus !=
                                                       InspectionStatus
