@@ -7,6 +7,7 @@ class Application {
   final Map dataObject;
   final List inspectors;
   final List leadInspector;
+  final List assistingInspector; // using it as second lead assessor
   final Map inspectorDataObject;
   final Map inspectorSummaryDataObject;
   final String inspectionStatus;
@@ -23,6 +24,7 @@ class Application {
     required this.dataObject,
     required this.inspectors,
     required this.leadInspector,
+    required this.assistingInspector,
     required this.inspectorDataObject,
     required this.inspectorSummaryDataObject,
     required this.inspectionStatus,
@@ -43,6 +45,9 @@ class Application {
           json['inspection'] != null ? json['inspection']['assignedTo'] : [],
       leadInspector:
           json['inspection'] != null ? json['inspection']['leadInspector'] : [],
+      assistingInspector: json['inspection'] != null
+          ? json['inspection']['assistingInspector']
+          : [],
       inspectorDataObject: json['inspectorDataObject'] != null
           ? json['inspectorDataObject']['dataObject']
           : {},
@@ -65,6 +70,7 @@ class Application {
         dataObject,
         inspectors,
         leadInspector,
+        assistingInspector,
         inspectorDataObject,
         inspectorSummaryDataObject,
         inspectionStatus,

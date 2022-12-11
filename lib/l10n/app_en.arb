@@ -50,6 +50,8 @@
     "inspetionCompletedOn": "Assessment completed on",
     "inspectionSummary": "Assessment Summary",
     "leadInspector": "Lead assessor",
+    "firstLeadAssessor": "First Lead assessor",
+    "secondLeadAssessor": "Second Lead assessor",
     "assistingInspectors": "Assisting assessor",
     "iDisagree": "I disagree",
     "iConsent": "I consent",
@@ -68,5 +70,6 @@
     "remove": "Remove",
     "attachment": "Attachment",
     "version": "Version",
-    "canNotSubmitEmptyForm": "Empty assessment can't be submitted"
+    "canNotSubmitEmptyFormError": "Empty assessment can't be submitted",
+    "assessmentForAllError": "Assessment is not given for all fields"
 }

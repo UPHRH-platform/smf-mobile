@@ -61,11 +61,11 @@ class _LeadInspectorApplicationFieldState
 
     _data = widget.fieldData[widget.fieldData.keys.elementAt(0)];
     // print('Field: ' + _data.toString());
-    _radioValue = _data[_data.keys.elementAt(0)];
-    _summaryText = _data[_data.keys.elementAt(1)];
+    _radioValue = _data[_data.keys.elementAt(0)] ?? "";
+    _summaryText = _data[_data.keys.elementAt(1)] ?? "";
     try {
-      _inspectionValue = _data[_data.keys.elementAt(2)];
-      _attachment = _data[_data.keys.elementAt(3)];
+      _inspectionValue = _data[_data.keys.elementAt(2)] ?? "";
+      _attachment = _data[_data.keys.elementAt(3)] ?? "";
     } catch (_) {
       return;
     }
@@ -445,23 +445,23 @@ class _LeadInspectorApplicationFieldState
                                         InkWell(
                                             onTap: () {
                                               // print(_options[i]);
-                                              if (widget.applicationStatus !=
-                                                  InspectionStatus
-                                                      .inspectionCompleted) {
-                                                setState(() {
-                                                  _radioValue = _options[i];
-                                                });
-                                                if (_options[i] ==
-                                                    FieldValue.inCorrect) {
-                                                  _displayCommentDialog();
-                                                }
-                                                Map data = {
-                                                  'summaryText': _summaryText,
-                                                  'inspectionValue':
-                                                      _inspectionValue
-                                                };
-                                                triggerUpdate(data);
+                                              // if (widget.applicationStatus !=
+                                              //     InspectionStatus
+                                              //         .inspectionCompleted) {
+                                              setState(() {
+                                                _radioValue = _options[i];
+                                              });
+                                              if (_options[i] ==
+                                                  FieldValue.inCorrect) {
+                                                _displayCommentDialog();
                                               }
+                                              Map data = {
+                                                'summaryText': _summaryText,
+                                                'inspectionValue':
+                                                    _inspectionValue
+                                              };
+                                              triggerUpdate(data);
+                                              // }
                                             },
                                             child: Container(
                                                 padding: const EdgeInsets.only(

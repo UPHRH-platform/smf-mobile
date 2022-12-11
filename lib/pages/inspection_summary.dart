@@ -24,14 +24,14 @@ class InspectionSummaryPage extends StatefulWidget {
   final List inspectionFields;
   final Map inspectionData;
 
-  const InspectionSummaryPage(
-      {Key? key,
-      required this.formId,
-      required this.inspectors,
-      required this.leadInspector,
-      required this.inspectionFields,
-      required this.inspectionData})
-      : super(key: key);
+  const InspectionSummaryPage({
+    Key? key,
+    required this.formId,
+    required this.inspectors,
+    required this.leadInspector,
+    required this.inspectionFields,
+    required this.inspectionData,
+  }) : super(key: key);
   @override
   _InspectionSummaryPageState createState() => _InspectionSummaryPageState();
 }
@@ -40,6 +40,7 @@ class _InspectionSummaryPageState extends State<InspectionSummaryPage> {
   // Map _source = {ConnectivityResult.none: false};
   // final MyConnectivity _connectivity = MyConnectivity.instance;
   final TextEditingController _summaryController = TextEditingController();
+
   final List<Map> _inspectors = [];
   int _leadInspectorId = 0;
   bool _iAgree = false;
@@ -247,7 +248,7 @@ class _InspectionSummaryPageState extends State<InspectionSummaryPage> {
                           ? Container(
                               margin: const EdgeInsets.fromLTRB(20, 10, 20, 15),
                               child: Text(
-                                'Lead assessor',
+                                AppLocalizations.of(context)!.firstLeadAssessor,
                                 style: GoogleFonts.lato(
                                   color: AppColors.black87,
                                   fontWeight: FontWeight.w700,
@@ -266,7 +267,7 @@ class _InspectionSummaryPageState extends State<InspectionSummaryPage> {
                       Container(
                           margin: const EdgeInsets.fromLTRB(20, 10, 20, 15),
                           child: Text(
-                            'Assisting assessor',
+                            AppLocalizations.of(context)!.secondLeadAssessor,
                             style: GoogleFonts.lato(
                               color: AppColors.black87,
                               fontWeight: FontWeight.w700,
