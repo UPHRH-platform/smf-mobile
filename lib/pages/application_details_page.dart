@@ -284,6 +284,7 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
       //Validate assessment form to make sure all inputs are given by the assessor when second assessor submmits the form
       if (widget.application.inspectionStatus ==
           InspectionStatus.leadInspectorCompleted) {
+        data["inspectionCompleted"] = true;
         isValidForm = true;
         for (int i = 0; i < fieldsLength; i++) {
           _data[_data.keys.elementAt(i)].forEach((key, value) {
