@@ -7,8 +7,6 @@ import 'package:smf_mobile/constants/color_constants.dart';
 // import 'package:smf_mobile/models/form_model.dart';
 import 'package:smf_mobile/pages/login_email_page.dart';
 import 'package:smf_mobile/repositories/application_repository.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:smf_mobile/services/location_service.dart';
 // import 'package:smf_mobile/repositories/form_repository.dart';
 import 'package:smf_mobile/util/helper.dart';
 import 'package:smf_mobile/widgets/people_card.dart';
@@ -128,16 +126,7 @@ class _InspectionSummaryPageState extends State<InspectionSummaryPage> {
   }
 
   Future<void> _submitInspection() async {
-    Position position;
     bool isInternetConnected = await Helper.isInternetConnected();
-
-    try {
-      position = await LocationService.getCurrentPosition();
-    } catch (error) {
-      Helper.toastMessage(error.toString());
-      return;
-    }
-
     // await Future.delayed(const Duration(milliseconds: 10));
     if (isInternetConnected) {
       _validateUser();
@@ -154,6 +143,7 @@ class _InspectionSummaryPageState extends State<InspectionSummaryPage> {
           'Enter the summary of this inspection': _summaryController.text
         }
       };
+      print(data);
       final responseCode =
           await Provider.of<ApplicationRespository>(context, listen: false)
               .submitInspection(isInternetConnected, data);
