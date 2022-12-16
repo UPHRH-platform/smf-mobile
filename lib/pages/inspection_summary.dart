@@ -143,6 +143,7 @@ class _InspectionSummaryPageState extends State<InspectionSummaryPage> {
           'Enter the summary of this inspection': _summaryController.text
         }
       };
+      print(data);
       final responseCode =
           await Provider.of<ApplicationRespository>(context, listen: false)
               .submitInspection(isInternetConnected, data);
