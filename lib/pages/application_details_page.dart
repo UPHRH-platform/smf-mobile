@@ -19,6 +19,8 @@ import 'package:smf_mobile/widgets/people_card.dart';
 import 'package:smf_mobile/widgets/silverappbar_delegate.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'dart:async';
+import 'package:geolocator/geolocator.dart';
+import 'package:smf_mobile/services/location_service.dart';
 // import 'package:connectivity_plus/connectivity_plus.dart';
 // import 'package:smf_mobile/util/connectivity_helper.dart';
 
@@ -267,16 +269,26 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
 
   Future<void> _submitInspection() async {
     bool isInternetConnected = await Helper.isInternetConnected();
+    Position position;
     // await Future.delayed(const Duration(milliseconds: 10));
     if (isInternetConnected) {
       _validateUser();
+    }
+
+    try {
+      position = await LocationService.getCurrentPosition();
+    } catch (error) {
+      Helper.toastMessage(error.toString());
+      return;
     }
 
     if (_isleadInspector) {
       Map data = {
         'applicationId': widget.application.applicationId,
         'userId': _userId,
-        'dataObject': _data
+        'dataObject': _data,
+        'latitude': position.latitude,
+        'longitude': position.longitude,
       };
 
       int fieldsLength = _data.keys.length;
