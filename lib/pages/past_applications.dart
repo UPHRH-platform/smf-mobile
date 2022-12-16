@@ -53,7 +53,9 @@ class _PastApplicationsState extends State<PastApplications> {
                 itemCount: widget.pastApplications.length,
                 itemBuilder: (context, i) {
                   return ApplicationCard(
-                      application: widget.pastApplications[i]);
+                    application: widget.pastApplications[i],
+                    isPastApplication: true,
+                  );
                 },
               ),
             ],

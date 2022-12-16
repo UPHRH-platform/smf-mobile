@@ -128,6 +128,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
   Future<dynamic> _getApplications() async {
     String rawUserId = await Helper.getUser(Storage.userId);
+    String username = await Helper.getUser(Storage.username);
     int userId = int.parse(rawUserId);
     bool isInternetConnected = await Helper.isInternetConnected();
     // await Future.delayed(const Duration(milliseconds: 10));
@@ -154,17 +155,18 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           temp = List.from(temp.reversed);
           int days = Helper.getDateDiffence(
               DateTime.now(), DateTime.parse(temp.join("-")));
-          if ((days == 0 || days > 0) &&
+          if ((days == 0) &&
               application.status == InspectionStatus.sentForInspection) {
-            if (application.leadInspector[0] == userId &&
-                application.inspectionStatus ==
-                    InspectionStatus.leadInspectorCompleted) {
+            if (application.inspectionStatus ==
+                    InspectionStatus.leadInspectorCompleted &&
+                application.updatedBy == username) {
               _pastApplications.add(application);
             } else {
               _pendingApplications.add(application);
             }
-          } else if ((days == 0 || days > 0) &&
-              application.status != InspectionStatus.sentForInspection) {
+          } else if (((days == 0) &&
+                  application.status != InspectionStatus.sentForInspection) ||
+              (days > 0)) {
             _pastApplications.add(application);
           } else {
             _upcomingApplications.add(application);

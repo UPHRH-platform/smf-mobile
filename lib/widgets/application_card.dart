@@ -12,9 +12,13 @@ class ApplicationCard extends StatefulWidget {
   static const route = AppUrl.homePage;
   final Application application;
   final bool isUpcomingApplication;
+  final bool isPastApplication;
 
   const ApplicationCard(
-      {Key? key, required this.application, this.isUpcomingApplication = false})
+      {Key? key,
+      required this.application,
+      this.isUpcomingApplication = false,
+      this.isPastApplication = false})
       : super(key: key);
   @override
   _ApplicationCardState createState() => _ApplicationCardState();
@@ -49,6 +53,7 @@ class _ApplicationCardState extends State<ApplicationCard> {
                 MaterialPageRoute(
                     builder: (context) => ApplicationDetailsPage(
                           application: widget.application,
+                          isPastApplication: widget.isPastApplication,
                         )));
           }
         },

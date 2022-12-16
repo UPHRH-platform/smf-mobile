@@ -26,9 +26,11 @@ import 'package:smf_mobile/services/location_service.dart';
 
 class ApplicationDetailsPage extends StatefulWidget {
   final Application application;
+  final bool isPastApplication;
   const ApplicationDetailsPage({
     Key? key,
     required this.application,
+    this.isPastApplication = false,
   }) : super(key: key);
 
   @override
@@ -86,12 +88,15 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
     _userId = int.parse(id);
     if (widget.application.leadInspector.isNotEmpty) {
       _leadInspectorId = widget.application.leadInspector[0];
-      if (widget.application.leadInspector[0] == _userId) {
+      if (widget.application.leadInspector[0] == _userId ||
+          widget.application.assistingInspector[0] == _userId) {
         setState(() {
           _isleadInspector = true;
         });
-      } else if (widget.application.status ==
-          InspectionStatus.inspectionCompleted) {
+      }
+      if (widget.application.status == InspectionStatus.inspectionCompleted ||
+          widget.application.inspectionStatus ==
+              InspectionStatus.leadInspectorCompleted) {
         _inspectionSummary =
             widget.application.inspectorSummaryDataObject['Inspection Summary'][
                 widget.application
@@ -286,20 +291,43 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
         'longitude': position.longitude,
       };
 
-      //Validate assessment form to make sure some inputs are given by the assessor
       int fieldsLength = _data.keys.length;
       bool isValidForm = false;
-      for (int i = 0; i < fieldsLength; i++) {
-        _data[_data.keys.elementAt(i)].forEach((key, value) {
-          if (value[value.keys.elementAt(0)]["value"].isNotEmpty) {
-            isValidForm = true;
-          }
-        });
+      //Validate assessment form to make sure all inputs are given by the assessor when second assessor submmits the form
+      if (widget.application.inspectionStatus ==
+          InspectionStatus.leadInspectorCompleted) {
+        data["inspectionCompleted"] = true;
+        isValidForm = true;
+        for (int i = 0; i < fieldsLength; i++) {
+          _data[_data.keys.elementAt(i)].forEach((key, value) {
+            if (value[value.keys.elementAt(0)]["value"] == null ||
+                value[value.keys.elementAt(0)]["value"]?.isEmpty) {
+              isValidForm = false;
+            }
+          });
+        }
+      } else {
+        //Validate assessment form to make sure some inputs are given by the assessor when first assessor submmits
+        for (int i = 0; i < fieldsLength; i++) {
+          _data[_data.keys.elementAt(i)].forEach((key, value) {
+            if (value[value.keys.elementAt(0)]["value"]?.isNotEmpty) {
+              isValidForm = true;
+            }
+          });
+        }
       }
 
       if (!isValidForm) {
-        Helper.toastMessage("Empty assessment can't be submitted");
-        return;
+        if (widget.application.inspectionStatus ==
+            InspectionStatus.leadInspectorCompleted) {
+          Helper.toastMessage(
+              AppLocalizations.of(context)!.assessmentForAllError);
+          return;
+        } else {
+          Helper.toastMessage(
+              AppLocalizations.of(context)!.canNotSubmitEmptyFormError);
+          return;
+        }
       }
 
       Navigator.of(context).pushReplacement(MaterialPageRoute(
@@ -466,7 +494,7 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
                                 children: [
                                   for (Map field in _fields)
                                     ListView(children: [
-                                      !_isleadInspector
+                                      widget.isPastApplication
                                           ? Wrap(
                                               children: [
                                                 Container(
@@ -548,36 +576,36 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
                                                             ),
                                                           ),
                                                         ),
-                                                        Container(
-                                                          margin:
-                                                              const EdgeInsets
-                                                                      .only(
-                                                                  top: 10),
-                                                          width:
-                                                              double.infinity,
-                                                          child: Text(
-                                                            AppLocalizations.of(
-                                                                        context)!
-                                                                    .inspetionCompletedOn +
-                                                                ' ' +
-                                                                Helper.formatDate(widget
-                                                                    .application
-                                                                    .scheduledDate),
-                                                            textAlign: TextAlign
-                                                                .center,
-                                                            style: GoogleFonts
-                                                                .lato(
-                                                              color: AppColors
-                                                                  .black60,
-                                                              fontSize: 14.0,
-                                                              letterSpacing:
-                                                                  0.25,
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .w400,
-                                                            ),
-                                                          ),
-                                                        ),
+                                                        // Container(
+                                                        //   margin:
+                                                        //       const EdgeInsets
+                                                        //               .only(
+                                                        //           top: 10),
+                                                        //   width:
+                                                        //       double.infinity,
+                                                        //   child: Text(
+                                                        //     AppLocalizations.of(
+                                                        //                 context)!
+                                                        //             .inspetionCompletedOn +
+                                                        //         ' ' +
+                                                        //         Helper.formatDate(widget
+                                                        //             .application
+                                                        //             .scheduledDate),
+                                                        //     textAlign: TextAlign
+                                                        //         .center,
+                                                        //     style: GoogleFonts
+                                                        //         .lato(
+                                                        //       color: AppColors
+                                                        //           .black60,
+                                                        //       fontSize: 14.0,
+                                                        //       letterSpacing:
+                                                        //           0.25,
+                                                        //       fontWeight:
+                                                        //           FontWeight
+                                                        //               .w400,
+                                                        //     ),
+                                                        //   ),
+                                                        // ),
                                                       ]),
                                                 ),
                                                 Container(
@@ -689,7 +717,7 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
                                                               child: Text(
                                                                 AppLocalizations.of(
                                                                         context)!
-                                                                    .leadInspector,
+                                                                    .firstLeadAssessor,
                                                                 style:
                                                                     GoogleFonts
                                                                         .lato(
@@ -727,7 +755,7 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
                                                           child: Text(
                                                             AppLocalizations.of(
                                                                     context)!
-                                                                .assistingInspectors,
+                                                                .secondLeadAssessor,
                                                             style: GoogleFonts
                                                                 .lato(
                                                               color: AppColors
@@ -785,7 +813,7 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
                                                             InspectionStatus
                                                                 .leadInspectorCompleted
                                                         ? InspectionStatus
-                                                            .inspectionCompleted
+                                                            .leadInspectorCompleted
                                                         : widget
                                                             .application.status,
                                                     parentAction: updateField,
@@ -848,147 +876,147 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
                 ),
               ),
               child: Column(children: [
-                !_isleadInspector &&
-                        widget.application.inspectionStatus ==
-                            InspectionStatus.leadInspectorCompleted
-                    ? Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          !_iConcent
-                              ? ButtonTheme(
-                                  child: OutlinedButton(
-                                      onPressed: () {
-                                        if (!_iDisagree &&
-                                            _inspectionStatus !=
-                                                InspectionStatus
-                                                    .inspectionCompleted) {
-                                          _displayCommentDialog();
-                                        }
-                                        if (_inspectionStatus !=
-                                            InspectionStatus
-                                                .inspectionCompleted) {
-                                          setState(() {
-                                            _iDisagree = !_iDisagree;
-                                          });
-                                        }
-                                      },
-                                      style: OutlinedButton.styleFrom(
-                                        backgroundColor: _iDisagree
-                                            ? AppColors.primaryBlue
-                                            : Colors.white,
-                                        side: const BorderSide(
-                                            width: 1, color: AppColors.black40),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(4),
-                                        ),
-                                        // onSurface: Colors.grey,
-                                      ),
-                                      child: Row(
-                                        children: [
-                                          Text(
-                                            AppLocalizations.of(context)!
-                                                .iDisagree,
-                                            style: GoogleFonts.lato(
-                                                color: _iDisagree
-                                                    ? Colors.white
-                                                    : AppColors.black60,
-                                                fontSize: 14,
-                                                letterSpacing: 0.5,
-                                                fontWeight: FontWeight.w700),
-                                          ),
-                                          Padding(
-                                              padding:
-                                                  const EdgeInsets.fromLTRB(
-                                                      5, 0, 0, 0),
-                                              child: Icon(
-                                                Icons.clear,
-                                                color: _iDisagree
-                                                    ? Colors.white
-                                                    : AppColors.black60,
-                                                size: 20,
-                                              ))
-                                        ],
-                                      )),
-                                )
-                              : const Center(),
-                          !_iDisagree
-                              ? Padding(
-                                  padding: const EdgeInsets.only(left: 10),
-                                  child: TextButton(
-                                      onPressed: () {
-                                        if (!_iConcent &&
-                                            _inspectionStatus !=
-                                                InspectionStatus
-                                                    .inspectionCompleted) {
-                                          _displayCommentDialog();
-                                        }
-                                        if (_inspectionStatus !=
-                                            InspectionStatus
-                                                .inspectionCompleted) {
-                                          setState(() {
-                                            _iConcent = !_iConcent;
-                                          });
-                                        }
-                                      },
-                                      style: TextButton.styleFrom(
-                                        // primary: Colors.white,
-                                        padding: const EdgeInsets.only(
-                                            left: 15, right: 15),
-                                        backgroundColor: _iConcent
-                                            ? AppColors.primaryBlue
-                                            : Colors.white,
-                                        shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(4),
-                                            side: const BorderSide(
-                                                color: AppColors.black40)),
-                                      ),
-                                      child: Row(
-                                        children: [
-                                          Text(
-                                            AppLocalizations.of(context)!
-                                                .iConsent,
-                                            style: GoogleFonts.lato(
-                                                color: _iConcent
-                                                    ? Colors.white
-                                                    : AppColors.black60,
-                                                fontSize: 14,
-                                                letterSpacing: 0.5,
-                                                fontWeight: FontWeight.w700),
-                                          ),
-                                          Padding(
-                                              padding:
-                                                  const EdgeInsets.fromLTRB(
-                                                      5, 0, 0, 0),
-                                              child: Icon(
-                                                Icons.check,
-                                                color: _iConcent
-                                                    ? Colors.white
-                                                    : AppColors.black60,
-                                                size: 20,
-                                              ))
-                                        ],
-                                      )),
-                                )
-                              : const Center(),
-                          _iConcent || _iDisagree
-                              ? Padding(
-                                  padding: const EdgeInsets.only(left: 0),
-                                  child: IconButton(
-                                    onPressed: () {
-                                      _displayCommentDialog();
-                                    },
-                                    icon: const Icon(
-                                      Icons.edit,
-                                      color: AppColors.black40,
-                                    ),
-                                  ),
-                                )
-                              : const Center()
-                        ],
-                      )
-                    : const Center(),
+                // !_isleadInspector &&
+                //         widget.application.inspectionStatus ==
+                //             InspectionStatus.leadInspectorCompleted
+                //     ? Row(
+                //         mainAxisAlignment: MainAxisAlignment.center,
+                //         children: [
+                //           !_iConcent
+                //               ? ButtonTheme(
+                //                   child: OutlinedButton(
+                //                       onPressed: () {
+                //                         if (!_iDisagree &&
+                //                             _inspectionStatus !=
+                //                                 InspectionStatus
+                //                                     .inspectionCompleted) {
+                //                           _displayCommentDialog();
+                //                         }
+                //                         if (_inspectionStatus !=
+                //                             InspectionStatus
+                //                                 .inspectionCompleted) {
+                //                           setState(() {
+                //                             _iDisagree = !_iDisagree;
+                //                           });
+                //                         }
+                //                       },
+                //                       style: OutlinedButton.styleFrom(
+                //                         backgroundColor: _iDisagree
+                //                             ? AppColors.primaryBlue
+                //                             : Colors.white,
+                //                         side: const BorderSide(
+                //                             width: 1, color: AppColors.black40),
+                //                         shape: RoundedRectangleBorder(
+                //                           borderRadius:
+                //                               BorderRadius.circular(4),
+                //                         ),
+                //                         // onSurface: Colors.grey,
+                //                       ),
+                //                       child: Row(
+                //                         children: [
+                //                           Text(
+                //                             AppLocalizations.of(context)!
+                //                                 .iDisagree,
+                //                             style: GoogleFonts.lato(
+                //                                 color: _iDisagree
+                //                                     ? Colors.white
+                //                                     : AppColors.black60,
+                //                                 fontSize: 14,
+                //                                 letterSpacing: 0.5,
+                //                                 fontWeight: FontWeight.w700),
+                //                           ),
+                //                           Padding(
+                //                               padding:
+                //                                   const EdgeInsets.fromLTRB(
+                //                                       5, 0, 0, 0),
+                //                               child: Icon(
+                //                                 Icons.clear,
+                //                                 color: _iDisagree
+                //                                     ? Colors.white
+                //                                     : AppColors.black60,
+                //                                 size: 20,
+                //                               ))
+                //                         ],
+                //                       )),
+                //                 )
+                //               : const Center(),
+                //           !_iDisagree
+                //               ? Padding(
+                //                   padding: const EdgeInsets.only(left: 10),
+                //                   child: TextButton(
+                //                       onPressed: () {
+                //                         if (!_iConcent &&
+                //                             _inspectionStatus !=
+                //                                 InspectionStatus
+                //                                     .inspectionCompleted) {
+                //                           _displayCommentDialog();
+                //                         }
+                //                         if (_inspectionStatus !=
+                //                             InspectionStatus
+                //                                 .inspectionCompleted) {
+                //                           setState(() {
+                //                             _iConcent = !_iConcent;
+                //                           });
+                //                         }
+                //                       },
+                //                       style: TextButton.styleFrom(
+                //                         // primary: Colors.white,
+                //                         padding: const EdgeInsets.only(
+                //                             left: 15, right: 15),
+                //                         backgroundColor: _iConcent
+                //                             ? AppColors.primaryBlue
+                //                             : Colors.white,
+                //                         shape: RoundedRectangleBorder(
+                //                             borderRadius:
+                //                                 BorderRadius.circular(4),
+                //                             side: const BorderSide(
+                //                                 color: AppColors.black40)),
+                //                       ),
+                //                       child: Row(
+                //                         children: [
+                //                           Text(
+                //                             AppLocalizations.of(context)!
+                //                                 .iConsent,
+                //                             style: GoogleFonts.lato(
+                //                                 color: _iConcent
+                //                                     ? Colors.white
+                //                                     : AppColors.black60,
+                //                                 fontSize: 14,
+                //                                 letterSpacing: 0.5,
+                //                                 fontWeight: FontWeight.w700),
+                //                           ),
+                //                           Padding(
+                //                               padding:
+                //                                   const EdgeInsets.fromLTRB(
+                //                                       5, 0, 0, 0),
+                //                               child: Icon(
+                //                                 Icons.check,
+                //                                 color: _iConcent
+                //                                     ? Colors.white
+                //                                     : AppColors.black60,
+                //                                 size: 20,
+                //                               ))
+                //                         ],
+                //                       )),
+                //                 )
+                //               : const Center(),
+                //           _iConcent || _iDisagree
+                //               ? Padding(
+                //                   padding: const EdgeInsets.only(left: 0),
+                //                   child: IconButton(
+                //                     onPressed: () {
+                //                       _displayCommentDialog();
+                //                     },
+                //                     icon: const Icon(
+                //                       Icons.edit,
+                //                       color: AppColors.black40,
+                //                     ),
+                //                   ),
+                //                 )
+                //               : const Center()
+                //         ],
+                //       )
+                //     : const Center(),
                 Container(
                   margin: const EdgeInsets.only(top: 10),
                   child: Row(
@@ -1051,13 +1079,16 @@ class _ApplicationDetailsPageState extends State<ApplicationDetailsPage>
                                           InspectionStatus
                                               .leadInspectorCompleted &&
                                       widget.application.status !=
-                                          InspectionStatus.approved) ||
+                                          InspectionStatus.approved &&
+                                      !widget.isPastApplication) ||
                                   (widget.application.inspectionStatus ==
                                           InspectionStatus
                                               .leadInspectorCompleted &&
-                                      !_isleadInspector &&
+                                      // !_isleadInspector &&
                                       widget.application.status !=
-                                          InspectionStatus.inspectionCompleted)
+                                          InspectionStatus
+                                              .inspectionCompleted &&
+                                      !widget.isPastApplication)
                               ? TextButton(
                                   onPressed: () {
                                     _submitInspection();
