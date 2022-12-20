@@ -106,6 +106,18 @@ class _ApplicationCardState extends State<ApplicationCard> {
                       fontWeight: FontWeight.w400,
                     )),
               ),
+              widget.application.districtName.isNotEmpty
+                  ? Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: Text(widget.application.districtName,
+                          style: GoogleFonts.lato(
+                            color: AppColors.black60,
+                            fontSize: 14.0,
+                            letterSpacing: 0.12,
+                            fontWeight: FontWeight.w700,
+                          )),
+                    )
+                  : const SizedBox(),
               // Row(
               //   children: [
               //     Padding(

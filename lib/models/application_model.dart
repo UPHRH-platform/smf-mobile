@@ -15,6 +15,7 @@ class Application {
   final String createdDate;
   final String createdBy;
   final String updatedBy;
+  final String districtName;
 
   const Application({
     required this.formId,
@@ -33,6 +34,7 @@ class Application {
     required this.createdDate,
     required this.createdBy,
     required this.updatedBy,
+    required this.districtName,
   });
 
   factory Application.fromJson(Map<String, dynamic> json) {
@@ -61,6 +63,7 @@ class Application {
       createdDate: json['createdDate'],
       createdBy: json['createdBy'],
       updatedBy: json['updatedBy'] ?? "",
+      districtName: json['districtName'] ?? "",
     );
   }
 
